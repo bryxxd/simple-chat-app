@@ -22,7 +22,7 @@
         "vue": "^3.4.0"
     },
     "dependencies": {
-        "@vueuse/core": "^13.3.0",
+        "@vueuse/core": "^13.4.0",
         "class-variance-authority": "^0.7.1",
         "clsx": "^2.1.1",
         "lucide-vue-next": "^0.517.0",
