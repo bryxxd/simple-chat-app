@@ -1,4 +1,4 @@
-<script setup>
+<script>
 import {
   BadgeCheck,
   Bell,
@@ -29,11 +29,43 @@ import {
   useSidebar,
 } from '@/components/ui/sidebar';
 
-const props = defineProps({
-  user: { type: Object, required: true },
-});
-
-const { isMobile } = useSidebar();
+export default {
+  components: {
+    Avatar,
+    AvatarFallback,
+    AvatarImage,
+    BadgeCheck,
+    Bell,
+    ChevronsUpDown,
+    CreditCard,
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuGroup,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+    LogOut,
+    Sparkles,
+    SidebarMenu,
+    SidebarMenuButton,
+    SidebarMenuItem,
+  },
+  name: 'NavUser',
+  props: {
+    user: { type: Object, required: true },
+  },
+  data() {
+    return {
+      // No local data needed
+    };
+  },
+  computed: {
+    isMobile() {
+      return useSidebar().isMobile;
+    },
+  },
+};
 </script>
 
 <template>
@@ -41,10 +73,8 @@ const { isMobile } = useSidebar();
     <SidebarMenuItem>
       <DropdownMenu>
         <DropdownMenuTrigger as-child>
-          <SidebarMenuButton
-            size="lg"
-            class="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground md:h-8 md:p-0"
-          >
+          <SidebarMenuButton size="lg"
+            class="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground md:h-8 md:p-0">
             <Avatar class="h-8 w-8 rounded-lg">
               <AvatarImage :src="user.avatar" :alt="user.name" />
               <AvatarFallback class="rounded-lg"> CN </AvatarFallback>
@@ -56,12 +86,8 @@ const { isMobile } = useSidebar();
             <ChevronsUpDown class="ml-auto size-4" />
           </SidebarMenuButton>
         </DropdownMenuTrigger>
-        <DropdownMenuContent
-          class="w-[--reka-dropdown-menu-trigger-width] min-w-56 rounded-lg"
-          :side="isMobile ? 'bottom' : 'right'"
-          align="end"
-          :side-offset="4"
-        >
+        <DropdownMenuContent class="w-[--reka-dropdown-menu-trigger-width] min-w-56 rounded-lg"
+          :side="isMobile ? 'bottom' : 'right'" align="end" :side-offset="4">
           <DropdownMenuLabel class="p-0 font-normal">
             <div class="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
               <Avatar class="h-8 w-8 rounded-lg">
