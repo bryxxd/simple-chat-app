@@ -8,7 +8,7 @@ Route::middleware('guest')->group(function () {
     /*
      * Login routes
      */
-    Route::get('/', [LoginController::class, 'index'])->name('login');
+    Route::get('/login', [LoginController::class, 'index'])->name('login');
 
     /*
      * Signup routes
