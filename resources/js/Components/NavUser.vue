@@ -52,12 +52,9 @@ export default {
     SidebarMenuItem,
   },
   name: 'NavUser',
-  props: {
-    user: { type: Object, required: true },
-  },
+  inject: ['user'],
   data() {
     return {
-      // No local data needed
     };
   },
   computed: {
