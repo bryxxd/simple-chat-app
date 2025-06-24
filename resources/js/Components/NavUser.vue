@@ -1,13 +1,9 @@
 <script>
 import {
   BadgeCheck,
-  Bell,
   ChevronsUpDown,
-  CreditCard,
   LogOut,
-  Sparkles,
 } from "lucide-vue-next";
-
 import {
   Avatar,
   AvatarFallback,
@@ -35,9 +31,7 @@ export default {
     AvatarFallback,
     AvatarImage,
     BadgeCheck,
-    Bell,
     ChevronsUpDown,
-    CreditCard,
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuGroup,
@@ -46,7 +40,6 @@ export default {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
     LogOut,
-    Sparkles,
     SidebarMenu,
     SidebarMenuButton,
     SidebarMenuItem,
@@ -100,26 +93,10 @@ export default {
           <DropdownMenuSeparator />
           <DropdownMenuGroup>
             <DropdownMenuItem>
-              <Sparkles />
-              Upgrade to Pro
-            </DropdownMenuItem>
-          </DropdownMenuGroup>
-          <DropdownMenuSeparator />
-          <DropdownMenuGroup>
-            <DropdownMenuItem>
               <BadgeCheck />
               Account
             </DropdownMenuItem>
-            <DropdownMenuItem>
-              <CreditCard />
-              Billing
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              <Bell />
-              Notifications
-            </DropdownMenuItem>
           </DropdownMenuGroup>
-          <DropdownMenuSeparator />
           <DropdownMenuItem>
             <LogOut />
             Log out
