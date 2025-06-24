@@ -1,6 +1,6 @@
 <script>
 export default {
-    name: 'AppLayout',
+    name: 'GuestLayout',
     props: {
         title: {
             type: String,

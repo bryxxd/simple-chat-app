@@ -1,6 +1,6 @@
 <script>
 import { Head } from '@inertiajs/vue3';
-import AppLayout from '@/Layouts/AppLayout.vue';
+import GuestLayout from '@/Layouts/GuestLayout.vue';
 import { Button } from '@/components/ui/button';
 import {
     Card,
@@ -16,7 +16,7 @@ import { Link } from '@inertiajs/vue3';
 export default {
     components: {
         Head,
-        AppLayout,
+        GuestLayout,
         Button,
         Card,
         CardContent,
@@ -33,7 +33,7 @@ export default {
 <template>
 
     <Head title="Forgot Password" />
-    <AppLayout>
+    <GuestLayout>
         <Card class="mx-auto max-w-sm">
             <CardHeader>
                 <CardTitle class="text-xl">Forgot Password</CardTitle>
@@ -54,6 +54,6 @@ export default {
                 </div>
             </CardContent>
         </Card>
-    </AppLayout>
+    </GuestLayout>
 
 </template>

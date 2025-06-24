@@ -1,6 +1,6 @@
 <script>
 import { Head, Link } from '@inertiajs/vue3';
-import AppLayout from '@/Layouts/AppLayout.vue';
+import GuestLayout from '@/Layouts/GuestLayout.vue';
 import { Button } from '@/components/ui/button';
 import { Card, CardTitle, CardContent, CardHeader, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -10,7 +10,7 @@ export default {
     components: {
         Head,
         Link,
-        AppLayout,
+        GuestLayout,
         Button,
         Card,
         CardContent,
@@ -31,7 +31,7 @@ export default {
 <template>
 
     <Head title="Login" />
-    <AppLayout>
+    <GuestLayout>
         <div class="flex flex-col gap-6">
             <Card class="mx-auto max-w-sm">
                 <CardHeader>
@@ -91,6 +91,6 @@ export default {
                 <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.
             </div>
         </div>
-    </AppLayout>
+    </GuestLayout>
 
 </template>

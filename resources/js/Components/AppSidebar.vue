@@ -1,4 +1,5 @@
 <script>
+import { Link } from "@inertiajs/vue3";
 import {
     Sidebar,
     SidebarContent,
@@ -14,6 +15,7 @@ import { Label } from "@/components/ui/label";
 export default {
     name: "AppSidebar",
     components: {
+        Link,
         Sidebar,
         SidebarContent,
         SidebarGroup,
@@ -49,9 +51,7 @@ export default {
         <Sidebar collapsible="none" class="flex-1 flex">
             <SidebarHeader class="gap-3.5 border-b p-4">
                 <div class="flex w-full items-center justify-between">
-                    <div class="text-base font-medium text-foreground">
-                        {{ title }}
-                    </div>
+                    <Link :href="route('dashboard')" class="text-base font-medium text-foreground">{{ title }}</Link>
                     <Label class="flex items-center gap-2 text-sm">
                         <span>Unreads</span>
                         <Switch class="shadow-none" />

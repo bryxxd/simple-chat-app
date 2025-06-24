@@ -24,6 +24,8 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from '@/components/ui/sidebar';
+import { Link } from '@inertiajs/vue3';
+
 
 export default {
   components: {
@@ -40,6 +42,7 @@ export default {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
     LogOut,
+    Link,
     SidebarMenu,
     SidebarMenuButton,
     SidebarMenuItem,
@@ -94,7 +97,7 @@ export default {
           <DropdownMenuGroup>
             <DropdownMenuItem>
               <BadgeCheck />
-              Account
+              <Link :href="route('profile')">Account</Link>
             </DropdownMenuItem>
           </DropdownMenuGroup>
           <DropdownMenuItem>

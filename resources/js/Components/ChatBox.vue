@@ -7,6 +7,7 @@ export default {
             default: null
         }
     },
+    name: "ChatBox"
 }
 
 </script>

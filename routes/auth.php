@@ -3,6 +3,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
+use Inertia\Inertia;
 
 Route::middleware('guest')->group(function () {
     /*
@@ -14,6 +15,13 @@ Route::middleware('guest')->group(function () {
      * Signup routes
      */
     Route::get('/signup', [RegisteredUserController::class, 'create'])->name('signup');
+
+    /*
+     * Profile routes
+     */
+    Route::get('/profile', function () {
+        return Inertia::render('Profile');
+    })->name('profile');
 
     /*
      * Forgot password reset routes
