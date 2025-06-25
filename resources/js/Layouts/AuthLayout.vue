@@ -106,11 +106,9 @@ export default {
                 </div>
                 <NavUser :user="user" class="w-[3rem] md:w-[2rem]" />
             </header>
-            <div class="flex flex-1 flex-col gap-4 p-0 md:p-4">
+            <div>
                 <slot>
-                    <ChatBox class="hidden md:block" :activeChat="updateActiveChat" />
-                    <Room class="block md:hidden" v-for="mail in mails" :key="mail.id" :mail="mail"
-                        @click="setActiveChat(mail.id)"></Room>
+                    <ChatBox :activeChat="updateActiveChat" />
                 </slot>
             </div>
         </SidebarInset>
