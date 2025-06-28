@@ -27,11 +27,37 @@ export default {
             default: null
         }
     },
+    emits: ['send-message'],
     data() {
         return {
             avatar: '/images/shadcn.jpg',
-            isCurrentUser: true
+            isSender : true,
+            messageInput : '',
         }
+    },
+    methods : {
+        // handleSendMessage() {
+        //     this.$emit('handle-send-message', 1 , this.messageInput);
+        //     this.messageInput = '';
+        //     this.$nextTick(() => {
+        //         const chatContent = this.$refs.chatContent;
+        //         if (chatContent && chatContent.$el) {
+        //             chatContent.$el.scrollTop = chatContent.$el.scrollHeight;
+        //         } else if (chatContent) {
+        //             chatContent.scrollTop = chatContent.scrollHeight;
+        //         }
+        //     });
+        // }
+    },
+    mounted() {
+        // this.$nextTick(() => {
+        //     const chatContent = this.$refs.chatContent;
+        //     if (chatContent && chatContent.$el) {
+        //         chatContent.$el.scrollTop = chatContent.$el.scrollHeight;
+        //     } else if (chatContent) {
+        //         chatContent.scrollTop = chatContent.scrollHeight;
+        //     }
+        // });
     }
 }
 
@@ -40,70 +66,23 @@ export default {
     <Chat>
         <ChatDetails>
             <ChatAvatar :src="avatar" />
-            <div class="flex flex-col justify-center ml-4">
-                <ChatName>ShadCN</ChatName>
-                <ChatStatus>Online</ChatStatus>
+            <div class="flex flex-col justify-between ml-4">
+                <ChatName>{{ activeChat.participant.name }}</ChatName>
+                <ChatStatus v-if="activeChat.participant.isOnline" class="text-green-700">Online</ChatStatus>
             </div>
         </ChatDetails>
 
-        <ChatContent>
+        <ChatContent ref="chatContent">
             <ChatList>
-                <ChatItem>
-                    <ChatAvatar :src="avatar" class="w-8 h-8 mr-2" />
-                    <ChatMessage variant="sender">
-                        Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been
-                        the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley
-                        of type and scrambled it to make a type specimen book. It has survived not only five centuries,
-                        but also the leap into electronic typesetting, remaining essentially unchanged. It was
-                        popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages,
-                        and more recently with desktop publishing software like Aldus PageMaker including versions of
-                        Lorem Ipsum.
-                    </ChatMessage>
-                </ChatItem>
-                <ChatItem>
-                    <ChatAvatar :src="avatar" class="w-8 h-8 mr-2" />
-                    <ChatMessage>
-                        Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been
-                        the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley
-                        of type and scrambled it to make a type specimen book. It has survived not only five centuries,
-                        but also the leap into electronic typesetting, remaining essentially unchanged. It was
-                        popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages,
-                        and more recently with desktop publishing software like Aldus PageMaker including versions of
-                        Lorem Ipsum.
-                    </ChatMessage>
-                </ChatItem>
-                <ChatItem>
-                    <ChatAvatar :src="avatar" class="w-8 h-8 mr-2" />
-                    <ChatMessage>
-                        Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been
-                        the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley
-                        of type and scrambled it to make a type specimen book. It has survived not only five centuries,
-                        but also the leap into electronic typesetting, remaining essentially unchanged. It was
-                        popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages,
-                        and more recently with desktop publishing software like Aldus PageMaker including versions of
-                        Lorem Ipsum.
-                    </ChatMessage>
-                </ChatItem>
-                <ChatItem>
-                    <ChatAvatar :src="avatar" class="w-8 h-8 mr-2" />
-                    <ChatMessage>
-                        Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been
-                        the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley
-                        of type and scrambled it to make a type specimen book. It has survived not only five centuries,
-                        but also the leap into electronic typesetting, remaining essentially unchanged. It was
-                        popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages,
-                        and more recently with desktop publishing software like Aldus PageMaker including versions of
-                        Lorem Ipsum.
-                    </ChatMessage>
+                <ChatItem v-for="(message, index) in activeChat.messages" :key="index" :class="{'flex-row-reverse': message.senderId === 1}">
+                    <ChatAvatar :src="avatar" class="w-8 h-8" />
+                    <ChatMessage :class="{ 'bg-primary text-primary-foreground' : message.senderId === 1}">{{ message.content }}</ChatMessage>
                 </ChatItem>
             </ChatList>
         </ChatContent>
-
         <ChatForm>
-            <Textarea placeholder="Type your message..." />
-            <Button class="absolute right-[0.5rem] top-[0.7rem]">Send
-                <Send />
-            </Button>
+            <Textarea placeholder="Type your message..." v-model="messageInput"/>
+            <Button class="absolute right-[0.5rem] top-[0.7rem]" @click.prevent="$emit('send-message', activeChat.id, messageInput)">Send<Send /></Button>
         </ChatForm>
     </Chat>
 </template>

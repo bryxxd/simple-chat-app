@@ -26,13 +26,14 @@ export default {
         Switch,
         Label
     },
+    emits : ["set-active-chat"],
     props: {
         side: { type: String, required: false },
         variant: { type: String, required: false },
         collapsible: { type: String, required: false, default: "icon" },
         class: { type: null, required: false },
     },
-    inject: ["mails"],
+    inject: ["chats"],
     data() {
         return {
             title: "Logo"
@@ -40,7 +41,7 @@ export default {
     },
     methods: {
         setActiveChat(id) {
-            this.$emit("setActiveChat", id);
+            this.$emit("set-active-chat", id);
         }
     },
 };
@@ -62,7 +63,7 @@ export default {
             <SidebarContent class="hidden md:block">
                 <SidebarGroup class="px-0">
                     <SidebarGroupContent>
-                        <Room v-for="mail in mails" :key="mail.id" :mail="mail" @click="setActiveChat(mail.id)"></Room>
+                        <Room v-for="chat in chats" :key="chat.id" :chat="chat" @click="setActiveChat(chat.id)"></Room>
                     </SidebarGroupContent>
                 </SidebarGroup>
             </SidebarContent>

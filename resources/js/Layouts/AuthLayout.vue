@@ -1,13 +1,13 @@
 <script>
-import AppSidebar from '@/components/AppSidebar.vue';
-import ChatBox from '@/Components/ChatBox.vue';
-import NavUser from '@/components/NavUser.vue';
-import { Room } from '@/components/ui/room/';
+import AppSidebar from "@/components/AppSidebar.vue";
+import ChatBox from "@/Components/ChatBox.vue";
+import NavUser from "@/components/NavUser.vue";
+import { Room } from "@/components/ui/room/";
 import {
     SidebarInset,
     SidebarProvider,
     SidebarTrigger,
-} from '@/components/ui/sidebar';
+} from "@/components/ui/sidebar";
 import {
     Breadcrumb,
     BreadcrumbItem,
@@ -15,10 +15,10 @@ import {
     BreadcrumbList,
     BreadcrumbPage,
     BreadcrumbSeparator,
-} from '@/components/ui/breadcrumb'
+} from "@/components/ui/breadcrumb";
 
 export default {
-    name: 'Dashboard',
+    name: "Dashboard",
     components: {
         AppSidebar,
         Breadcrumb,
@@ -32,7 +32,7 @@ export default {
         SidebarProvider,
         SidebarTrigger,
         NavUser,
-        Room
+        Room,
     },
     data() {
         return {
@@ -41,33 +41,265 @@ export default {
                 email: "m@example.com",
                 avatar: "./images/shadcn.jpg",
             },
-            mails: [
-                { id: 1, avatar: "./images/shadcn.jpg", name: "William Smith", email: "williamsmith@example.com", subject: "Meeting Tomorrow", date: "09:34 AM", teaser: "Hi team, just a reminder about our meeting tomorrow at 10 AM.\nPlease come prepared with your project updates." },
-                { id: 2, avatar: "./images/shadcn.jpg", name: "Alice Smith", email: "alicesmith@example.com", subject: "Re: Project Update", date: "Yesterday", teaser: "Thanks for the update. The progress looks great so far.\nLet's schedule a call to discuss the next steps." },
-                { id: 3, avatar: "./images/shadcn.jpg", name: "Bob Johnson", email: "bobjohnson@example.com", subject: "Weekend Plans", date: "2 days ago", teaser: "Hey everyone! I'm thinking of organizing a team outing this weekend.\nWould you be interested in a hiking trip or a beach day?" },
-                { id: 4, avatar: "./images/shadcn.jpg", name: "Emily Davis", email: "emilydavis@example.com", subject: "Re: Question about Budget", date: "2 days ago", teaser: "I've reviewed the budget numbers you sent over.\nCan we set up a quick call to discuss some potential adjustments?" },
-                { id: 5, avatar: "./images/shadcn.jpg", name: "Michael Wilson", email: "michaelwilson@example.com", subject: "Important Announcement", date: "1 week ago", teaser: "Please join us for an all-hands meeting this Friday at 3 PM.\nWe have some exciting news to share about the company's future." },
-                { id: 6, avatar: "./images/shadcn.jpg", name: "Sarah Brown", email: "sarahbrown@example.com", subject: "Re: Feedback on Proposal", date: "1 week ago", teaser: "Thank you for sending over the proposal. I've reviewed it and have some thoughts.\nCould we schedule a meeting to discuss my feedback in detail?" },
-                { id: 7, avatar: "./images/shadcn.jpg", name: "David Lee", email: "davidlee@example.com", subject: "New Project Idea", date: "1 week ago", teaser: "I've been brainstorming and came up with an interesting project concept.\nDo you have time this week to discuss its potential impact and feasibility?" },
-                { id: 8, avatar: "./images/shadcn.jpg", name: "Olivia Wilson", email: "oliviawilson@example.com", subject: "Vacation Plans", date: "1 week ago", teaser: "Just a heads up that I'll be taking a two-week vacation next month.\nI'll make sure all my projects are up to date before I leave." },
-                { id: 9, avatar: "./images/shadcn.jpg", name: "James Martin", email: "jamesmartin@example.com", subject: "Re: Conference Registration", date: "1 week ago", teaser: "I've completed the registration for the upcoming tech conference.\nLet me know if you need any additional information from my end." },
-                { id: 10, avatar: "./images/shadcn.jpg", name: "Sophia White", email: "sophiawhite@example.com", subject: "Team Dinner", date: "1 week ago", teaser: "To celebrate our recent project success, I'd like to organize a team dinner.\nAre you available next Friday evening? Please let me know your preferences." },
+            chats: [
+                {
+                    id: 1,
+                    participant: {
+                        id: 2,
+                        name: "Sarah Johnson",
+                        email: "sarah.johnson@example.com",
+                        avatar: "./images/shadcn.jpg",
+                        isOnline: true
+                    },
+                    lastMessage: {
+                        content: "Perfect! See you at the coffee shop at 3 PM ☕",
+                        timestamp: "2024-06-28T14:25:00Z",
+                        senderId: 2
+                    },
+                    unreadCount: 2,
+                    messages: [
+                        {
+                            id: 1,
+                            senderId: 1,
+                            content: "Hey Sarah! Are you free for coffee this afternoon?",
+                            timestamp: "2024-06-28T14:20:00Z",
+                            type: "text"
+                        },
+                        {
+                            id: 2,
+                            senderId: 2,
+                            content: "Yes! I'd love to catch up. What time works for you?",
+                            timestamp: "2024-06-28T14:22:00Z",
+                            type: "text"
+                        },
+                        {
+                            id: 3,
+                            senderId: 1,
+                            content: "How about 3 PM at our usual spot?",
+                            timestamp: "2024-06-28T14:23:00Z",
+                            type: "text"
+                        },
+                        {
+                            id: 4,
+                            senderId: 2,
+                            content: "Perfect! See you at the coffee shop at 3 PM ☕",
+                            timestamp: "2024-06-28T14:25:00Z",
+                            type: "text"
+                        }
+                    ]
+                },
+                {
+                    id: 2,
+                    participant: {
+                        id: 3,
+                        name: "Mike Chen",
+                        email: "mike.chen@example.com",
+                        avatar: "./images/shadcn.jpg",
+                        isOnline: false
+                    },
+                    lastMessage: {
+                        content: "Thanks for sharing! I'll review it tonight.",
+                        timestamp: "2024-06-28T11:45:00Z",
+                        senderId: 3
+                    },
+                    unreadCount: 0,
+                    messages: [
+                        {
+                            id: 5,
+                            senderId: 1,
+                            content: "Hey Mike, I finished the project proposal. Want to take a look?",
+                            timestamp: "2024-06-28T11:30:00Z",
+                            type: "text"
+                        },
+                        {
+                            id: 6,
+                            senderId: 1,
+                            content: "I've attached the PDF here",
+                            timestamp: "2024-06-28T11:31:00Z",
+                            type: "file"
+                        },
+                        {
+                            id: 7,
+                            senderId: 3,
+                            content: "Awesome! Let me download it now.",
+                            timestamp: "2024-06-28T11:40:00Z",
+                            type: "text"
+                        },
+                        {
+                            id: 8,
+                            senderId: 3,
+                            content: "Thanks for sharing! I'll review it tonight.",
+                            timestamp: "2024-06-28T11:45:00Z",
+                            type: "text"
+                        }
+                    ]
+                },
+                {
+                    id: 3,
+                    participant: {
+                        id: 4,
+                        name: "Emma Wilson",
+                        email: "emma.wilson@example.com",
+                        avatar: "./images/shadcn.jpg",
+                        isOnline: true
+                    },
+                    lastMessage: {
+                        content: "Can't wait! It's going to be amazing! 🎉",
+                        timestamp: "2024-06-28T16:10:00Z",
+                        senderId: 4
+                    },
+                    unreadCount: 1,
+                    messages: [
+                        {
+                            id: 9,
+                            senderId: 4,
+                            content: "OMG! Did you see the announcement about the concert?",
+                            timestamp: "2024-06-28T16:05:00Z",
+                            type: "text"
+                        },
+                        {
+                            id: 10,
+                            senderId: 1,
+                            content: "Yes! I already got my tickets. Are you going?",
+                            timestamp: "2024-06-28T16:07:00Z",
+                            type: "text"
+                        },
+                        {
+                            id: 11,
+                            senderId: 4,
+                            content: "Definitely! Just bought mine too.",
+                            timestamp: "2024-06-28T16:08:00Z",
+                            type: "text"
+                        },
+                        {
+                            id: 12,
+                            senderId: 4,
+                            content: "Can't wait! It's going to be amazing! 🎉",
+                            timestamp: "2024-06-28T16:10:00Z",
+                            type: "text"
+                        }
+                    ]
+                },
+                {
+                    id: 4,
+                    participant: {
+                        id: 5,
+                        name: "David Rodriguez",
+                        email: "david.rodriguez@example.com",
+                        avatar:"./images/shadcn.jpg",
+                        isOnline: false
+                    },
+                    lastMessage: {
+                        content: "Sounds good! Let me know when you're ready.",
+                        timestamp: "2024-06-28T09:15:00Z",
+                        senderId: 5
+                    },
+                    unreadCount: 0,
+                    messages: [
+                        {
+                            id: 13,
+                            senderId: 1,
+                            content: "Morning David! Ready for our gym session today?",
+                            timestamp: "2024-06-28T09:00:00Z",
+                            type: "text"
+                        },
+                        {
+                            id: 14,
+                            senderId: 5,
+                            content: "Hey! Yes, but I'm running a bit late.",
+                            timestamp: "2024-06-28T09:10:00Z",
+                            type: "text"
+                        },
+                        {
+                            id: 15,
+                            senderId: 1,
+                            content: "No worries, take your time. I'll warm up first.",
+                            timestamp: "2024-06-28T09:12:00Z",
+                            type: "text"
+                        },
+                        {
+                            id: 16,
+                            senderId: 5,
+                            content: "Sounds good! Let me know when you're ready.",
+                            timestamp: "2024-06-28T09:15:00Z",
+                            type: "text"
+                        }
+                    ]
+                },
+                {
+                    id: 5,
+                    participant: {
+                        id: 6,
+                        name: "Lisa Thompson",
+                        email: "lisa.thompson@example.com",
+                        avatar: "./images/shadcn.jpg",
+                        isOnline: true
+                    },
+                    lastMessage: {
+                        content: "That recipe sounds delicious! Please share it 🍝",
+                        timestamp: "2024-06-28T18:30:00Z",
+                        senderId: 6
+                    },
+                    unreadCount: 3,
+                    messages: [
+                        {
+                            id: 17,
+                            senderId: 6,
+                            content: "Hi! How was your cooking class today?",
+                            timestamp: "2024-06-28T18:20:00Z",
+                            type: "text"
+                        },
+                        {
+                            id: 18,
+                            senderId: 1,
+                            content: "It was fantastic! We learned to make authentic Italian pasta.",
+                            timestamp: "2024-06-28T18:25:00Z",
+                            type: "text"
+                        },
+                        {
+                            id: 19,
+                            senderId: 1,
+                            content: "The chef shared some amazing secret techniques!",
+                            timestamp: "2024-06-28T18:27:00Z",
+                            type: "text"
+                        },
+                        {
+                            id: 20,
+                            senderId: 6,
+                            content: "That recipe sounds delicious! Please share it 🍝",
+                            timestamp: "2024-06-28T18:30:00Z",
+                            type: "text"
+                        }
+                    ]
+                }
             ],
-            activeChat: null
-        }
+            activeChat: null,
+        };
     },
     methods: {
-        chatSelected(chatID) {
+        handleActiveChat(chatID) {
             this.activeChat = chatID;
+        },
+        handleNewMessage(activeChatID, message) {
+            const currentChat = this.chats.find((chat) => chat.id === activeChatID);
+            currentChat.messages.push({
+                id : currentChat.messages.length + 1,
+                senderId : 1,
+                content: message,
+                timestamp: new Date().toISOString(),
+                type: "text",
+            })
         }
     },
     computed: {
         updateActiveChat() {
-            return this.activeChat ? this.mails.find(mail => mail.id === this.activeChat) : null
+            return this.activeChat
+                ? this.chats.find((chat) => chat.id === this.activeChat)
+                : this.chats[0];
         },
     },
     mounted() {
-        this.activeChat = this.mails[0]?.id || null;
+        this.activeChat = this.chats[0]?.id || null;
     },
     provide() {
         return {
@@ -76,15 +308,15 @@ export default {
                 email: "m@example.com",
                 avatar: "./images/shadcn.jpg",
             },
-            mails: this.mails,
-        }
-    }
+            chats: this.chats,
+        };
+    },
 };
 </script>
 
 <template>
-    <SidebarProvider :style="{ '--sidebar-width': '350px', }">
-        <AppSidebar @set-active-chat="chatSelected" />
+    <SidebarProvider :style="{ '--sidebar-width': '350px' }">
+        <AppSidebar @set-active-chat="handleActiveChat" />
         <SidebarInset>
             <header class="sticky top-0 flex shrink-0 items-center justify-between border-b bg-background p-2 md:p-4">
                 <div class="flex items-center">
@@ -108,7 +340,7 @@ export default {
             </header>
             <div>
                 <slot>
-                    <ChatBox :activeChat="updateActiveChat" />
+                    <ChatBox :activeChat="updateActiveChat" @send-message="handleNewMessage" />
                 </slot>
             </div>
         </SidebarInset>
