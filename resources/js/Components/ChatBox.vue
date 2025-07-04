@@ -25,9 +25,14 @@ export default {
             type: [Object, null],
             required: true,
             default: null
+        },
+        modelValue: {
+            type: [String, null],
+            required: false,
+            default: ''
         }
     },
-    emits: ['send-message'],
+    emits: ['send-message', 'update:modelValue'],
     data() {
         return {
             avatar: '/images/shadcn.jpg',
@@ -81,8 +86,8 @@ export default {
             </ChatList>
         </ChatContent>
         <ChatForm>
-            <Textarea placeholder="Type your message..." v-model="messageInput"/>
-            <Button class="absolute right-[0.5rem] top-[0.7rem]" @click.prevent="$emit('send-message', activeChat.id, messageInput)">Send<Send /></Button>
+            <Textarea placeholder="Type your message..." :modelValue="modelValue" @update:modelValue="$emit('update:modelValue', $event)" />
+            <Button class="absolute right-[0.5rem] top-[0.7rem]" @click.prevent="$emit('send-message', activeChat.id)">Send<Send /></Button>
         </ChatForm>
     </Chat>
 </template>
