@@ -1,9 +1,9 @@
 <script>
-import { Head, Link } from '@inertiajs/vue3';
+import { Head, Link, useForm } from '@inertiajs/vue3';
 import GuestLayout from '@/Layouts/GuestLayout.vue';
 import { Button } from '@/components/ui/button';
 import { Card, CardTitle, CardContent, CardHeader, CardDescription } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
+import { Input, InputError } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
 export default {
@@ -18,13 +18,23 @@ export default {
         CardTitle,
         CardDescription,
         Input,
+        InputError,
         Label,
     },
     data() {
         return {
-            image: './images/placeholder.svg'
+            image: './images/placeholder.svg',
+            form: useForm({
+                email: '',
+                password: ''
+            })
         }
     },
+    methods: {
+        submit() {
+            this.form.post(route('login.store'));
+        }
+    }
 };
 </script>
 
@@ -43,10 +53,16 @@ export default {
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <div class="grid gap-4">
+                    <form @submit.prevent="submit" method="POST" class="grid gap-4">
                         <div class="grid gap-2">
                             <Label for="email">Email</Label>
-                            <Input id="email" type="email" required />
+                            <Input 
+                                id="email" 
+                                type="text" 
+                                v-model="form.email" 
+                                :class="{'border-red-500': form.errors.email}" 
+                            />
+                            <InputError v-if="form.errors.email">{{ form.errors.email }}</InputError>
                         </div>
                         <div class="grid gap-2">
                             <div class="flex items-center">
@@ -55,10 +71,16 @@ export default {
                                     Forgot your password?
                                 </Link>
                             </div>
-                            <Input id="password" type="password" required />
+                            <Input 
+                                id="password" 
+                                type="password" 
+                                v-model="form.password" 
+                                :class="{'border-red-500': form.errors.password}" 
+                            />
+                            <InputError v-if="form.errors.password">{{ form.errors.password }}</InputError>
                         </div>
                         <Button type="submit" class="w-full">
-                            Login
+                            <span>Login</span>
                         </Button>
                         <div
                             class="relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-border">
@@ -76,7 +98,7 @@ export default {
                                 <span class="sr-only">Login with Google</span>
                             </Button>
                         </div>
-                    </div>
+                    </form>
                     <div class="mt-4 text-center text-sm">
                         Don't have an account?
                         <Link :href="route('signup')" class="underline">

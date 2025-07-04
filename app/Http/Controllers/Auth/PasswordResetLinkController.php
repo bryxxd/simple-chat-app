@@ -15,4 +15,14 @@ class PasswordResetLinkController extends Controller
     public function create() {
         return Inertia::render('auth/ForgotPassword');
     }
+
+
+    /**
+     * Handle the incoming request to send a password reset link.
+     */
+    public function show(Request $request) { 
+        $request->validate([
+            'email' => ['required', 'email']
+        ]);
+    }
 }

@@ -60,7 +60,7 @@ export default {
                 </div>
                 <SidebarInput placeholder="Type to search..." />
             </SidebarHeader>
-            <SidebarContent class="hidden md:block">
+            <SidebarContent>
                 <SidebarGroup class="px-0">
                     <SidebarGroupContent>
                         <Room v-for="chat in chats" :key="chat.id" :chat="chat" @click="setActiveChat(chat.id)"></Room>

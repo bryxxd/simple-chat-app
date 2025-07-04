@@ -10,11 +10,13 @@ Route::middleware('guest')->group(function () {
      * Login routes
      */
     Route::get('/login', [LoginController::class, 'index'])->name('login');
+    Route::post('/login', [LoginController::class, 'store'])->name('login.store');
 
     /*
      * Signup routes
      */
     Route::get('/signup', [RegisteredUserController::class, 'create'])->name('signup');
+    Route::post('/signup', [RegisteredUserController::class, 'store'])->name('signup.store');
 
     /*
      * Profile routes
@@ -27,4 +29,5 @@ Route::middleware('guest')->group(function () {
      * Forgot password reset routes
      */
     Route::get('/forgot-password', [PasswordResetLinkController::class, 'create'])->name('forgot.password');
+    Route::post('/forgot-password', [PasswordResetLinkController::class, 'show'])->name('forgot.password.store');
 });
