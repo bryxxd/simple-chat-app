@@ -25,7 +25,7 @@ export default {
         return {
             image: './images/placeholder.svg',
             form: useForm({
-                email: '',
+                username: '',
                 password: ''
             })
         }
@@ -49,20 +49,20 @@ export default {
                         Login
                     </CardTitle>
                     <CardDescription>
-                        Enter your email below to login to your account
+                        Enter your username below to login to your account
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
                     <form @submit.prevent="submit" method="POST" class="grid gap-4">
                         <div class="grid gap-2">
-                            <Label for="email">Email</Label>
+                            <Label for="username">Username</Label>
                             <Input 
-                                id="email" 
+                                id="username" 
                                 type="text" 
-                                v-model="form.email" 
-                                :class="{'border-red-500': form.errors.email}" 
+                                v-model="form.username" 
+                                :class="{'border-red-500': form.errors.username}" 
                             />
-                            <InputError v-if="form.errors.email">{{ form.errors.email }}</InputError>
+                            <InputError v-if="form.errors.username">{{ form.errors.username }}</InputError>
                         </div>
                         <div class="grid gap-2">
                             <div class="flex items-center">
@@ -101,7 +101,7 @@ export default {
                     </form>
                     <div class="mt-4 text-center text-sm">
                         Don't have an account?
-                        <Link :href="route('signup')" class="underline">
+                        <Link :href="route('signup.index')" class="underline">
                             Sign up
                         </Link>
                     </div>

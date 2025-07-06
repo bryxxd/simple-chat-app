@@ -66,7 +66,7 @@ export default {
                         <Button type="submit" class="w-full">Send</Button>
                     </div>
                     <div class="mt-4 text-center text-sm">
-                        <Link :href="route('login')" class="underline">Back to Login</Link>
+                        <Link :href="route('login.index')" class="underline">Back to Login</Link>
                     </div>
                 </form>
             </CardContent>

@@ -9,14 +9,27 @@ Route::middleware('guest')->group(function () {
     /*
      * Login routes
      */
-    Route::get('/login', [LoginController::class, 'index'])->name('login');
+    Route::get('/login', [LoginController::class, 'index'])->name('login.index');
     Route::post('/login', [LoginController::class, 'store'])->name('login.store');
 
     /*
      * Signup routes
      */
-    Route::get('/signup', [RegisteredUserController::class, 'create'])->name('signup');
+    Route::get('/signup', [RegisteredUserController::class, 'create'])->name('signup.index');
     Route::post('/signup', [RegisteredUserController::class, 'store'])->name('signup.store');
+
+    /*
+     * Forgot password reset routes
+     */
+    Route::get('/forgot-password', [PasswordResetLinkController::class, 'create'])->name('forgot.password');
+    Route::post('/forgot-password', [PasswordResetLinkController::class, 'show'])->name('forgot.password.store');
+});
+
+Route::middleware('auth')->group(function () {
+    /*
+     * Logout route
+     */
+    Route::post('/logout', [LoginController::class, 'destroy'])->name('logout');
 
     /*
      * Profile routes
@@ -24,10 +37,4 @@ Route::middleware('guest')->group(function () {
     Route::get('/profile', function () {
         return Inertia::render('Profile');
     })->name('profile');
-
-    /*
-     * Forgot password reset routes
-     */
-    Route::get('/forgot-password', [PasswordResetLinkController::class, 'create'])->name('forgot.password');
-    Route::post('/forgot-password', [PasswordResetLinkController::class, 'show'])->name('forgot.password.store');
 });

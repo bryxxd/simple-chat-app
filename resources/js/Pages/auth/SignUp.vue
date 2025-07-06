@@ -1,16 +1,16 @@
 <script>
-import { Head, Link, useForm } from '@inertiajs/vue3';
-import GuestLayout from '@/Layouts/GuestLayout.vue';
-import { Button } from '@/components/ui/button';
+import { Head, Link, useForm } from "@inertiajs/vue3";
+import GuestLayout from "@/Layouts/GuestLayout.vue";
+import { Button } from "@/components/ui/button";
 import {
     Card,
     CardContent,
     CardDescription,
     CardHeader,
     CardTitle,
-} from '@/components/ui/card';
-import { Input, InputError } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+} from "@/components/ui/card";
+import { Input, InputError } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 export default {
     components: {
@@ -25,28 +25,30 @@ export default {
         Input,
         InputError,
         Label,
-        Link
+        Link,
     },
-    data () {
+    data() {
         return {
-            form : useForm({
-                email : '',
-                username : '',
-                password : '',
-                password_confirmation : ''
-            })
-        }
+            form: useForm({
+                first_name: "",
+                last_name: "",
+                email: "",
+                username: "",
+                password: "",
+                password_confirmation: "",
+            }),
+        };
     },
-    methods : {
+    methods: {
         submit() {
-            this.form.post(route('signup.store'))
-        }
-    }
+            this.form.post(route("signup.store"));
+        },
+    },
 };
-
 </script>
 
 <template>
+
     <Head title="Sign Up" />
     <GuestLayout>
         <Card class="mx-auto max-w-sm">
@@ -58,27 +60,47 @@ export default {
             </CardHeader>
             <CardContent>
                 <form @submit.prevent="submit" method="POST" class="grid gap-4">
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div class="grid gap-2">
+                            <Label for="first-name">First name</Label>
+                            <Input id="first-name" v-model="form.first_name" :class="{ 'border-red-500': form.errors.first_name }" />
+                            <InputError v-if="form.errors.username">{{ form.errors.first_name }}</InputError>
+                        </div>
+                        <div class="grid gap-2">
+                            <Label for="last-name">Last name</Label>
+                            <Input id="last-name" v-model="form.last_name" :class="{ 'border-red-500': form.errors.last_name }" />
+                            <InputError v-if="form.errors.username">{{ form.errors.last_name }}</InputError>
+                        </div>
+                    </div>
                     <div class="grid gap-2">
                         <Label for="email">Email</Label>
-                        <Input id="email" type="email" v-model="form.email" :class="{'border-red-500': form.errors.email}"  />
+                        <Input id="email" type="email" v-model="form.email"
+                            :class="{ 'border-red-500': form.errors.email }" />
                         <InputError v-if="form.errors.email">{{ form.errors.email }}</InputError>
                     </div>
                     <div class="grid gap-2">
                         <Label for="username">Username</Label>
-                        <Input id="username" type="text" v-model="form.username" :class="{'border-red-500': form.errors.username}" />
+                        <Input id="username" type="text" v-model="form.username"
+                            :class="{ 'border-red-500': form.errors.username }" />
                         <InputError v-if="form.errors.username">{{ form.errors.username }}</InputError>
                     </div>
                     <div class="grid gap-2">
                         <Label for="password">Password</Label>
-                        <Input id="password" type="password" v-model="form.password" :class="{'border-red-500': form.errors.password}"  />
+                        <Input id="password" type="password" v-model="form.password"
+                            :class="{ 'border-red-500': form.errors.password }" />
                         <InputError v-if="form.errors.password">{{ form.errors.password }}</InputError>
                     </div>
                     <div class="grid gap-2">
                         <Label for="password_confirmation">Confirm Password</Label>
-                        <Input id="password_confirmation" type="password" v-model="form.password_confirmation" :class="{'border-red-500': form.errors.password_confirmation}" />
-                        <InputError v-if="form.errors.password_confirmation">{{ form.errors.password_confirmation }}</InputError>
+                        <Input id="password_confirmation" type="password" v-model="form.password_confirmation" :class="{
+                            'border-red-500': form.errors.password_confirmation,
+                        }" />
+                        <InputError v-if="form.errors.password_confirmation">{{ form.errors.password_confirmation }}
+                        </InputError>
                     </div>
-                    <Button type="submit" class="w-full"> <span>Create an account</span> </Button>
+                    <Button type="submit" class="w-full">
+                        <span>Create an account</span>
+                    </Button>
                     <div
                         class="relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-border">
                         <span class="relative z-10 bg-background px-2 text-muted-foreground">
@@ -98,10 +120,9 @@ export default {
                 </form>
                 <div class="mt-4 text-center text-sm">
                     Already have an account?
-                    <Link :href="route('login')" class="underline">Sign in</Link>
+                    <Link :href="route('login.index')" class="underline">Sign in</Link>
                 </div>
             </CardContent>
         </Card>
     </GuestLayout>
-
 </template>
