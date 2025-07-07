@@ -34,7 +34,12 @@ Route::middleware('auth')->group(function () {
     /*
      * Profile routes
      */
-    Route::get('/profile', function () {
-        return Inertia::render('Profile');
-    })->name('profile');
+
+    Route::get('/settings/password', function () {
+        return Inertia::render('settings/Password');
+    })->name('settings.password');
+
+    Route::get('/settings/appearance', function () {
+        return Inertia::render('settings/Appearance');
+    })->name('settings.appearance');
 });

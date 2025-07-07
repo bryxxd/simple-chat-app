@@ -39,7 +39,7 @@ export default {
             user: {
                 name: "shadcn",
                 email: "m@example.com",
-                avatar: "./images/shadcn.jpg",
+                avatar: "/images/shadcn.jpg",
             },
             message: '',
             chats: [
@@ -49,7 +49,7 @@ export default {
                         id: 2,
                         name: "Sarah Johnson",
                         email: "sarah.johnson@example.com",
-                        avatar: "./images/shadcn.jpg",
+                        avatar: "/images/shadcn.jpg",
                         isOnline: true
                     },
                     lastMessage: {
@@ -95,7 +95,7 @@ export default {
                         id: 3,
                         name: "Mike Chen",
                         email: "mike.chen@example.com",
-                        avatar: "./images/shadcn.jpg",
+                        avatar: "/images/shadcn.jpg",
                         isOnline: false
                     },
                     lastMessage: {
@@ -141,7 +141,7 @@ export default {
                         id: 4,
                         name: "Emma Wilson",
                         email: "emma.wilson@example.com",
-                        avatar: "./images/shadcn.jpg",
+                        avatar: "/images/shadcn.jpg",
                         isOnline: true
                     },
                     lastMessage: {
@@ -187,7 +187,7 @@ export default {
                         id: 5,
                         name: "David Rodriguez",
                         email: "david.rodriguez@example.com",
-                        avatar:"./images/shadcn.jpg",
+                        avatar:"/images/shadcn.jpg",
                         isOnline: false
                     },
                     lastMessage: {
@@ -233,7 +233,7 @@ export default {
                         id: 6,
                         name: "Lisa Thompson",
                         email: "lisa.thompson@example.com",
-                        avatar: "./images/shadcn.jpg",
+                        avatar: "/images/shadcn.jpg",
                         isOnline: true
                     },
                     lastMessage: {
@@ -308,7 +308,7 @@ export default {
             user: {
                 name: "shadcn",
                 email: "m@example.com",
-                avatar: "./images/shadcn.jpg",
+                avatar: "/images/shadcn.jpg",
             },
             chats: this.chats,
         };

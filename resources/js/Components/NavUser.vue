@@ -114,7 +114,7 @@ export default {
                     <DropdownMenuGroup>
                         <DropdownMenuItem>
                             <BadgeCheck />
-                            <Link class="block w-full text-left" :href="route('profile')">Account</Link>
+                            <Link class="block w-full text-left" :href="route('settings.profile')">Account</Link>
                         </DropdownMenuItem>
                     </DropdownMenuGroup>
                     <DropdownMenuItem>
