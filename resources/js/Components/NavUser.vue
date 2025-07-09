@@ -16,7 +16,7 @@ import {
     SidebarMenuItem,
     useSidebar,
 } from "@/components/ui/sidebar";
-import { Link, router } from "@inertiajs/vue3";
+import { Link, usePage } from "@inertiajs/vue3";
 
 export default {
     components: {
@@ -39,14 +39,13 @@ export default {
         SidebarMenuItem,
     },
     name: "NavUser",
-    inject: ["user"],
-    data() {
-        return {};
-    },
     computed: {
         isMobile() {
             return useSidebar().isMobile;
         },
+        user() {
+            return usePage().props.auth.user;
+        }
     },
 };
 </script>
@@ -62,19 +61,11 @@ export default {
                     >
                         <Avatar class="h-8 w-8 rounded-lg">
                             <AvatarImage :src="user.avatar" :alt="user.name" />
-                            <AvatarFallback class="rounded-lg">
-                                CN
-                            </AvatarFallback>
+                            <AvatarFallback class="rounded-lg">Avatar</AvatarFallback>
                         </Avatar>
-                        <div
-                            class="grid flex-1 text-left text-sm leading-tight"
-                        >
-                            <span class="truncate font-semibold">{{
-                                user.name
-                            }}</span>
-                            <span class="truncate text-xs">{{
-                                user.email
-                            }}</span>
+                        <div class="grid flex-1 text-left text-sm leading-tight">
+                            <span class="truncate font-semibold">{{`${user.first_name} ${user.last_name}` }}</span>
+                            <span class="truncate text-xs">{{ user.email }}</span>
                         </div>
                         <ChevronsUpDown class="ml-auto size-4" />
                     </SidebarMenuButton>
@@ -94,19 +85,11 @@ export default {
                                     :src="user.avatar"
                                     :alt="user.name"
                                 />
-                                <AvatarFallback class="rounded-lg">
-                                    CN
-                                </AvatarFallback>
+                                <AvatarFallback class="rounded-lg">Avatar</AvatarFallback>
                             </Avatar>
-                            <div
-                                class="grid flex-1 text-left text-sm leading-tight"
-                            >
-                                <span class="truncate font-semibold">{{
-                                    user.name
-                                }}</span>
-                                <span class="truncate text-xs">{{
-                                    user.email
-                                }}</span>
+                            <div class="grid flex-1 text-left text-sm leading-tight" >
+                                <span class="truncate font-semibold">{{ `${user.first_name} ${user.last_name}` }}</span>
+                                <span class="truncate text-xs">{{ user.email }}</span>
                             </div>
                         </div>
                     </DropdownMenuLabel>

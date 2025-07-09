@@ -305,11 +305,6 @@ export default {
     },
     provide() {
         return {
-            user: {
-                name: "shadcn",
-                email: "m@example.com",
-                avatar: "/images/shadcn.jpg",
-            },
             chats: this.chats,
         };
     },
