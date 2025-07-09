@@ -61,7 +61,7 @@ export default {
                             <Label for="email">Email</Label>
                             <Input id="email" type="email" v-model="form.email"
                                 :class="{ 'border-red-500': form.errors.email }" />
-                            <InputError v-if="form.errors.email">{{ form.errors.email }}</InputError>
+                            <InputError v-if="form.errors.email" :message="form.errors.email" />
                         </div>
                         <Button type="submit" class="w-full">Send</Button>
                     </div>

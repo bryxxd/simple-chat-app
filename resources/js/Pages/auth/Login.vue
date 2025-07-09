@@ -62,7 +62,7 @@ export default {
                                 v-model="form.username" 
                                 :class="{'border-red-500': form.errors.username}" 
                             />
-                            <InputError v-if="form.errors.username">{{ form.errors.username }}</InputError>
+                            <InputError v-if="form.errors.username" :message="form.errors.username" />
                         </div>
                         <div class="grid gap-2">
                             <div class="flex items-center">
@@ -77,7 +77,7 @@ export default {
                                 v-model="form.password" 
                                 :class="{'border-red-500': form.errors.password}" 
                             />
-                            <InputError v-if="form.errors.password">{{ form.errors.password }}</InputError>
+                            <InputError v-if="form.errors.password" :message="form.errors.password" />
                         </div>
                         <Button type="submit" class="w-full">
                             <span>Login</span>

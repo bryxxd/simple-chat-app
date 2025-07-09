@@ -1,13 +1,13 @@
 <script>
-import AppSidebar from "@/components/AppSidebar.vue";
+import AppSidebar from "@/Components/AppSidebar.vue";
 import ChatBox from "@/Components/ChatBox.vue";
-import NavUser from "@/components/NavUser.vue";
-import { Room } from "@/components/ui/room/";
+import NavUser from "@/Components/NavUser.vue";
+import { Room } from "@/Components/ui/room/";
 import {
     SidebarInset,
     SidebarProvider,
     SidebarTrigger,
-} from "@/components/ui/sidebar";
+} from "@/Components/ui/sidebar";
 import {
     Breadcrumb,
     BreadcrumbItem,
@@ -15,7 +15,7 @@ import {
     BreadcrumbList,
     BreadcrumbPage,
     BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
+} from "@/Components/ui/breadcrumb";
 
 export default {
     name: "Dashboard",
@@ -32,7 +32,7 @@ export default {
         SidebarProvider,
         SidebarTrigger,
         NavUser,
-        Room,
+        Room
     },
     data() {
         return {
@@ -320,7 +320,7 @@ export default {
     <SidebarProvider :style="{ '--sidebar-width': '350px' }">
         <AppSidebar @set-active-chat="handleActiveChat" />
         <SidebarInset>
-            <header class="sticky top-0 flex shrink-0 items-center justify-between border-b bg-background p-2 md:p-4">
+            <header class="sticky top-0 flex shrink-0 items-center justify-between border-b bg-background p-2 md:p-4 z-50">
                 <div class="flex items-center">
                     <SidebarTrigger class="-ml-1" />
                     <!-- <Separator orientation="vertical" class="mr-2 h-4" />

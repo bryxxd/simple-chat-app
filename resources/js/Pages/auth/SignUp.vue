@@ -64,39 +64,38 @@ export default {
                         <div class="grid gap-2">
                             <Label for="first-name">First name</Label>
                             <Input id="first-name" v-model="form.first_name" :class="{ 'border-red-500': form.errors.first_name }" />
-                            <InputError v-if="form.errors.username">{{ form.errors.first_name }}</InputError>
+                            <InputError v-if="form.errors.first_name" :message="form.errors.first_name" />
                         </div>
                         <div class="grid gap-2">
                             <Label for="last-name">Last name</Label>
                             <Input id="last-name" v-model="form.last_name" :class="{ 'border-red-500': form.errors.last_name }" />
-                            <InputError v-if="form.errors.username">{{ form.errors.last_name }}</InputError>
+                            <InputError v-if="form.errors.last_name" :message="form.errors.last_name" />
                         </div>
                     </div>
                     <div class="grid gap-2">
                         <Label for="email">Email</Label>
                         <Input id="email" type="email" v-model="form.email"
                             :class="{ 'border-red-500': form.errors.email }" />
-                        <InputError v-if="form.errors.email">{{ form.errors.email }}</InputError>
+                        <InputError v-if="form.errors.email" :message="form.errors.email" />
                     </div>
                     <div class="grid gap-2">
                         <Label for="username">Username</Label>
                         <Input id="username" type="text" v-model="form.username"
                             :class="{ 'border-red-500': form.errors.username }" />
-                        <InputError v-if="form.errors.username">{{ form.errors.username }}</InputError>
+                        <InputError v-if="form.errors.username" :message="form.errors.username" />
                     </div>
                     <div class="grid gap-2">
                         <Label for="password">Password</Label>
                         <Input id="password" type="password" v-model="form.password"
                             :class="{ 'border-red-500': form.errors.password }" />
-                        <InputError v-if="form.errors.password">{{ form.errors.password }}</InputError>
+                        <InputError v-if="form.errors.password" :message="form.errors.password" />
                     </div>
                     <div class="grid gap-2">
                         <Label for="password_confirmation">Confirm Password</Label>
                         <Input id="password_confirmation" type="password" v-model="form.password_confirmation" :class="{
                             'border-red-500': form.errors.password_confirmation,
                         }" />
-                        <InputError v-if="form.errors.password_confirmation">{{ form.errors.password_confirmation }}
-                        </InputError>
+                        <InputError v-if="form.errors.password_confirmation" :message="form.errors.password_confirmation" />
                     </div>
                     <Button type="submit" class="w-full">
                         <span>Create an account</span>
