@@ -10,4 +10,5 @@ Route::middleware('auth')->group(function () {
 
     // Avatar upload route
     Route::post('/settings/profile/avatar/validation', [AvatarController::class, 'validation'])->name('settings.profile.avatar.validation');
+    Route::post('/settings/profile/avatar', [AvatarController::class, 'store'])->name('settings.profile.avatar.store');
 });

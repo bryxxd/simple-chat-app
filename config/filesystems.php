@@ -49,8 +49,8 @@ return [
 
         'profile' => [
             'driver' => 'local',
-            'root' => storage_path('app/public/profile'),
-            'url' => env('APP_URL').'/storage/profile',
+            'root' => public_path('/profile'),
+            'url' => env('APP_URL').'/profile',
             'visibility' => 'public',
             'throw' => false,
             'report' => false,

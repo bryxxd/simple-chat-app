@@ -29,6 +29,7 @@ export default {
                 coordinates: null,
                 image: null
             },
+            croppedCanvas: null
         }
     },
     components: {
@@ -107,7 +108,29 @@ export default {
         handleCrop() {
             this.showCropper = false;
             this.isCroppingFinished = true;
-            this.userAvatar = this.$refs.cropper.getResult().canvas.toDataURL();
+            const cropperResult = this.$refs.cropper.getResult();
+            this.userAvatar = cropperResult.canvas.toDataURL();
+            this.croppedCanvas = cropperResult.canvas;
+        },
+        handleUpdateAvatar() {
+            const canvas = this.croppedCanvas;
+
+            if (canvas) {
+                const formData = new FormData();
+
+                canvas.toBlob(blob => {
+                    formData.append('avatar', blob);
+
+                    router.post(route('settings.profile.avatar.store'), formData, {
+                        onSuccess: () => {
+                            alert('Profile picture updated successfully!');
+                        },
+                        onError: (errors) => {
+                            alert('Failed to update profile picture: ' + errors);
+                        }
+                    });
+                }, 'image/jpeg');
+            }
         }
     }
 }
@@ -146,7 +169,7 @@ export default {
                 <AlertDialogFooter class="sm:justify-center">
                     <AlertDialogCancel @click="handleCancelUpload">Cancel</AlertDialogCancel>
                     <AlertDialogAction v-if="isCroppingFinished">
-                        <Button>Save</Button>
+                        <Button @click="handleUpdateAvatar">Save</Button>
                     </AlertDialogAction>
                     <AlertDialogAction v-else class="relative">
                         <form ref="uploadForm">
@@ -167,7 +190,8 @@ export default {
                         to use as your profile picture.</AlertDialogDescription>
                 </AlertDialogHeader>
                 <div>
-                    <cropper class="cropper" :src="newAvatar" :default-size="defaultSize" @change="onChange" />
+                    <cropper ref="cropper" class="cropper" :src="newAvatar" :default-size="defaultSize"
+                        @change="onChange" />
                 </div>
                 <AlertDialogFooter class="sm:justify-center">
                     <AlertDialogCancel @click="handleCancelCropper">Cancel</AlertDialogCancel>
