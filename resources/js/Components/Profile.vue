@@ -1,26 +1,35 @@
 <script>
-import { Cropper } from 'vue-advanced-cropper';
+import { Cropper, Preview } from 'vue-advanced-cropper';
 import 'vue-advanced-cropper/dist/style.css';
 import { AlertDialog, AlertDialogContent, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogTrigger, AlertDialogAction, AlertDialogCancel } from '@/Components/ui/alert-dialog';
 import { Avatar, AvatarImage } from '@/Components/ui/avatar';
 import { Pencil } from 'lucide-vue-next';
-import { Input } from '@/Components/ui/input';
-import { Popover, PopoverContent, PopoverTrigger } from '@/Components/ui/popover';
+import { Input, InputError } from '@/Components/ui/input';
+import { Progress } from '@/Components/ui/progress';
 import { Button } from '@/Components/ui/button';
 import { Label } from '@/Components/ui/label';
+import { router } from '@inertiajs/vue3'
 export default {
     name: "Profile",
-    data() {
-        return {
-            hasUploaded: false,
-            image: null,
-        }
-    },
     props: {
         user: {
             type: Object,
             required: true
         },
+    },
+    data() {
+        return {
+            showUploadDialog: false,
+            showCropper: false,
+            userAvatar: this.user.avatar,
+            newAvatar: null,
+            isCroppingFinished: false,
+            validationErrors: null,
+            result: {
+                coordinates: null,
+                image: null
+            },
+        }
     },
     components: {
         Avatar,
@@ -35,30 +44,71 @@ export default {
         AlertDialogTitle,
         AlertDialogDescription,
         Cropper,
+        Preview,
         Pencil,
+        Progress,
         Input,
-        Popover,
-        PopoverContent,
-        PopoverTrigger,
+        InputError,
         Button,
         Label
     },
     methods: {
-        handleFileUpload(event) {
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    this.image = e.target.result;
-                }
-
-                this.hasUploaded = true
-                reader.readAsDataURL(file);
+        defaultSize() {
+            return {
+                width: 300,
+                height: 300
             }
         },
-        change({ coordinates, canvas }) {
-            console.log(coordinates, canvas);
+        handleImageUpload(event) {
+            const file = event.target.files[0];
+
+            if (file) {
+                // First, validate the file with server
+                const formData = new FormData();
+                formData.append('avatar', file);
+
+                router.post(route('settings.profile.avatar.validation'), formData, {
+                    onSuccess: () => {
+                        // Validation passed, proceed to cropper
+                        this.validationErrors = null;
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            this.newAvatar = e.target.result;
+                            this.showCropper = true;
+                        }
+                        reader.readAsDataURL(file);
+                    },
+                    onError: (errors) => {
+                        // Show validation errors
+                        this.validationErrors = errors;
+                    },
+
+                });
+            }
         },
+        onChange({ coordinates, image }) {
+            this.result = {
+                coordinates: coordinates,
+                image: image
+            }
+        },
+        handleCancelCropper() {
+            this.showCropper = false;
+            this.newAvatar = this.user.avatar;
+            this.isCroppingFinished = false;
+            this.userAvatar = this.user.avatar;
+        },
+        handleCancelUpload() {
+            this.showUploadDialog = false;
+            this.userAvatar = this.user.avatar;
+            this.validationErrors = null;
+            this.isCroppingFinished = false;
+        },
+        handleCrop() {
+            this.showCropper = false;
+            this.isCroppingFinished = true;
+            this.userAvatar = this.$refs.cropper.getResult().canvas.toDataURL();
+        }
     }
 }
 </script>
@@ -66,35 +116,62 @@ export default {
     <div class="relative">
         <Label for="profile-picture" class="block text-sm font-medium">Profile Picture</Label>
 
-        <Avatar class="w-40 h-40 mt-2">
-            <AvatarImage :src="user.avatar" />
-        </Avatar>
-        <Popover>
-            <PopoverTrigger class="absolute bottom-0 left-0" as-child>
-                <Button class="p-2" variant="outline">
-                    <Pencil />
-                </Button>
-            </PopoverTrigger>
-            <PopoverContent class="w-auto p-0">
-                <div class="hover:bg-sidebar-accent hover:text-sidebar-accent-foreground cursor-pointer py-2 px-4">
-                    <Label for="profile-picture" class="block w-full cursor-pointer">Upload a photo</Label>
-                    <Input type="file" id="profile-picture" name="profile-picture"
-                        class="opacity-0 absolute cursor-pointer hidden" accept="image/*" @change="handleFileUpload" />
-                </div>
-            </PopoverContent>
-        </Popover>
+        <div class="relative">
+            <Avatar class="w-40 h-40 mt-2">
+                <AvatarImage :src="user.avatar" />
+            </Avatar>
+            <Button type="button" class="p-2 absolute left-0 bottom-0" variant="outline"
+                @click="showUploadDialog = true">
+                <Pencil />
+            </Button>
+        </div>
 
-        <AlertDialog :open="hasUploaded" class="w-full">
+        <!-- Upload Dialog -->
+        <AlertDialog :open="showUploadDialog" v-if="!showCropper" class="w-full">
             <AlertDialogContent>
                 <AlertDialogHeader>
-                    <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                    <AlertDialogDescription class="w-full">
-                        <cropper class="cropper" :src="image" @change="change" />
-                    </AlertDialogDescription>
+                    <AlertDialogTitle>
+                        Profile Picture
+                    </AlertDialogTitle>
                 </AlertDialogHeader>
-                <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction>Continue</AlertDialogAction>
+                <div>
+                    <preview v-if="isCroppingFinished" class="w-44 h-44 mx-auto" :image="result.image"
+                        :coordinates="result.coordinates" />
+                    <img v-else class="w-44 h-44 mx-auto" :src="userAvatar" alt="user avatar">
+                </div>
+                <AlertDialogDescription v-if="!isCroppingFinished" class="w-full text-center">
+                    JPG, PNG, GIF up to 5MB
+                    <InputError v-if="validationErrors" :message="validationErrors.avatar" />
+                </AlertDialogDescription>
+                <AlertDialogFooter class="sm:justify-center">
+                    <AlertDialogCancel @click="handleCancelUpload">Cancel</AlertDialogCancel>
+                    <AlertDialogAction v-if="isCroppingFinished">
+                        <Button>Save</Button>
+                    </AlertDialogAction>
+                    <AlertDialogAction v-else class="relative">
+                        <form ref="uploadForm">
+                            <Input type="file" class="absolute opacity-0 cursor-pointer"
+                                @change="handleImageUpload" />Upload a photo
+                        </form>
+                    </AlertDialogAction>
+                </AlertDialogFooter>
+            </AlertDialogContent>
+        </AlertDialog>
+
+        <!-- Cropper Dialog -->
+        <AlertDialog :open="showCropper" class="w-full">
+            <AlertDialogContent>
+                <AlertDialogHeader>
+                    <AlertDialogTitle></AlertDialogTitle>
+                    <AlertDialogDescription class="w-full">Adjust the crop area to select the part of the image you want
+                        to use as your profile picture.</AlertDialogDescription>
+                </AlertDialogHeader>
+                <div>
+                    <cropper class="cropper" :src="newAvatar" :default-size="defaultSize" @change="onChange" />
+                </div>
+                <AlertDialogFooter class="sm:justify-center">
+                    <AlertDialogCancel @click="handleCancelCropper">Cancel</AlertDialogCancel>
+                    <AlertDialogAction @click="handleCrop">Ok</AlertDialogAction>
                 </AlertDialogFooter>
             </AlertDialogContent>
         </AlertDialog>
@@ -103,8 +180,7 @@ export default {
 
 <style scoped>
 .cropper {
-    height: auto;
-    max-width: 600px;
     width: 100%;
+    max-width: 462px;
 }
 </style>
