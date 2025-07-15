@@ -199,7 +199,8 @@ export default {
                 </AlertDialogDescription>
                 <AlertDialogFooter class="sm:justify-center">
                     <AlertDialogCancel @click="handleCancelUpload">Cancel</AlertDialogCancel>
-                    <AlertDialogAction v-if="isCroppingFinished" @click="handleUpdateAvatar" :disabled="loadingState.uploading">
+                    <AlertDialogAction v-if="isCroppingFinished" @click="handleUpdateAvatar"
+                        :disabled="loadingState.uploading">
                         <span v-if="loadingState.uploading">
                             <LoaderCircle class="animate-spin" />
                         </span>
@@ -210,10 +211,7 @@ export default {
                             <LoaderCircle class="animate-spin" />
                         </template>
                         <template v-else>
-                            <form ref="uploadForm">
-                                <Input type="file" class="absolute top-0 left-0 opacity-0 w-full h-full cursor-pointer"
-                                    @change="handleImageUpload" />Upload a photo
-                            </form>
+                            <Input type="file" class="absolute top-0 left-0 opacity-0 w-full h-full cursor-pointer" @change="handleImageUpload" />Upload a photo
                         </template>
                     </AlertDialogAction>
                 </AlertDialogFooter>
