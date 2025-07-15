@@ -1,7 +1,7 @@
 <script setup>
 import AuthLayout from "@/Layouts/AuthLayout.vue";
 import Settings from "@/Layouts/settings/Layout.vue";
-import Profile from "@/Components/Profile.vue";
+import ProfilePicture from "@/Components/ProfilePicture.vue";
 import { Input, InputError } from "@/Components/ui/input";
 import { Button } from '@/Components/ui/button';
 import { Label } from '@/Components/ui/label';
@@ -40,7 +40,7 @@ const submit = () => {
             </div>
             <Divider/>
             <form @submit.prevent="submit" class="space-y-8">
-                <Profile :user="user"/>
+                <ProfilePicture :user="user"/>
                 <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div>
                         <Label for="first_name" class="block text-sm font-medium">First Name</Label>

@@ -1,7 +1,7 @@
 import { usePage } from '@inertiajs/vue3';
 import { useToast } from '@/components/ui/toast/use-toast';
 
-export function useFlashMessages(title) {
+export function useFlashMessages(title, message) {
 
     const { toast } = useToast();
     const page = usePage();
@@ -11,7 +11,7 @@ export function useFlashMessages(title) {
     if (flash?.success) {
         toast({
             title: title,
-            description: flash.success,
+            description: message || flash.success,
             variant: "success",
         })
     }
@@ -19,7 +19,7 @@ export function useFlashMessages(title) {
     if (flash?.info) {
         toast({
             title: title,
-            description: flash.info,
+            description: message || flash.info,
             variant: "info"
         })
     }
@@ -27,7 +27,7 @@ export function useFlashMessages(title) {
     if (flash?.error) {
         toast({
             title: title,
-            description: flash.error,
+            description: message || flash.error,
             variant: "destructive",
         })
     }
