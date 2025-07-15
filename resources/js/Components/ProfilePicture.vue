@@ -34,6 +34,7 @@ export default {
             },
             croppedImageSrc: null,
             croppedCanvas: null,
+            originalFileType: null
         }
     },
     computed: {
@@ -73,6 +74,9 @@ export default {
             const file = event.target.files[0];
 
             if (file) {
+                // Store the original file type for later use
+                this.originalFileType = file.type;
+
                 // First, validate the file with server
                 this.loadingState.validation = true;
                 this.validationErrors = null;
@@ -156,7 +160,7 @@ export default {
                             console.error('Upload errors:', errors);
                         }
                     });
-                });
+                }, this.originalFileType); // Use the original file type 
             }
         }
     }
@@ -190,7 +194,7 @@ export default {
                     <img v-else class="w-44 h-44 mx-auto object-cover" :src="userAvatar" alt="user avatar">
                 </div>
                 <AlertDialogDescription v-if="!isCroppingFinished" class="w-full text-center">
-                    JPG, PNG, GIF up to 5MB
+                    JPG and PNG up to 5MB
                     <InputError v-if="validationErrors" :message="validationErrors.image" />
                 </AlertDialogDescription>
                 <AlertDialogFooter class="sm:justify-center">

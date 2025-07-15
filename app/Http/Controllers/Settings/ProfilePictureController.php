@@ -14,11 +14,11 @@ class ProfilePictureController extends Controller
     public function validation(Request $request)
     {
         $request->validate([
-            'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:5120'
+            'image' => 'required|image|mimes:jpeg,png,jpg|max:5120'
         ], [
             'image.required' => 'Please select an image to upload.',
             'image.image' => 'The file must be an image.',
-            'image.mimes' => 'The image must be a file of type: jpeg, png, jpg, gif.',
+            'image.mimes' => 'The image must be a file of type: jpeg, png, jpg.',
             'image.max' => 'The image must not be larger than 5MB.'
         ]);
     }
