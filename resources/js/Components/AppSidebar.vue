@@ -1,5 +1,6 @@
 <script>
 import { Link } from "@inertiajs/vue3";
+import SearchUser from "@/components/SearchUser.vue";
 import {
     Sidebar,
     SidebarContent,
@@ -24,6 +25,7 @@ export default {
         SidebarInput,
         Room,
         Switch,
+        SearchUser,
         Label
     },
     emits : ["set-active-chat"],
@@ -58,7 +60,8 @@ export default {
                         <Switch class="shadow-none" />
                     </Label>
                 </div>
-                <SidebarInput placeholder="Type to search..." />
+                <!-- Search User -->
+                <SearchUser />
             </SidebarHeader>
             <SidebarContent>
                 <SidebarGroup class="px-0">
