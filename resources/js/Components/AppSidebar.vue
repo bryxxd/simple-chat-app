@@ -35,7 +35,7 @@ export default {
         collapsible: { type: String, required: false, default: "icon" },
         class: { type: null, required: false },
     },
-    inject: ["chats"],
+    inject: ["interactedUsers"],
     data() {
         return {
             title: "Logo"
@@ -61,12 +61,12 @@ export default {
                     </Label>
                 </div>
                 <!-- Search User -->
-                <SearchUser />
+                <SearchUser @set-active-chat="setActiveChat"/>
             </SidebarHeader>
             <SidebarContent>
                 <SidebarGroup class="px-0">
                     <SidebarGroupContent>
-                        <Room v-for="chat in chats" :key="chat.id" :chat="chat" @click="setActiveChat(chat.id)"></Room>
+                        <Room v-for="user in interactedUsers" :key="user.id" :user="user" @click="setActiveChat(user.id)"></Room>
                     </SidebarGroupContent>
                 </SidebarGroup>
             </SidebarContent>

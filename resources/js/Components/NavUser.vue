@@ -61,7 +61,6 @@ export default {
                     >
                         <Avatar class="h-8 w-8 rounded-full">
                             <AvatarImage :src="user.avatar" :alt="user.name" />
-                            <AvatarFallback class="rounded-lg">Avatar</AvatarFallback>
                         </Avatar>
                         <div class="grid flex-1 text-left text-sm leading-tight">
                             <span class="truncate font-semibold">{{`${user.first_name} ${user.last_name}` }}</span>
@@ -85,7 +84,6 @@ export default {
                                     :src="user.avatar"
                                     :alt="user.name"
                                 />
-                                <AvatarFallback class="rounded-lg">Avatar</AvatarFallback>
                             </Avatar>
                             <div class="grid flex-1 text-left text-sm leading-tight" >
                                 <span class="truncate font-semibold">{{ `${user.first_name} ${user.last_name}` }}</span>

@@ -54,10 +54,9 @@ export default {
             <ComboboxEmpty> No user found. </ComboboxEmpty>
 
             <ComboboxGroup>
-                <ComboboxItem v-for="user in users" :key="user.id" :value="user" class="justify-start">
+                <ComboboxItem v-for="user in users" :key="user.id" :value="user" class="justify-start" @click="$emit('set-active-chat', user.id)">
                     <Avatar>
                         <AvatarImage :src="user.avatar" alt="" />
-                        <AvatarFallback>CN</AvatarFallback>
                     </Avatar>
                     {{ user.first_name }} {{ user.last_name }}
                 </ComboboxItem>

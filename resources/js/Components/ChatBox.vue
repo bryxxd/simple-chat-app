@@ -21,7 +21,7 @@ export default {
         Send
     },
     props: {
-        activeChat: {
+        user: {
             type: [Object, null],
             required: true,
             default: null
@@ -38,48 +38,36 @@ export default {
             avatar: '/images/shadcn.jpg',
             isSender : true,
             messageInput : '',
+            messages : [
+                {
+                    id: 1,
+                    content: 'Hello!',
+                    senderId: 1
+                },
+                {
+                    id: 2,
+                    content: 'Hi there!',
+                    senderId: 2
+                }
+            ]
         }
     },
-    methods : {
-        // handleSendMessage() {
-        //     this.$emit('handle-send-message', 1 , this.messageInput);
-        //     this.messageInput = '';
-        //     this.$nextTick(() => {
-        //         const chatContent = this.$refs.chatContent;
-        //         if (chatContent && chatContent.$el) {
-        //             chatContent.$el.scrollTop = chatContent.$el.scrollHeight;
-        //         } else if (chatContent) {
-        //             chatContent.scrollTop = chatContent.scrollHeight;
-        //         }
-        //     });
-        // }
-    },
-    mounted() {
-        // this.$nextTick(() => {
-        //     const chatContent = this.$refs.chatContent;
-        //     if (chatContent && chatContent.$el) {
-        //         chatContent.$el.scrollTop = chatContent.$el.scrollHeight;
-        //     } else if (chatContent) {
-        //         chatContent.scrollTop = chatContent.scrollHeight;
-        //     }
-        // });
-    }
 }
 
 </script>
 <template>
     <Chat>
         <ChatDetails>
-            <ChatAvatar :src="avatar" />
+            <ChatAvatar :src="user.avatar" />
             <div class="flex flex-col justify-between ml-4">
-                <ChatName>{{ activeChat.participant.name }}</ChatName>
-                <ChatStatus v-if="activeChat.participant.isOnline" class="text-green-700">Online</ChatStatus>
+                <ChatName>{{ user.first_name }} {{ user.last_name }}</ChatName>
+                <!-- <ChatStatus v-if="activeChat.participant.isOnline" class="text-green-700">Online</ChatStatus> -->
             </div>
         </ChatDetails>
 
         <ChatContent ref="chatContent">
             <ChatList>
-                <ChatItem v-for="(message, index) in activeChat.messages" :key="index" :class="{'flex-row-reverse': message.senderId === 1}">
+                <ChatItem v-for="(message, index) in messages" :key="index" :class="{'flex-row-reverse': message.senderId === 1}">
                     <ChatAvatar :src="avatar" class="w-8 h-8" />
                     <ChatMessage :class="{ 'bg-primary text-primary-foreground' : message.senderId === 1}">{{ message.content }}</ChatMessage>
                 </ChatItem>
