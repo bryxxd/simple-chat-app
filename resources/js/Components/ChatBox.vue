@@ -3,6 +3,7 @@ import { Chat, ChatContent, ChatDetails, ChatAvatar, ChatMessage, ChatName, Chat
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Send } from "lucide-vue-next";
+import { useForm } from "@inertiajs/vue3";
 
 export default {
     components: {
@@ -26,18 +27,16 @@ export default {
             required: true,
             default: null
         },
-        modelValue: {
-            type: [String, null],
-            required: false,
-            default: ''
-        }
     },
-    emits: ['send-message', 'update:modelValue'],
+    emits: ['update:modelValue'],
     data() {
         return {
             avatar: '/images/shadcn.jpg',
             isSender : true,
-            messageInput : '',
+            form : useForm({
+                'message' : '',
+                'to_user_id' : this.user.id
+            }),
             messages : [
                 {
                     id: 1,
@@ -52,11 +51,23 @@ export default {
             ]
         }
     },
+    methods: {
+        sendMessage() {
+           this.form.post(route('messages.store'), {
+                onSuccess: () => {
+                    this.form.message = ''
+                }
+           })
+        }
+    }
 }
 
 </script>
 <template>
     <Chat>
+        <pre>
+            {{ user.id }}
+        </pre>
         <ChatDetails>
             <ChatAvatar :src="user.avatar" />
             <div class="flex flex-col justify-between ml-4">
@@ -73,9 +84,9 @@ export default {
                 </ChatItem>
             </ChatList>
         </ChatContent>
-        <ChatForm>
-            <Textarea placeholder="Type your message..." :modelValue="modelValue" @update:modelValue="$emit('update:modelValue', $event)" />
-            <Button class="absolute right-[0.5rem] top-[0.7rem]" @click.prevent="$emit('send-message', activeChat.id)">Send<Send /></Button>
+        <ChatForm @submit.prevent="sendMessage" method="POST">
+            <Textarea placeholder="Type your message..." v-model="form.message" />
+            <Button class="absolute right-[0.5rem] top-[0.7rem]" type="submit">Send<Send /></Button>
         </ChatForm>
     </Chat>
 </template>

@@ -41,7 +41,6 @@ export default {
                 email: "m@example.com",
                 avatar: "/images/shadcn.jpg",
             },
-            message: '',
             activeChat: null,
         };
     },
@@ -49,17 +48,6 @@ export default {
         handleActiveChat(chatID) {
             this.activeChat = chatID;
         },
-        handleNewMessage(activeChatID) {
-            const currentChat = this.chats.find((chat) => chat.id === activeChatID);
-            currentChat.messages.push({
-                id : currentChat.messages.length + 1,
-                senderId : 1,
-                content: this.message,
-                timestamp: new Date().toISOString(),
-                type: "text",
-            });
-            this.message = '';
-        }
     },
     computed: {
         updateActiveChat() {
@@ -92,7 +80,7 @@ export default {
             </header>
             <div>
                 <slot>
-                    <ChatBox :user="updateActiveChat" @send-message="handleNewMessage" v-model="message" />
+                    <ChatBox :user="updateActiveChat"/>
                 </slot>
             </div>
         </SidebarInset>
