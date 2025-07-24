@@ -1,5 +1,5 @@
-<script setup lang="ts">
-import { usePage } from "@inertiajs/vue3"; 
+<script>
+import { usePage } from "@inertiajs/vue3";
 import { computed } from "vue";
 import { Search } from "lucide-vue-next";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -14,14 +14,28 @@ import {
     ComboboxList,
 } from "@/components/ui/combobox";
 
-const page = usePage();
-
-const users = computed(() => {
-    return page.props.users.users.map(user => ({
-        name: user.first_name + ' ' + user.last_name,
-        img: user.avatar,
-    }));
-});
+export default {
+    name: "SearchUser",
+    components: {
+        Combobox,
+        ComboboxAnchor,
+        ComboboxEmpty,
+        ComboboxGroup,
+        ComboboxInput,
+        ComboboxItem,
+        ComboboxItemIndicator,
+        ComboboxList,
+        Avatar,
+        AvatarImage,
+        AvatarFallback,
+        Search
+    },
+    computed: {
+        users() {
+            return usePage().props.users;
+        }
+    }
+}
 
 </script>
 
@@ -40,12 +54,12 @@ const users = computed(() => {
             <ComboboxEmpty> No user found. </ComboboxEmpty>
 
             <ComboboxGroup>
-                <ComboboxItem v-for="user in users" :key="user.name" :value="user" class="justify-start">
+                <ComboboxItem v-for="user in users" :key="user.id" :value="user" class="justify-start">
                     <Avatar>
-                        <AvatarImage :src="user.img" :alt="user.name" />
+                        <AvatarImage :src="user.avatar" alt="" />
                         <AvatarFallback>CN</AvatarFallback>
                     </Avatar>
-                    {{ user.name }}
+                    {{ user.first_name }} {{ user.last_name }}
                 </ComboboxItem>
             </ComboboxGroup>
         </ComboboxList>

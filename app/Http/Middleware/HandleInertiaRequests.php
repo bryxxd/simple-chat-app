@@ -40,9 +40,7 @@ class HandleInertiaRequests extends Middleware
                 'success' => $request->session()->get('success'),
                 'info' => $request->session()->get('info')
             ],
-            'users' => [
-                'users' => Auth::check() ? User::all() : []
-            ]
+            'users' => Auth::check() ? User::select('id', 'first_name', 'last_name', 'email', 'avatar')->get() : [],
         ];
     }
 }
