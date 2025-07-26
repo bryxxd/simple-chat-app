@@ -54,7 +54,7 @@ export default {
             return this.activeChat ? this.interactedUsers.find(user => user.id === this.activeChat) : this.interactedUsers[0];
         },
         interactedUsers() {
-            return usePage().props.users
+            return usePage().props.users 
         }
     },
     mounted() {

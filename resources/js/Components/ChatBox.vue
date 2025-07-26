@@ -35,7 +35,7 @@ export default {
             isSender : true,
             form : useForm({
                 'message' : '',
-                'to_user_id' : this.user.id
+                'to_user_id' : ''
             }),
             messages : [
                 {
@@ -54,10 +54,20 @@ export default {
     methods: {
         sendMessage() {
            this.form.post(route('messages.store'), {
+                onBefore: () => {
+                    console.log('To user ID: ' , this.form.to_user_id);
+                },
                 onSuccess: () => {
                     this.form.message = ''
                 }
            })
+        }
+    }, 
+    watch: {
+        user(newUser) {
+            if (newUser) {
+                this.form.to_user_id = newUser.id;
+            }
         }
     }
 }

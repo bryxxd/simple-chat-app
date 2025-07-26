@@ -46,9 +46,10 @@ class MessagesController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Messages $messages)
+    public function show(Messages $messages, Request $request)
     {
         //
+        Messages::where('from_user_id', Auth::id())->orWhere('to_user_id', $request->to_user_id)->get();
     }
 
     /**
