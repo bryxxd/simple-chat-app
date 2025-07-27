@@ -46,11 +46,20 @@ class MessagesController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Messages $messages, Request $request)
+    public function show($to_user_id)
     {
         //
-        Messages::where('from_user_id', Auth::id())->orWhere('to_user_id', $request->to_user_id)->get();
+        $messages = Messages::where('from_user_id', Auth::id())->where('to_user_id', $to_user_id)
+            ->orWhere(function ($query) use ($to_user_id) {
+                $query->where('from_user_id', $to_user_id)
+                      ->where('to_user_id', Auth::id());
+            })
+            ->orderBy('created_at', 'asc')
+            ->get();
+
+        return response()->json( $messages);
     }
+
 
     /**
      * Show the form for editing the specified resource.
