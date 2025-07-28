@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use App\Models\Messages;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -49,15 +50,26 @@ class MessagesController extends Controller
     public function show($to_user_id)
     {
         //
-        $messages = Messages::where('from_user_id', Auth::id())->where('to_user_id', $to_user_id)
+        $messages = Messages::where(function ($query) use ($to_user_id) {
+            $query->where('from_user_id', Auth::id())
+                ->where('to_user_id', $to_user_id);
+        })
             ->orWhere(function ($query) use ($to_user_id) {
                 $query->where('from_user_id', $to_user_id)
-                      ->where('to_user_id', Auth::id());
+                    ->where('to_user_id', Auth::id());
             })
             ->orderBy('created_at', 'asc')
             ->get();
 
-        return response()->json( $messages);
+        $to_user_avatar = User::select('avatar')
+            ->where('id', $to_user_id)
+            ->first();
+
+
+        return response()->json([
+            'messages' => $messages,
+            'to_user_avatar' => $to_user_avatar,
+        ]);
     }
 
 

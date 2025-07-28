@@ -23,37 +23,33 @@ export default {
     },
     props: {
         user: {
-            type: [Object, null],
-            required: true,
+            type: [Object],
             default: null
         },
         chats: {
             type: Array,
             required: true,
             default: () => []
+        },
+        to_user_avatar: {
+            type: String,
+            default: '',
         }
     },
-    emits: ['update:modelValue'],
     data() {
         return {
-            avatar: '/images/shadcn.jpg',
             form: useForm({
                 'message': '',
                 'to_user_id': ''
             }),
         }
     },
-    computed: {
-        authUser() {
-            return usePage().props.auth.user;
-        }
-    },
     methods: {
         sendMessage() {
             this.form.post(route('messages.store'), {
                 preserveState: true,
-                onBefore: () => {
-                    console.log('To user ID: ', this.form.to_user_id);
+                onProgress: (e) => {
+                    console.log('Sending message...', e);
                 },
                 onSuccess: () => {
                     this.chats.push({
@@ -66,6 +62,19 @@ export default {
                 }
             })
         },
+        isReversed(chat) {
+            return this.authUser && chat.from_user_id === this.authUser.id;
+        },
+        getUserAvatar(chat) {
+            return this.authUser && chat.from_user_id === this.authUser.id
+                ? this.authUser.avatar
+                : this.to_user_avatar
+        },
+    },
+    computed: {
+        authUser() {
+            return usePage().props.auth.user;
+        }
     },
     watch: {
         user: {
@@ -75,12 +84,7 @@ export default {
                 }
             },
             immediate: true
-        }
-    },
-    mounted() {
-        if (this.user) {
-            this.form.to_user_id = this.user.id;
-        }
+        },
     },
 }
 
@@ -88,7 +92,7 @@ export default {
 <template>
     <Chat>
         <ChatDetails>
-            <ChatAvatar :src="user.avatar" />
+            <ChatAvatar :src="to_user_avatar" />
             <div class="flex flex-col justify-between ml-4">
                 <ChatName>{{ user.first_name }} {{ user.last_name }}</ChatName>
                 <!-- <ChatStatus v-if="activeChat.participant.isOnline" class="text-green-700">Online</ChatStatus> -->
@@ -96,11 +100,9 @@ export default {
         </ChatDetails>
         <ChatContent ref="chatContent">
             <ChatList>
-                <ChatItem v-for="(chat, index) in chats" :key="index"
-                    :class="{ 'flex-row-reverse': authUser && chat.from_user_id === authUser.id }">
-                    <ChatAvatar :src="avatar" class="w-8 h-8" />
-                    <ChatMessage
-                        :class="{ 'bg-primary text-primary-foreground': authUser && chat.from_user_id === authUser.id }">
+                <ChatItem v-for="(chat, index) in chats" :key="index" :class="{ 'flex-row-reverse': isReversed(chat) }">
+                    <ChatAvatar :src="getUserAvatar(chat)" class="w-8 h-8" />
+                    <ChatMessage :class="{ 'bg-primary text-primary-foreground': isReversed(chat) }">
                         {{ chat.content }}
                     </ChatMessage>
                 </ChatItem>

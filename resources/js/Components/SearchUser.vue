@@ -34,6 +34,11 @@ export default {
         users() {
             return usePage().props.users;
         }
+    },
+    methods: {
+        getUserAvatar(user) {
+            return user?.avatar || '/images/profile-placeholder.jpg';
+        }
     }
 }
 
@@ -56,7 +61,7 @@ export default {
             <ComboboxGroup>
                 <ComboboxItem v-for="user in users" :key="user.id" :value="user" class="justify-start" @click="$emit('set-active-chat', user.id)">
                     <Avatar>
-                        <AvatarImage :src="user.avatar" alt="" />
+                        <AvatarImage :src="getUserAvatar(user)" alt="" />
                     </Avatar>
                     {{ user.first_name }} {{ user.last_name }}
                 </ComboboxItem>
