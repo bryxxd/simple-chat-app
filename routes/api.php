@@ -2,7 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\MessagesController;
+use App\Http\Controllers\ChatRoomController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -10,5 +10,5 @@ Route::get('/user', function (Request $request) {
 
 
 Route::middleware('web')->group(function () {
-    Route::get('/messages/{user_id}', [MessagesController::class, 'show']);
+    Route::get('/chat-room/{to_user_id}', [ChatRoomController::class, 'show']);
 });

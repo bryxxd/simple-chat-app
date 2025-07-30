@@ -3,11 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
-use App\Models\Messages;
+use App\Models\ChatRoom;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
-class MessagesController extends Controller
+class ChatRoomController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -32,10 +32,10 @@ class MessagesController extends Controller
     {
         //
         $request->validate([
-            'message' => ['required', 'string', 'max:255'],
+            'message' => ['required', 'string'],
         ]);
 
-        Messages::insert([
+        ChatRoom::insert([
             'from_user_id' => Auth::id(),
             'to_user_id' => $request->to_user_id,
             'content' => $request->message,
@@ -50,7 +50,7 @@ class MessagesController extends Controller
     public function show($to_user_id)
     {
         //
-        $messages = Messages::where(function ($query) use ($to_user_id) {
+        $chatQuery = ChatRoom::where(function ($query) use ($to_user_id) {
             $query->where('from_user_id', Auth::id())
                 ->where('to_user_id', $to_user_id);
         })
@@ -58,25 +58,21 @@ class MessagesController extends Controller
                 $query->where('from_user_id', $to_user_id)
                     ->where('to_user_id', Auth::id());
             })
-            ->orderBy('created_at', 'asc')
+            ->orderBy('created_at', 'desc')
             ->get();
 
-        $to_user_avatar = User::select('avatar')
-            ->where('id', $to_user_id)
-            ->first();
-
+        $to_user_details = User::select('id','first_name', 'last_name','avatar')->where('id', $to_user_id)->first();
 
         return response()->json([
-            'messages' => $messages,
-            'to_user_avatar' => $to_user_avatar,
+            'messages' => $chatQuery,
+            'to_user_details' => $to_user_details,
         ]);
     }
-
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Messages $messages)
+    public function edit(ChatRoom $chatRoom)
     {
         //
     }
@@ -84,7 +80,7 @@ class MessagesController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Messages $messages)
+    public function update(Request $request, ChatRoom $chatRoom)
     {
         //
     }
@@ -92,7 +88,7 @@ class MessagesController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Messages $messages)
+    public function destroy(ChatRoom $chatRoom)
     {
         //
     }

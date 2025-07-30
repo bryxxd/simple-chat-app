@@ -22,18 +22,15 @@ export default {
         Send
     },
     props: {
-        user: {
-            type: [Object],
-            default: null
-        },
         chats: {
-            type: Array,
+            type: Object,
             required: true,
-            default: () => []
+            default: () => ({})
         },
-        to_user_avatar: {
-            type: String,
-            default: '',
+        activeUser: {
+            type: Object,
+            required: true,
+            default: () => ({})
         }
     },
     data() {
@@ -48,17 +45,17 @@ export default {
         sendMessage() {
             this.form.post(route('messages.store'), {
                 preserveState: true,
-                onProgress: (e) => {
-                    console.log('Sending message...', e);
-                },
                 onSuccess: () => {
-                    this.chats.push({
+                    this.chats.messages.push({
                         content: this.form.message,
                         from_user_id: this.authUser.id,
                         to_user_id: this.form.to_user_id,
                         created_at: new Date().toISOString()
                     });
                     this.form.message = '';
+                },
+                onError: (errors) => {
+                    console.log('Error sending message:', errors);
                 }
             })
         },
@@ -68,7 +65,7 @@ export default {
         getUserAvatar(chat) {
             return this.authUser && chat.from_user_id === this.authUser.id
                 ? this.authUser.avatar
-                : this.to_user_avatar
+                : this.chats.to_user_details.avatar;
         },
     },
     computed: {
@@ -77,7 +74,7 @@ export default {
         }
     },
     watch: {
-        user: {
+        activeUser: {
             async handler(newUser) {
                 if (newUser) {
                     this.form.to_user_id = newUser.id;
@@ -92,15 +89,15 @@ export default {
 <template>
     <Chat>
         <ChatDetails>
-            <ChatAvatar :src="to_user_avatar" />
+            <ChatAvatar :src="chats?.to_user_details?.avatar" />
             <div class="flex flex-col justify-between ml-4">
-                <ChatName>{{ user.first_name }} {{ user.last_name }}</ChatName>
+                <ChatName>{{ chats?.to_user_details?.first_name }} {{ chats?.to_user_details?.last_name }}</ChatName>
                 <!-- <ChatStatus v-if="activeChat.participant.isOnline" class="text-green-700">Online</ChatStatus> -->
             </div>
         </ChatDetails>
         <ChatContent ref="chatContent">
             <ChatList>
-                <ChatItem v-for="(chat, index) in chats" :key="index" :class="{ 'flex-row-reverse': isReversed(chat) }">
+                <ChatItem v-for="(chat, index) in chats.messages" :key="index" :class="{ 'flex-row-reverse': isReversed(chat) }">
                     <ChatAvatar :src="getUserAvatar(chat)" class="w-8 h-8" />
                     <ChatMessage :class="{ 'bg-primary text-primary-foreground': isReversed(chat) }">
                         {{ chat.content }}
