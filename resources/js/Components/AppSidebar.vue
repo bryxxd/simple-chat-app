@@ -9,7 +9,7 @@ import {
     SidebarHeader,
     SidebarInput,
 } from "@/components/ui/sidebar";
-import { Room } from "@/components/ui/room";
+import Room  from "@/components/Room.vue";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 
