@@ -7,11 +7,12 @@ import {
     SidebarProvider,
     SidebarTrigger,
 } from "@/Components/ui/sidebar";
-import { usePage } from "@inertiajs/vue3";
+import { usePage, Head } from "@inertiajs/vue3";
 import axios from "axios";
 export default {
     name: "AuthLayout",
     components: {
+        Head,
         AppSidebar,
         ChatBox,
         SidebarInset,
@@ -22,42 +23,38 @@ export default {
     data() {
         return {
             activeChat: null,
-            chats: [],
-            to_user_avatar: '',
+            chat_data: {},
         };
     },
     methods: {
-        handleActiveChat(chatID) {
-            this.activeChat = chatID;
-        },
-        async fetchMessages() {
+        async fetchChatRooms() {
             if (!this.activeChat) return;
             try {
-                const res = await axios.get(`/api/messages/${this.activeChat}`);
-                this.chats = res.data.messages || [];
-                this.to_user_avatar = res.data.to_user_avatar.avatar || '';
+                const res = await axios.get(`/api/chat-room/${this.activeChat}`);
+                this.chat_data = res.data;
             } catch (error) {
-                console.error('Error fetching messages:', error);
+                console.log('Error fetching chat room:', error);
             }
+        },
+        handleFilterChat(userID) {
+            this.activeChat = userID;
+            this.fetchChatRooms();
         }
     },
     computed: {
-        activeUser() {
-            return this.activeChat ? this.interactedUsers.find(user => user.id === this.activeChat) : this.interactedUsers[0];
-        },
         interactedUsers() {
             return usePage().props.users || [];
-        }
+        },
+        activeUser() { 
+            return this.activeChat ? 
+            this.interactedUsers.find(user => user.id === this.activeChat) 
+            : this.interactedUsers[0];
+        },
     },
     mounted() {
         if (this.interactedUsers?.length > 0) {
             this.activeChat = this.interactedUsers[0].id;
-            this.fetchMessages();
-        }
-    },
-    watch: {
-        activeChat(newChatID) {
-            this.fetchMessages();
+            this.fetchChatRooms();
         }
     },
     provide() {
@@ -69,8 +66,9 @@ export default {
 </script>
 
 <template>
+    <Head title="Chat" />
     <SidebarProvider :style="{ '--sidebar-width': '350px' }">
-        <AppSidebar @set-active-chat="handleActiveChat" />
+        <AppSidebar @set-active-chat="handleFilterChat" />
         <SidebarInset>
             <header
                 class="sticky top-0 flex shrink-0 items-center justify-between border-b bg-background p-2 md:p-4 z-50">
@@ -81,7 +79,7 @@ export default {
             </header>
             <div>
                 <slot>
-                    <ChatBox :user="activeUser" :chats="chats" :to_user_avatar="to_user_avatar" />
+                    <ChatBox :chats="chat_data" :activeUser="activeUser" />
                 </slot>
             </div>
         </SidebarInset>

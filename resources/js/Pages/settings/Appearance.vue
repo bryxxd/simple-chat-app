@@ -10,10 +10,12 @@ import {
 } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Head } from '@inertiajs/vue3';
 
 export default {
     name: "Appearance",
     components: {
+        Head,
         AppearanceTabs,
         Button,
         Input,
@@ -32,6 +34,7 @@ export default {
 };
 </script>
 <template>
+    <Head title="Appearance" />
     <AuthLayout>
         <Settings>
             <div>

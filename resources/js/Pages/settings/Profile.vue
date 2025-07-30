@@ -6,7 +6,7 @@ import { Input, InputError } from "@/Components/ui/input";
 import { Button } from '@/Components/ui/button';
 import { Label } from '@/Components/ui/label';
 import Divider from "@/Components/Divider.vue";
-import { usePage, useForm } from '@inertiajs/vue3';
+import { usePage, useForm, Head } from '@inertiajs/vue3';
 import { useFlashMessages } from "@/composables/useFlashMessage";   
 import { computed } from 'vue';
 
@@ -32,6 +32,7 @@ const submit = () => {
 
 </script>
 <template>
+    <Head title="Profile" />
     <AuthLayout>
         <Settings>
             <div>
