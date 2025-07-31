@@ -3,6 +3,7 @@ import { Chat, ChatContent, ChatDetails, ChatAvatar, ChatMessage, ChatName, Chat
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Send } from "lucide-vue-next";
+import { useEcho, useEchoPublic } from '@laravel/echo-vue';
 import { useForm, usePage } from "@inertiajs/vue3";
 
 export default {
@@ -31,7 +32,7 @@ export default {
             type: Object,
             required: true,
             default: () => ({})
-        }
+        },
     },
     data() {
         return {
@@ -50,7 +51,6 @@ export default {
                         content: this.form.message,
                         from_user_id: this.authUser.id,
                         to_user_id: this.form.to_user_id,
-                        created_at: new Date().toISOString()
                     });
                     this.form.message = '';
                 },
@@ -83,7 +83,23 @@ export default {
             immediate: true
         },
     },
-}
+    mounted() {
+        const { listen } = useEcho(
+            'new-messages.' + this.authUser.id,
+            'NewMessageEvent',
+            (e) => {
+                console.log(e)
+                if (e.from_user_id !== this.authUser.id) {
+                    this.chats.messages.push({
+                        content: e.content,
+                        from_user_id: e.from_user_id,
+                        to_user_id: e.to_user_id,
+                    });
+                }
+            });
+        listen()
+    }
+};
 
 </script>
 <template>
@@ -97,7 +113,8 @@ export default {
         </ChatDetails>
         <ChatContent ref="chatContent">
             <ChatList>
-                <ChatItem v-for="(chat, index) in chats.messages" :key="index" :class="{ 'flex-row-reverse': isReversed(chat) }">
+                <ChatItem v-for="(chat, index) in chats.messages" :key="index"
+                    :class="{ 'flex-row-reverse': isReversed(chat) }">
                     <ChatAvatar :src="getUserAvatar(chat)" class="w-8 h-8" />
                     <ChatMessage :class="{ 'bg-primary text-primary-foreground': isReversed(chat) }">
                         {{ chat.content }}

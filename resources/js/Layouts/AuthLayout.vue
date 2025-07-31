@@ -27,7 +27,7 @@ export default {
         };
     },
     methods: {
-        async fetchChatRooms() {
+        async fetchChatData() {
             if (!this.activeChat) return;
             try {
                 const res = await axios.get(`/api/chat-room/${this.activeChat}`);
@@ -38,7 +38,7 @@ export default {
         },
         handleFilterChat(userID) {
             this.activeChat = userID;
-            this.fetchChatRooms();
+            this.fetchChatData();
         }
     },
     computed: {
@@ -54,7 +54,7 @@ export default {
     mounted() {
         if (this.interactedUsers?.length > 0) {
             this.activeChat = this.interactedUsers[0].id;
-            this.fetchChatRooms();
+            this.fetchChatData();
         }
     },
     provide() {

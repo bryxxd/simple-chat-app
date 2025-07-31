@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Models\ChatRoom;
 use Illuminate\Http\Request;
+use App\Events\NewMessageEvent;
 use Illuminate\Support\Facades\Auth;
 
 class ChatRoomController extends Controller
@@ -40,6 +41,9 @@ class ChatRoomController extends Controller
             'to_user_id' => $request->to_user_id,
             'content' => $request->message,
         ]);
+
+        // Dispatch the event to notify users about the new message
+        event(new NewMessageEvent(Auth::id(), $request->to_user_id, $request->message));
 
         return back();
     }
