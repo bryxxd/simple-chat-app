@@ -59,7 +59,7 @@ export default {
                 }
             })
         },
-        isReversed(chat) {
+        isSender(chat) {
             return this.authUser && chat.from_user_id === this.authUser.id;
         },
         getUserAvatar(chat) {
@@ -114,9 +114,9 @@ export default {
         <ChatContent ref="chatContent">
             <ChatList>
                 <ChatItem v-for="(chat, index) in chats.messages" :key="index"
-                    :class="{ 'flex-row-reverse': isReversed(chat) }">
+                    :class="{ 'flex-row-reverse': isSender(chat) }">
                     <ChatAvatar :src="getUserAvatar(chat)" class="w-8 h-8" />
-                    <ChatMessage :class="{ 'bg-primary text-primary-foreground': isReversed(chat) }">
+                    <ChatMessage :variant="isSender(chat) ? 'sender' : 'default'">
                         {{ chat.content }}
                     </ChatMessage>
                 </ChatItem>

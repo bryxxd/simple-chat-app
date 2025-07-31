@@ -1,5 +1,6 @@
 <script setup>
 import { cn } from "@/lib/utils";
+import { chatMessageVariants } from ".";
 
 const props = defineProps({
     class: { type: null, required: false },
@@ -7,7 +8,7 @@ const props = defineProps({
 });
 </script>
 <template>
-    <p :class="cn('bg-muted p-2 rounded-lg max-w-lg ', props.class)">
+    <p :class="cn(chatMessageVariants({ variant }), props.class)">
         <slot />
     </p>
 </template>
