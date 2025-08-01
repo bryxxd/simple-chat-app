@@ -89,11 +89,6 @@ export default {
                     (e.from_user_id === this.authUser.id && e.to_user_id === this.activeUser?.id) ||
                     (e.from_user_id === this.activeUser?.id && e.to_user_id === this.authUser.id);
 
-                console.log('From User ID:', e.from_user_id);
-                console.log('To User ID:', e.to_user_id);
-                console.log('Active User ID:', this.activeUser?.id);
-                console.log('Auth User ID:', this.authUser.id);
-
                 if (isMessageForCurrentChat) {
                     // Append the new message to the chat
                     this.chats.messages.push({
