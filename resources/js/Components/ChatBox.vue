@@ -47,17 +47,13 @@ export default {
             this.form.post(route('messages.store'), {
                 preserveState: true,
                 onSuccess: () => {
-                    this.chats.messages.push({
-                        content: this.form.message,
-                        from_user_id: this.authUser.id,
-                        to_user_id: this.form.to_user_id,
-                    });
+                    // Message will be added via Echo listener, just clear the form
                     this.form.message = '';
                 },
                 onError: (errors) => {
                     console.log('Error sending message:', errors);
                 }
-            })
+            });
         },
         isSender(chat) {
             return this.authUser && chat.from_user_id === this.authUser.id;
@@ -88,12 +84,22 @@ export default {
             'new-messages.' + this.authUser.id,
             'NewMessageEvent',
             (e) => {
-                console.log(e)
-                if (e.from_user_id !== this.authUser.id) {
+                // Check if the message is relevant to the current chat
+                const isMessageForCurrentChat =
+                    (e.from_user_id === this.authUser.id && e.to_user_id === this.activeUser?.id) ||
+                    (e.from_user_id === this.activeUser?.id && e.to_user_id === this.authUser.id);
+
+                console.log('From User ID:', e.from_user_id);
+                console.log('To User ID:', e.to_user_id);
+                console.log('Active User ID:', this.activeUser?.id);
+                console.log('Auth User ID:', this.authUser.id);
+
+                if (isMessageForCurrentChat) {
+                    // Append the new message to the chat
                     this.chats.messages.push({
                         content: e.content,
                         from_user_id: e.from_user_id,
-                        to_user_id: e.to_user_id,
+                        to_user_id: e.to_user_id
                     });
                 }
             });
@@ -112,7 +118,7 @@ export default {
             </div>
         </ChatDetails>
         <ChatContent ref="chatContent">
-            <ChatList>
+            <ChatList ref="chatList">
                 <ChatItem v-for="(chat, index) in chats.messages" :key="index"
                     :class="{ 'flex-row-reverse': isSender(chat) }">
                     <ChatAvatar :src="getUserAvatar(chat)" class="w-8 h-8" />

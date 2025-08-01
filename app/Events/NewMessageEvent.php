@@ -39,4 +39,18 @@ class NewMessageEvent implements ShouldBroadcastNow
             new PrivateChannel('new-messages.' . $this->toUserId)
         ];
     }
+
+    /**
+     * Get the data to broadcast.
+     *
+     * @return array<string, mixed>
+     */
+    public function broadcastWith(): array
+    {
+        return [
+            'from_user_id' => $this->fromUserId,
+            'to_user_id' => $this->toUserId,
+            'content' => $this->message,
+        ];
+    }
 }
