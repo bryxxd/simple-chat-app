@@ -36,6 +36,11 @@ export default {
             required: true,
             default: () => ({})
         },
+        isLoading: {
+            type: Boolean,
+            required: false,
+            default: false
+        }
     },
     data() {
         return {
@@ -109,26 +114,28 @@ export default {
 <template>
     <Chat>
         <ChatDetails>
-            <SkeletonChatDetails />
-            <!-- <ChatAvatar :src="chats?.to_user_details?.avatar" />
-            <div class="flex flex-col justify-between ml-4">
-                <ChatName>{{ chats?.to_user_details?.first_name }} {{ chats?.to_user_details?.last_name }}</ChatName> -->
-                <!-- <ChatStatus v-if="activeChat.participant.isOnline" class="text-green-700">Online</ChatStatus> -->
-            <!-- </div> -->
+            <SkeletonChatDetails v-if="isLoading" />
+            <div class="flex" v-else>
+                <ChatAvatar :src="chats?.to_user_details?.avatar" />
+                <div class="flex flex-col justify-between ml-4">
+                    <ChatName>{{ chats?.to_user_details?.first_name }} {{ chats?.to_user_details?.last_name }}</ChatName>
+                    <!-- <ChatStatus v-if="activeChat.participant.isOnline" class="text-green-700">Online</ChatStatus> -->
+                </div>
+            </div>
         </ChatDetails>
         <ChatContent ref="chatContent">
             <ChatList ref="chatList">
-                <!-- <ChatItem v-for="(chat, index) in chats.messages" :key="index"
+                <SkeletonChatList v-if="isLoading" />
+                <ChatItem v-else v-for="(chat, index) in chats.messages" :key="index"
                     :class="{ 'flex-row-reverse': isSender(chat) }">
                     <ChatAvatar :src="getUserAvatar(chat)" class="w-8 h-8" />
                     <ChatMessage :variant="isSender(chat) ? 'sender' : 'default'">
                         {{ chat.content }}
                     </ChatMessage>
-                </ChatItem> -->
-                <SkeletonChatList />
+                </ChatItem>
             </ChatList>
         </ChatContent>
-        <ChatForm @submit.prevent="sendMessage" method="POST">
+        <ChatForm @submit.prevent="sendMessage" method="POST" v-if="!isLoading">
             <Textarea placeholder="Type your message..." v-model="form.message" />
             <Button class="absolute right-[0.5rem] top-[0.7rem]" type="submit">Send
                 <Send />

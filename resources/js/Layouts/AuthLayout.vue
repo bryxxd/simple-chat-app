@@ -24,16 +24,20 @@ export default {
         return {
             activeChat: null,
             chat_data: {},
+            isLoading: false,
         };
     },
     methods: {
         async fetchChatData() {
             if (!this.activeChat) return;
             try {
+                this.isLoading = true;
                 const res = await axios.get(`/api/chat-room/${this.activeChat}`);
                 this.chat_data = res.data;
             } catch (error) {
                 console.log('Error fetching chat room:', error);
+            } finally {
+                this.isLoading = false;
             }
         },
         handleFilterChat(userID) {
@@ -79,7 +83,7 @@ export default {
             </header>
             <div>
                 <slot>
-                    <ChatBox :chats="chat_data" :activeUser="activeUser" />
+                    <ChatBox :isLoading="isLoading" :chats="chat_data" :activeUser="activeUser" />
                 </slot>
             </div>
         </SidebarInset>
