@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Send } from "lucide-vue-next";
 import { useEcho, useEchoPublic } from '@laravel/echo-vue';
 import { useForm, usePage } from "@inertiajs/vue3";
-
+import { Skeleton, SkeletonChatDetails, SkeletonChatList } from '@/components/ui/skeleton';
 export default {
     components: {
         Chat,
@@ -20,7 +20,10 @@ export default {
         ChatList,
         Textarea,
         Button,
-        Send
+        Send,
+        Skeleton,
+        SkeletonChatDetails,
+        SkeletonChatList
     },
     props: {
         chats: {
@@ -106,21 +109,23 @@ export default {
 <template>
     <Chat>
         <ChatDetails>
-            <ChatAvatar :src="chats?.to_user_details?.avatar" />
+            <SkeletonChatDetails />
+            <!-- <ChatAvatar :src="chats?.to_user_details?.avatar" />
             <div class="flex flex-col justify-between ml-4">
-                <ChatName>{{ chats?.to_user_details?.first_name }} {{ chats?.to_user_details?.last_name }}</ChatName>
+                <ChatName>{{ chats?.to_user_details?.first_name }} {{ chats?.to_user_details?.last_name }}</ChatName> -->
                 <!-- <ChatStatus v-if="activeChat.participant.isOnline" class="text-green-700">Online</ChatStatus> -->
-            </div>
+            <!-- </div> -->
         </ChatDetails>
         <ChatContent ref="chatContent">
             <ChatList ref="chatList">
-                <ChatItem v-for="(chat, index) in chats.messages" :key="index"
+                <!-- <ChatItem v-for="(chat, index) in chats.messages" :key="index"
                     :class="{ 'flex-row-reverse': isSender(chat) }">
                     <ChatAvatar :src="getUserAvatar(chat)" class="w-8 h-8" />
                     <ChatMessage :variant="isSender(chat) ? 'sender' : 'default'">
                         {{ chat.content }}
                     </ChatMessage>
-                </ChatItem>
+                </ChatItem> -->
+                <SkeletonChatList />
             </ChatList>
         </ChatContent>
         <ChatForm @submit.prevent="sendMessage" method="POST">
