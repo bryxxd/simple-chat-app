@@ -9,6 +9,7 @@ import {
 } from "@/Components/ui/sidebar";
 import { usePage, Head } from "@inertiajs/vue3";
 import axios from "axios";
+
 export default {
     name: "AuthLayout",
     components: {
@@ -25,6 +26,7 @@ export default {
             activeChat: null,
             chat_data: {},
             isLoading: false,
+            onlineUsers: []
         };
     },
     methods: {
@@ -49,10 +51,10 @@ export default {
         interactedUsers() {
             return usePage().props.users || [];
         },
-        activeUser() { 
-            return this.activeChat ? 
-            this.interactedUsers.find(user => user.id === this.activeChat) 
-            : this.interactedUsers[0];
+        activeUser() {
+            return this.activeChat ?
+                this.interactedUsers.find(user => user.id === this.activeChat)
+                : this.interactedUsers[0];
         },
     },
     mounted() {
@@ -60,16 +62,39 @@ export default {
             this.activeChat = this.interactedUsers[0].id;
             this.fetchChatData();
         }
+
+        window.Echo.join('online-users')
+            .here((users) => {
+                // Handle initial list of online users
+                users.forEach(e => {
+                    this.onlineUsers.push(e.id)
+                });
+            })
+            .joining((user) => {
+                // Handle when a new user comes online
+                this.onlineUsers.push(user.id)
+            })
+            .leaving((user) => {
+                // Handle when a user goes offline
+                this.onlineUsers.pop(user.id)
+            })
+            .error((error) => {
+                console.error('Error in presence channel:', error);
+            });
     },
     provide() {
         return {
-            interactedUsers: this.interactedUsers
+            interactedUsers: this.interactedUsers,
+            isOnline: (activeUser) => {
+                return this.onlineUsers.find(e => e == activeUser);
+            }
         };
     },
 };
 </script>
 
 <template>
+
     <Head title="Chat" />
     <SidebarProvider :style="{ '--sidebar-width': '350px' }">
         <AppSidebar @set-active-chat="handleFilterChat" />

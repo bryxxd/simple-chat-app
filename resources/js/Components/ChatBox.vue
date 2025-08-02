@@ -3,7 +3,6 @@ import { Chat, ChatContent, ChatDetails, ChatAvatar, ChatMessage, ChatName, Chat
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Send } from "lucide-vue-next";
-import { useEcho, useEchoPublic } from '@laravel/echo-vue';
 import { useForm, usePage } from "@inertiajs/vue3";
 import { Skeleton, SkeletonChatDetails, SkeletonChatList } from '@/components/ui/skeleton';
 export default {
@@ -40,8 +39,9 @@ export default {
             type: Boolean,
             required: false,
             default: false
-        }
+        },
     },
+    inject: ['isOnline'],
     data() {
         return {
             form: useForm({
@@ -88,17 +88,13 @@ export default {
         },
     },
     mounted() {
-        const { listen } = useEcho(
-            'new-messages.' + this.authUser.id,
-            'NewMessageEvent',
-            (e) => {
-                // Check if the message is relevant to the current chat
+        window.Echo.private('new-messages.' + this.authUser.id)
+            .listen('NewMessageEvent', e => {
                 const isMessageForCurrentChat =
                     (e.from_user_id === this.authUser.id && e.to_user_id === this.activeUser?.id) ||
                     (e.from_user_id === this.activeUser?.id && e.to_user_id === this.authUser.id);
 
                 if (isMessageForCurrentChat) {
-                    // Append the new message to the chat
                     this.chats.messages.push({
                         content: e.content,
                         from_user_id: e.from_user_id,
@@ -106,7 +102,6 @@ export default {
                     });
                 }
             });
-        listen()
     }
 };
 
@@ -118,8 +113,9 @@ export default {
             <div class="flex" v-else>
                 <ChatAvatar :src="chats?.to_user_details?.avatar" />
                 <div class="flex flex-col justify-between ml-4">
-                    <ChatName>{{ chats?.to_user_details?.first_name }} {{ chats?.to_user_details?.last_name }}</ChatName>
-                    <!-- <ChatStatus v-if="activeChat.participant.isOnline" class="text-green-700">Online</ChatStatus> -->
+                    <ChatName>{{ chats?.to_user_details?.first_name }} {{ chats?.to_user_details?.last_name }}
+                    </ChatName>
+                    <ChatStatus v-if="isOnline(activeUser.id)" class="text-green-700">Online</ChatStatus>
                 </div>
             </div>
         </ChatDetails>
