@@ -2,8 +2,10 @@
 
 namespace App\Http\Middleware;
 
-use Illuminate\Http\Request;
 use Inertia\Middleware;
+use Illuminate\Http\Request;
+use Illuminate\Foundation\Auth\User;
+use Illuminate\Support\Facades\Auth;
 
 class HandleInertiaRequests extends Middleware
 {
@@ -34,6 +36,11 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => $request->user(),
             ],
+            'flash' => [
+                'success' => $request->session()->get('success'),
+                'info' => $request->session()->get('info')
+            ],
+            'users' => Auth::check() ? User::select('id', 'first_name', 'last_name', 'email', 'avatar')->where('id', '!=', auth()->id())->get() : [],
         ];
     }
 }
