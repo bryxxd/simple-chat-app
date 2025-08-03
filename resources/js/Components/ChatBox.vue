@@ -4,6 +4,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Send } from "lucide-vue-next";
 import { useForm, usePage } from "@inertiajs/vue3";
+import UserActiveStatus from './UserActiveStatus.vue';
 import { Skeleton, SkeletonChatDetails, SkeletonChatList } from '@/components/ui/skeleton';
 export default {
     components: {
@@ -22,7 +23,8 @@ export default {
         Send,
         Skeleton,
         SkeletonChatDetails,
-        SkeletonChatList
+        SkeletonChatList,
+        UserActiveStatus
     },
     props: {
         chats: {
@@ -116,6 +118,7 @@ export default {
                     <ChatName>{{ chats?.to_user_details?.first_name }} {{ chats?.to_user_details?.last_name }}
                     </ChatName>
                     <ChatStatus v-if="isOnline(activeUser.id)" class="text-green-700">Online</ChatStatus>
+                    <UserActiveStatus v-else :id="activeUser.id"/>
                 </div>
             </div>
         </ChatDetails>

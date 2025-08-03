@@ -18,7 +18,6 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->string('username')->unique()->nullable();
             $table->string('avatar')->default('/images/profile-placeholder.png');
-            $table->enum('status', ['online', 'offline'])->default('offline');
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->rememberToken();

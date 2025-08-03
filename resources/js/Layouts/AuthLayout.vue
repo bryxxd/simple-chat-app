@@ -7,7 +7,7 @@ import {
     SidebarProvider,
     SidebarTrigger,
 } from "@/Components/ui/sidebar";
-import { usePage, Head } from "@inertiajs/vue3";
+import { usePage, Head, router } from "@inertiajs/vue3";
 import axios from "axios";
 
 export default {
@@ -76,7 +76,15 @@ export default {
             })
             .leaving((user) => {
                 // Handle when a user goes offline
-                this.onlineUsers.pop(user.id)
+                this.onlineUsers.pop(user.id);
+
+                (async function updateLastActive() {
+                    try {
+                        await axios.post(`/api/update-last-active/${user.id}`);
+                    } catch (error) {
+                        console.log('Error updating last active:', error);
+                    }
+                })();
             })
             .error((error) => {
                 console.error('Error in presence channel:', error);

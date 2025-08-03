@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\ChatRoomController;
 
 Route::get('/user', function (Request $request) {
@@ -11,4 +12,6 @@ Route::get('/user', function (Request $request) {
 
 Route::middleware('web')->group(function () {
     Route::get('/chat-room/{to_user_id}', [ChatRoomController::class, 'show']);
+    Route::get('/get-last-active/{id}', [UserController::class, 'get_last_active']);
+    Route::post('/update-last-active/{id}', [UserController::class, 'update_last_active']);
 });
