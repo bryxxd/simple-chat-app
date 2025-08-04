@@ -76,8 +76,6 @@ export default {
             })
             .leaving((user) => {
                 // Handle when a user goes offline
-                this.onlineUsers.pop(user.id);
-
                 (async function updateLastActive() {
                     try {
                         await axios.post(`/api/update-last-active/${user.id}`);
@@ -85,6 +83,11 @@ export default {
                         console.log('Error updating last active:', error);
                     }
                 })();
+                
+                setTimeout(() => {
+                    this.onlineUsers.pop(user.id);
+                }, 60000);
+
             })
             .error((error) => {
                 console.error('Error in presence channel:', error);
