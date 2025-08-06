@@ -11,28 +11,26 @@ const userLeft = ref({
 const lastActive = computed(() => {
     const lastActiveDate = new Date(userLeft.value.last_active_at);
     const now = new Date();
+    // Calculate the difference in milliseconds
     const diffInMs = now - lastActiveDate;
+    // Calculate the difference in minutes
     const diffInMinutes = Math.floor(diffInMs / (1000 * 60));
+    // Calculate the difference in hours and days
     const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
+    // Calculate the difference in days
     const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
 
-    // Check if it's today
-    const isToday = lastActiveDate.toDateString() === now.toDateString();
-    
-    if (isToday) {
-        if (diffInMinutes < 60) {
-            return `Active ${diffInMinutes} minute${diffInMinutes === 1 ? '' : 's'} ago`;
-        } else {
-            return `Active ${diffInHours} hour${diffInHours === 1 ? '' : 's'} ago`;
-        }
-    } else if (diffInDays === 1) {
-        return 'Active 1 day ago';
+    if (diffInMinutes < 60) {
+        return `Active ${diffInMinutes} minute${diffInMinutes === 1 ? '' : 's'} ago`;
+    } else if(diffInHours < 24) {
+        return `Active ${diffInHours} hour${diffInHours === 1 ? '' : 's'} ago`;
     } else if (diffInDays < 7) {
-        return `Active ${diffInDays} days ago`;
+        return `Active ${diffInDays} day${diffInDays === 1 ? '' : 's'} ago`;
     } else {
         return '';
     }
 })
+
 // Props
 const props = defineProps({
     id: {
