@@ -1,111 +1,92 @@
-<script>
+<script setup>
 import { Chat, ChatContent, ChatDetails, ChatAvatar, ChatMessage, ChatName, ChatItem, ChatList, ChatStatus, ChatForm } from '@/components/ui/chat';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Send } from "lucide-vue-next";
 import { useForm, usePage } from "@inertiajs/vue3";
 import UserActiveStatus from './UserActiveStatus.vue';
-import { Skeleton, SkeletonChatDetails, SkeletonChatList } from '@/components/ui/skeleton';
-export default {
-    components: {
-        Chat,
-        ChatContent,
-        ChatDetails,
-        ChatAvatar,
-        ChatMessage,
-        ChatName,
-        ChatStatus,
-        ChatItem,
-        ChatForm,
-        ChatList,
-        Textarea,
-        Button,
-        Send,
-        Skeleton,
-        SkeletonChatDetails,
-        SkeletonChatList,
-        UserActiveStatus
-    },
-    props: {
-        chats: {
-            type: Object,
-            required: true,
-            default: () => ({})
-        },
-        activeUser: {
-            type: Object,
-            required: true,
-            default: () => ({})
-        },
-        isLoading: {
-            type: Boolean,
-            required: false,
-            default: false
-        },
-    },
-    inject: ['isOnline'],
-    data() {
-        return {
-            form: useForm({
-                'message': '',
-                'to_user_id': ''
-            }),
-        }
-    },
-    methods: {
-        sendMessage() {
-            this.form.post(route('messages.store'), {
-                preserveState: true,
-                onSuccess: () => {
-                    // Message will be added via Echo listener, just clear the form
-                    this.form.message = '';
-                },
-                onError: (errors) => {
-                    console.log('Error sending message:', errors);
-                }
-            });
-        },
-        isSender(chat) {
-            return this.authUser && chat.from_user_id === this.authUser.id;
-        },
-        getUserAvatar(chat) {
-            return this.authUser && chat.from_user_id === this.authUser.id
-                ? this.authUser.avatar
-                : this.chats.to_user_details.avatar;
-        },
-    },
-    computed: {
-        authUser() {
-            return usePage().props.auth.user;
-        }
-    },
-    watch: {
-        activeUser: {
-            async handler(newUser) {
-                if (newUser) {
-                    this.form.to_user_id = newUser.id;
-                }
-            },
-            immediate: true
-        },
-    },
-    mounted() {
-        window.Echo.private('new-messages.' + this.authUser.id)
-            .listen('NewMessageEvent', e => {
-                const isMessageForCurrentChat =
-                    (e.from_user_id === this.authUser.id && e.to_user_id === this.activeUser?.id) ||
-                    (e.from_user_id === this.activeUser?.id && e.to_user_id === this.authUser.id);
+import { SkeletonChatDetails, SkeletonChatList } from '@/components/ui/skeleton';
+import { inject, onMounted, watch } from 'vue';
 
-                if (isMessageForCurrentChat) {
-                    this.chats.messages.push({
-                        content: e.content,
-                        from_user_id: e.from_user_id,
-                        to_user_id: e.to_user_id
-                    });
-                }
-            });
+// Props 
+const props = defineProps({
+    chats: {
+        type: Object,
+        required: true,
+        default: () => ({})
+    },
+    activeUser: {
+        type: Object,
+        required: true,
+        default: () => ({})
+    },
+    isLoading: {
+        type: Boolean,
+        required: false,
+        default: false
+    },
+});
+
+// Form
+const form = useForm({
+    message: '',
+    to_user_id: props.activeUser.id || ''
+});
+
+// Inject
+const isOnline = inject('isOnline');
+
+// Methods
+function sendMessage() {
+    form.post(route('messages.store'), {
+        preserveState: true,
+        onSuccess: () => {
+            // Message will be added via Echo listener, just clear the form
+            form.message = '';
+        },
+        onError: (errors) => {
+            console.log('Error sending message:', errors);
+        }
+    });
+}
+
+function isSender(chat) {
+    return authUser && chat.from_user_id === authUser.id;
+}
+
+function getUserAvatar(chat) {
+    return authUser && chat.from_user_id === authUser.id
+        ? authUser.avatar
+        : props.chats.to_user_details.avatar;
+}
+
+// Computed
+const authUser = usePage().props.auth.user;
+
+// Mounted
+onMounted(() => {
+    window.Echo.private('new-messages.' + authUser.id)
+        .listen('NewMessageEvent', e => {
+            const isMessageForCurrentChat =
+                (e.from_user_id === authUser.id && e.to_user_id === props.activeUser?.id) ||
+                (e.from_user_id === props.activeUser?.id && e.to_user_id === authUser.id);
+
+            if (isMessageForCurrentChat) {
+                props.chats.messages.push({
+                    content: e.content,
+                    from_user_id: e.from_user_id,
+                    to_user_id: e.to_user_id
+                });
+            }
+        });
+});
+
+// Watchers 
+watch(() => props.activeUser, (newUser) => {
+    if (newUser) {
+        form.to_user_id = newUser.id;
     }
-};
+}, { immediate: true });
 
 </script>
 <template>
@@ -118,7 +99,7 @@ export default {
                     <ChatName>{{ chats?.to_user_details?.first_name }} {{ chats?.to_user_details?.last_name }}
                     </ChatName>
                     <ChatStatus v-if="isOnline(activeUser.id)" class="text-green-700">Online</ChatStatus>
-                    <UserActiveStatus v-else :id="activeUser.id"/>
+                    <UserActiveStatus v-else :id="activeUser.id" />
                 </div>
             </div>
         </ChatDetails>
