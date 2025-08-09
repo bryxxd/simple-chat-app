@@ -1,4 +1,4 @@
-<script>
+<script setup>
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import GuestLayout from '@/Layouts/GuestLayout.vue';
 import { Button } from '@/components/ui/button';
@@ -6,35 +6,13 @@ import { Card, CardTitle, CardContent, CardHeader, CardDescription } from '@/com
 import { Input, InputError } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
-export default {
-    components: {
-        Head,
-        Link,
-        GuestLayout,
-        Button,
-        Card,
-        CardContent,
-        CardHeader,
-        CardTitle,
-        CardDescription,
-        Input,
-        InputError,
-        Label,
-    },
-    data() {
-        return {
-            image: './images/placeholder.svg',
-            form: useForm({
-                username: '',
-                password: ''
-            })
-        }
-    },
-    methods: {
-        submit() {
-            this.form.post(route('login.store'));
-        }
-    }
+const form = useForm({
+    username: '',
+    password: ''
+});
+
+const submit = () => {
+    form.post(route('login.store'));
 };
 </script>
 

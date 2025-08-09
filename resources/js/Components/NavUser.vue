@@ -1,4 +1,4 @@
-<script>
+<script setup>
 import { BadgeCheck, ChevronsUpDown, LogOut } from "lucide-vue-next";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -17,37 +17,12 @@ import {
     useSidebar,
 } from "@/components/ui/sidebar";
 import { Link, usePage } from "@inertiajs/vue3";
+import { computed } from "vue";
 
-export default {
-    components: {
-        Avatar,
-        AvatarFallback,
-        AvatarImage,
-        BadgeCheck,
-        ChevronsUpDown,
-        DropdownMenu,
-        DropdownMenuContent,
-        DropdownMenuGroup,
-        DropdownMenuItem,
-        DropdownMenuLabel,
-        DropdownMenuSeparator,
-        DropdownMenuTrigger,
-        LogOut,
-        Link,
-        SidebarMenu,
-        SidebarMenuButton,
-        SidebarMenuItem,
-    },
-    name: "NavUser",
-    computed: {
-        isMobile() {
-            return useSidebar().isMobile;
-        },
-        user() {
-            return usePage().props.auth.user;
-        }
-    },
-};
+// Computed properties
+const isMobile = computed(() => useSidebar().isMobile);
+const user = computed(() => usePage().props.auth.user);
+
 </script>
 
 <template>

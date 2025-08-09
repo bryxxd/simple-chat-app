@@ -1,4 +1,4 @@
-<script>
+<script setup>
 import AppSidebar from "@/Components/AppSidebar.vue";
 import ChatBox from "@/Components/ChatBox.vue";
 import NavUser from "@/Components/NavUser.vue";
@@ -7,101 +7,89 @@ import {
     SidebarProvider,
     SidebarTrigger,
 } from "@/Components/ui/sidebar";
-import { usePage, Head, router } from "@inertiajs/vue3";
+import { usePage, Head } from "@inertiajs/vue3";
 import axios from "axios";
+import { reactive, computed, onMounted, provide } from "vue";
 
-export default {
-    name: "AuthLayout",
-    components: {
-        Head,
-        AppSidebar,
-        ChatBox,
-        SidebarInset,
-        SidebarProvider,
-        SidebarTrigger,
-        NavUser,
-    },
-    data() {
-        return {
-            activeChat: null,
-            chat_data: {},
-            isLoading: false,
-            onlineUsers: []
-        };
-    },
-    methods: {
-        async fetchChatData() {
-            if (!this.activeChat) return;
-            try {
-                this.isLoading = true;
-                const res = await axios.get(`/api/chat-room/${this.activeChat}`);
-                this.chat_data = res.data;
-            } catch (error) {
-                console.log('Error fetching chat room:', error);
-            } finally {
-                this.isLoading = false;
-            }
-        },
-        handleFilterChat(userID) {
-            this.activeChat = userID;
-            this.fetchChatData();
-        }
-    },
-    computed: {
-        interactedUsers() {
-            return usePage().props.users || [];
-        },
-        activeUser() {
-            return this.activeChat ?
-                this.interactedUsers.find(user => user.id === this.activeChat)
-                : this.interactedUsers[0];
-        },
-    },
-    mounted() {
-        if (this.interactedUsers?.length > 0) {
-            this.activeChat = this.interactedUsers[0].id;
-            this.fetchChatData();
-        }
+// Data / Reactive state
+const data = reactive({
+    activeChat: null,
+    chat_data: {},
+    isLoading: false,
+    onlineUsers: []
+});
 
-        window.Echo.join('online-users')
-            .here((users) => {
-                // Handle initial list of online users
-                users.forEach(e => {
-                    this.onlineUsers.push(e.id)
-                });
-            })
-            .joining((user) => {
-                // Handle when a new user comes online
-                this.onlineUsers.push(user.id)
-            })
-            .leaving((user) => {
-                // Handle when a user goes offline
-                (async function updateLastActive() {
-                    try {
-                        await axios.post(`/api/update-last-active/${user.id}`);
-                    } catch (error) {
-                        console.log('Error updating last active:', error);
-                    }
-                })();
-                
-                setTimeout(() => {
-                    this.onlineUsers.pop(user.id);
-                }, 60000);
-
-            })
-            .error((error) => {
-                console.error('Error in presence channel:', error);
-            });
-    },
-    provide() {
-        return {
-            interactedUsers: this.interactedUsers,
-            isOnline: (activeUser) => {
-                return this.onlineUsers.find(e => e == activeUser);
-            }
-        };
-    },
+// Methods 
+async function fetchChatData() {
+    if (!data.activeChat) return;
+    try {
+        data.isLoading = true;
+        const res = await axios.get(`/api/chat-room/${data.activeChat}`);
+        data.chat_data = res.data;
+    } catch (error) {
+        console.log('Error fetching chat room:', error);
+    } finally {
+        data.isLoading = false;
+    }
 };
+
+function handleFilterChat(userID) {
+    data.activeChat = userID;
+    fetchChatData();
+}
+
+// Computed properties
+const interactedUsers = computed(() => {
+    return usePage().props.users || [];
+});
+
+const activeUser = computed(() => {
+    return data.activeChat ?
+        interactedUsers.value.find(user => user.id === data.activeChat)
+        : interactedUsers.value[0];
+});
+
+// Lifecycle hooks
+onMounted(() => {
+    if (interactedUsers?.length > 0) {
+        data.activeChat = interactedUsers[0].id;
+        fetchChatData();
+    }
+
+    window.Echo.join('online-users')
+        .here((users) => {
+            // Handle initial list of online users
+            users.forEach(e => {
+                data.onlineUsers.push(e.id)
+            });
+        })
+        .joining((user) => {
+            // Handle when a new user comes online
+            data.onlineUsers.push(user.id)
+        })
+        .leaving((user) => {
+            // Handle when a user goes offline
+            (async function updateLastActive() {
+                try {
+                    await axios.post(`/api/update-last-active/${user.id}`);
+                } catch (error) {
+                    console.log('Error updating last active:', error);
+                }
+            })();
+
+            setTimeout(() => {
+                data.onlineUsers.pop(user.id);
+            }, 60000);
+
+        })
+        .error((error) => {
+            console.error('Error in presence channel:', error);
+        });
+})
+
+// Provide
+provide('interactedUsers', interactedUsers);
+provide('isOnline', (activeUser) => data.onlineUsers.includes(activeUser.id));
 </script>
 
 <template>
@@ -119,7 +107,7 @@ export default {
             </header>
             <div>
                 <slot>
-                    <ChatBox :isLoading="isLoading" :chats="chat_data" :activeUser="activeUser" />
+                    <ChatBox :isLoading="data.isLoading" :chats="data.chat_data" :activeUser="activeUser" />
                 </slot>
             </div>
         </SidebarInset>

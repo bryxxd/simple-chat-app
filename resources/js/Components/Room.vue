@@ -1,19 +1,22 @@
-<script>
-export default {
-    name: 'Room',
-    props: {
-        user: {
-            type: Object,
-            required: true
-        }
-    },
-    computed: {
-        userAvatarSrc() {
-            return this.user?.avatar || '/images/profile-placeholder.jpg';
-        }
-    },
-    inject: ['isOnline']
-}
+<script setup>
+import { defineProps, inject, computed } from 'vue';
+
+// Props
+const props = defineProps({
+    user : {
+        type: Object,
+        required: true
+    }
+})
+
+// Computed properties
+const userAvatarSrc = computed(() => {
+    return props.user?.avatar || '/images/profile-placeholder.jpg';
+})
+
+// Injected dependencies
+const isOnline = inject('isOnline');
+
 </script>
 <template>
     <div class="flex items-center gap-2 whitespace-nowrap p-4 text-sm leading-tight last:border-b-0 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground cursor-pointer">

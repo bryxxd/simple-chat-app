@@ -1,37 +1,9 @@
-<script>
+<script setup>
 import AuthLayout from "@/Layouts/AuthLayout.vue";
 import AppearanceTabs from "@/Components/AppearanceTabs.vue";
 import Settings from "@/Layouts/settings/Layout.vue";
-import { Pencil } from "lucide-vue-next";
-import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
-} from '@/components/ui/popover';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Head } from '@inertiajs/vue3';
 
-export default {
-    name: "Appearance",
-    components: {
-        Head,
-        AppearanceTabs,
-        Button,
-        Input,
-        Popover,
-        PopoverContent,
-        PopoverTrigger,
-        Settings,
-        AuthLayout,
-        Pencil
-    },
-    data() {
-        return {
-            dummyimage: "/images/shadcn.jpg",
-        }
-    },
-};
 </script>
 <template>
     <Head title="Appearance" />

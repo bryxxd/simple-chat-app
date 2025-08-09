@@ -1,8 +1,8 @@
-<script>
+<script setup>
 import { usePage } from "@inertiajs/vue3";
 import { computed } from "vue";
 import { Search } from "lucide-vue-next";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import {
     Combobox,
     ComboboxAnchor,
@@ -10,37 +10,14 @@ import {
     ComboboxGroup,
     ComboboxInput,
     ComboboxItem,
-    ComboboxItemIndicator,
     ComboboxList,
 } from "@/components/ui/combobox";
 
-export default {
-    name: "SearchUser",
-    components: {
-        Combobox,
-        ComboboxAnchor,
-        ComboboxEmpty,
-        ComboboxGroup,
-        ComboboxInput,
-        ComboboxItem,
-        ComboboxItemIndicator,
-        ComboboxList,
-        Avatar,
-        AvatarImage,
-        AvatarFallback,
-        Search
-    },
-    computed: {
-        users() {
-            return usePage().props.users;
-        }
-    },
-    methods: {
-        getUserAvatar(user) {
-            return user?.avatar || '/images/profile-placeholder.jpg';
-        }
-    }
-}
+// Computed properties
+const users = computed(() => usePage().props.users);
+
+// Methods
+const getUserAvatar = (user) => user?.avatar || '/images/profile-placeholder.jpg';
 
 </script>
 
@@ -59,7 +36,8 @@ export default {
             <ComboboxEmpty> No user found. </ComboboxEmpty>
 
             <ComboboxGroup>
-                <ComboboxItem v-for="user in users" :key="user.id" :value="user" class="justify-start" @click="$emit('set-active-chat', user.id)">
+                <ComboboxItem v-for="user in users" :key="user.id" :value="user" class="justify-start"
+                    @click="$emit('set-active-chat', user.id)">
                     <Avatar>
                         <AvatarImage :src="getUserAvatar(user)" alt="" />
                     </Avatar>
