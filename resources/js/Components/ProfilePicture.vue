@@ -1,170 +1,156 @@
-<script>
+<script setup>
+import { ref, computed } from 'vue';
 import { Cropper, Preview } from 'vue-advanced-cropper';
 import 'vue-advanced-cropper/dist/style.css';
 import { AlertDialog, AlertDialogContent, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogTrigger, AlertDialogAction, AlertDialogCancel } from '@/Components/ui/alert-dialog';
 import { Avatar, AvatarImage } from '@/Components/ui/avatar';
 import { Pencil, LoaderCircle } from 'lucide-vue-next';
 import { Input, InputError } from '@/Components/ui/input';
-import { Button } from '@/Components/ui/button';
+import { Button } from '@/components/ui/button';
 import { Label } from '@/Components/ui/label';
 import { router } from '@inertiajs/vue3';
 import { useFlashMessages } from "@/composables/useFlashMessage";
 
-export default {
-    name: "ProfilePicture",
-    props: {
-        user: {
-            type: Object,
-            required: true
-        },
+// Props
+const props = defineProps({
+    user: {
+        type: Object,
+        required: true
     },
-    data() {
-        return {
-            showUploadDialog: false,
-            showCropper: false,
-            isCroppingFinished: false,
-            validationErrors: null,
-            result: {
-                coordinates: null,
-                image: null
-            },
-            loadingState: {
-                validation: false,
-                uploading: false
-            },
-            croppedImageSrc: null,
-            croppedCanvas: null,
-            originalFileType: null
-        }
-    },
-    computed: {
-        userAvatar() {
-            return this.showCropper ? this.croppedImageSrc : this.user.avatar;
-        }
-    },
-    components: {
-        Avatar,
-        AvatarImage,
-        AlertDialog,
-        AlertDialogTrigger,
-        AlertDialogCancel,
-        AlertDialogAction,
-        AlertDialogContent,
-        AlertDialogFooter,
-        AlertDialogHeader,
-        AlertDialogTitle,
-        AlertDialogDescription,
-        Cropper,
-        Preview,
-        Pencil,
-        LoaderCircle,
-        Input,
-        InputError,
-        Button,
-        Label
-    },
-    methods: {
-        defaultSize() {
-            return {
-                width: 300,
-                height: 300
-            }
-        },
-        handleImageUpload(event) {
-            const file = event.target.files[0];
+});
 
-            if (file) {
-                // Store the original file type for later use
-                this.originalFileType = file.type;
+// Reactive data
+const showUploadDialog = ref(false);
+const showCropper = ref(false);
+const isCroppingFinished = ref(false);
+const validationErrors = ref(null);
+const result = ref({
+    coordinates: null,
+    image: null
+});
+const loadingState = ref({
+    validation: false,
+    uploading: false
+});
+const croppedImageSrc = ref(null);
+const croppedCanvas = ref(null);
+const originalFileType = ref(null);
 
-                // First, validate the file with server
-                this.loadingState.validation = true;
-                this.validationErrors = null;
-                const formData = new FormData();
-                formData.append('image', file);
+// Template ref
+const cropper = ref(null);
 
-                router.post(route('settings.profile.picture.validation'), formData, {
-                    onSuccess: () => {
-                        // Validation passed, proceed to cropper
-                        this.validationErrors = null;
-                        this.loadingState.validation = false;
-                        const reader = new FileReader();
-                        reader.onload = (e) => {
-                            this.croppedImageSrc = e.target.result;
-                            this.showCropper = true;
-                        }
-                        reader.readAsDataURL(file);
-                    },
-                    onError: (errors) => {
-                        this.loadingState.validation = false;
-                        // Show validation errors
-                        this.validationErrors = errors;
-                        console.error('Validation errors:', errors);
-                    },
-
-                });
-            }
-        },
-        onChange({ coordinates, image }) {
-            this.result = {
-                coordinates: coordinates,
-                image: image
-            }
-        },
-        handleCancelCropper() {
-            this.showCropper = false;
-            this.showUploadDialog = true;
-            this.isCroppingFinished = false;
-            this.croppedImageSrc = null;
-            this.croppedCanvas = null;
-            this.validationErrors = null;
-        },
-        handleCancelUpload() {
-            this.showUploadDialog = false;
-            this.validationErrors = null;
-            this.isCroppingFinished = false;
-        },
-        handleCrop() {
-            this.showCropper = false;
-            this.isCroppingFinished = true;
-            const cropperResult = this.$refs.cropper.getResult();
-            this.croppedImageSrc = cropperResult.canvas.toDataURL();
-            this.croppedCanvas = cropperResult.canvas;
-        },
-        handleUpdateAvatar() {
-            const canvas = this.croppedCanvas;
-
-            this.loadingState.uploading = true;
-
-            if (canvas) {
-                const formData = new FormData();
-
-                canvas.toBlob(blob => {
-                    formData.append('image', blob);
-
-                    router.post(route('settings.profile.picture.store'), formData, {
-                        onProgress: (progress) => {
-                            this.loadingState.uploading = true;
-                        },
-                        onSuccess: () => {
-                            useFlashMessages('Profile picture status')
-                            this.loadingState.uploading = false;
-                            this.showUploadDialog = false;
-                            this.isCroppingFinished = false;
-                            this.showCropper = false;
-                            this.validationErrors = null;
-                        },
-                        onError: (errors) => {
-                            this.loadingState.uploading = false;
-                            this.validationErrors = errors;
-                            console.error('Upload errors:', errors);
-                        }
-                    });
-                }, this.originalFileType); // Use the original file type 
-            }
-        }
+// Computed
+const userAvatar = computed(() => {
+    if (showCropper.value && croppedImageSrc.value) {
+        return croppedImageSrc.value;
     }
-}
+    return props.user.avatar || '';
+});
+
+// Methods
+const defaultSize = () => {
+    return {
+        width: 300,
+        height: 300
+    }
+};
+
+const handleImageUpload = (event) => {
+    const file = event.target.files[0];
+
+    if (file) {
+        // Store the original file type for later use
+        originalFileType.value = file.type;
+
+        // First, validate the file with server
+        loadingState.value.validation = true;
+        validationErrors.value = null;
+        const formData = new FormData();
+        formData.append('image', file);
+
+        router.post(route('settings.profile.picture.validation'), formData, {
+            onSuccess: () => {
+                // Validation passed, proceed to cropper
+                validationErrors.value = null;
+                loadingState.value.validation = false;
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    croppedImageSrc.value = e.target.result;
+                    showCropper.value = true;
+                }
+                reader.readAsDataURL(file);
+            },
+            onError: (errors) => {
+                loadingState.value.validation = false;
+                // Show validation errors
+                validationErrors.value = errors;
+            },
+        });
+    }
+};
+
+const onChange = ({ coordinates, image }) => {
+    result.value = {
+        coordinates: coordinates,
+        image: image
+    }
+};
+
+const handleCancelCropper = () => {
+    showCropper.value = false;
+    showUploadDialog.value = true;
+    isCroppingFinished.value = false;
+    croppedImageSrc.value = null;
+    croppedCanvas.value = null;
+    validationErrors.value = null;
+};
+
+const handleCancelUpload = () => {
+    showUploadDialog.value = false;
+    validationErrors.value = null;
+    isCroppingFinished.value = false;
+};
+
+const handleCrop = () => {
+    showCropper.value = false;
+    isCroppingFinished.value = true;
+    const cropperResult = cropper.value.getResult();
+    croppedImageSrc.value = cropperResult.canvas.toDataURL();
+    croppedCanvas.value = cropperResult.canvas;
+};
+
+const handleUpdateAvatar = () => {
+    const canvas = croppedCanvas.value;
+
+    loadingState.value.uploading = true;
+
+    if (canvas) {
+        const formData = new FormData();
+
+        canvas.toBlob(blob => {
+            formData.append('image', blob);
+
+            router.post(route('settings.profile.picture.store'), formData, {
+                onProgress: (progress) => {
+                    loadingState.value.uploading = true;
+                },
+                onSuccess: () => {
+                    useFlashMessages('Profile picture status')
+                    loadingState.value.uploading = false;
+                    showUploadDialog.value = false;
+                    isCroppingFinished.value = false;
+                    showCropper.value = false;
+                    validationErrors.value = null;
+                },
+                onError: (errors) => {
+                    loadingState.value.uploading = false;
+                    validationErrors.value = errors;
+                    console.error('Upload errors:', errors);
+                }
+            });
+        }, originalFileType.value); // Use the original file type 
+    }
+};
 </script>
 <template>
     <div class="relative">
@@ -181,7 +167,7 @@ export default {
         </div>
 
         <!-- Upload Dialog -->
-        <AlertDialog :open="showUploadDialog" v-if="!showCropper" class="w-full">
+        <AlertDialog :open="showUploadDialog && !showCropper" class="w-full">
             <AlertDialogContent>
                 <AlertDialogHeader>
                     <AlertDialogTitle>
@@ -189,7 +175,7 @@ export default {
                     </AlertDialogTitle>
                 </AlertDialogHeader>
                 <div>
-                    <preview v-if="isCroppingFinished" class="w-44 h-44 mx-auto" :image="result.image"
+                    <Preview v-if="isCroppingFinished" class="w-44 h-44 mx-auto" :image="result.image"
                         :coordinates="result.coordinates" />
                     <img v-else class="w-44 h-44 mx-auto object-cover" :src="userAvatar" alt="user avatar">
                 </div>
@@ -227,7 +213,7 @@ export default {
                         to use as your profile picture.</AlertDialogDescription>
                 </AlertDialogHeader>
                 <div>
-                    <cropper ref="cropper" class="cropper" :src="userAvatar" :default-size="defaultSize"
+                    <Cropper ref="cropper" class="cropper" :src="croppedImageSrc" :default-size="defaultSize"
                         @change="onChange" />
                 </div>
                 <AlertDialogFooter class="sm:justify-center">

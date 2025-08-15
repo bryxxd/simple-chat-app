@@ -30,14 +30,26 @@ const props = defineProps({
 // Form
 const form = useForm({
     message: '',
-    to_user_id: props.activeUser.id || ''
+    to_user_id: props.activeUser?.id || ''
 });
 
 // Inject
 const isOnline = inject('isOnline');
 
+// Watch for activeUser changes
+watch(() => props.activeUser, (newActiveUser) => {
+    if (newActiveUser?.id) {
+        form.to_user_id = newActiveUser.id;
+    }
+}, { immediate: true });
+
 // Methods
 function sendMessage() {
+    if (!form.to_user_id) {
+        console.error('No active user selected');
+        return;
+    }
+    
     form.post(route('messages.store'), {
         preserveState: true,
         onSuccess: () => {
@@ -81,19 +93,12 @@ onMounted(() => {
         });
 });
 
-// Watchers 
-watch(() => props.activeUser, (newUser) => {
-    if (newUser) {
-        form.to_user_id = newUser.id;
-    }
-}, { immediate: true });
-
 </script>
 <template>
     <Chat>
         <ChatDetails>
             <SkeletonChatDetails v-if="isLoading" />
-            <div class="flex" v-else>
+            <div class="flex" v-else-if="activeUser">
                 <ChatAvatar :src="chats?.to_user_details?.avatar" />
                 <div class="flex flex-col justify-between ml-4">
                     <ChatName>{{ chats?.to_user_details?.first_name }} {{ chats?.to_user_details?.last_name }}
@@ -101,6 +106,9 @@ watch(() => props.activeUser, (newUser) => {
                     <ChatStatus v-if="isOnline(activeUser.id)" class="text-green-700">Online</ChatStatus>
                     <UserActiveStatus v-else :id="activeUser.id" />
                 </div>
+            </div>
+            <div v-else class="flex items-center justify-center text-gray-500">
+                <p>No active user selected</p>
             </div>
         </ChatDetails>
         <ChatContent ref="chatContent">

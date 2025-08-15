@@ -44,32 +44,39 @@ const interactedUsers = computed(() => {
 });
 
 const activeUser = computed(() => {
+    if (!interactedUsers.value || interactedUsers.value.length === 0) {
+        return null;
+    }
+    
     return data.activeChat ?
-        interactedUsers.value.find(user => user.id === data.activeChat)
+        interactedUsers.value.find(user => user.id === data.activeChat) || interactedUsers.value[0]
         : interactedUsers.value[0];
 });
 
 // Lifecycle hooks
 onMounted(() => {
-    if (interactedUsers?.length > 0) {
-        data.activeChat = interactedUsers[0].id;
+    if (interactedUsers.value?.length > 0) {
+        data.activeChat = interactedUsers.value[0].id;
         fetchChatData();
     }
 
     window.Echo.join('online-users')
         .here((users) => {
             // Handle initial list of online users
+            data.onlineUsers = []; // Clear existing array
             users.forEach(e => {
                 data.onlineUsers.push(e.id)
             });
         })
         .joining((user) => {
             // Handle when a new user comes online
-            data.onlineUsers.push(user.id)
+            if (!data.onlineUsers.includes(user.id)) {
+                data.onlineUsers.push(user.id);
+            }
         })
         .leaving((user) => {
             // Handle when a user goes offline
-            (async function updateLastActive() {
+            (async () => {
                 try {
                     await axios.post(`/api/update-last-active/${user.id}`);
                 } catch (error) {
@@ -78,7 +85,10 @@ onMounted(() => {
             })();
 
             setTimeout(() => {
-                data.onlineUsers.pop(user.id);
+                const index = data.onlineUsers.indexOf(user.id);
+                if (index > -1) {
+                    data.onlineUsers.splice(index, 1);
+                }
             }, 60000);
 
         })
@@ -87,9 +97,17 @@ onMounted(() => {
         });
 })
 
+// Computed for online status
+const isOnline = computed(() => {
+    return (userOrId) => {
+        const userId = typeof userOrId === 'object' ? userOrId.id : userOrId;
+        return data.onlineUsers.includes(userId);
+    };
+});
+
 // Provide
 provide('interactedUsers', interactedUsers);
-provide('isOnline', (activeUser) => data.onlineUsers.includes(activeUser.id));
+provide('isOnline', isOnline);
 </script>
 
 <template>
