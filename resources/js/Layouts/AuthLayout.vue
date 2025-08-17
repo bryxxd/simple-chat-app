@@ -40,18 +40,37 @@ function handleFilterChat(userID) {
 
 // Computed properties
 const interactedUsers = computed(() => {
+    return usePage().props.interactedUsers || [];
+});
+
+const users = computed(() => {
     return usePage().props.users || [];
 });
 
 const activeUser = computed(() => {
-    if (!interactedUsers.value || interactedUsers.value.length === 0) {
+    if (!data.activeChat) {
         return null;
     }
+        
+    // First try interactedUsers
+    if (interactedUsers.value && interactedUsers.value.length > 0) {
+        const foundUser = interactedUsers.value.find(user => user.id == data.activeChat);
+        if (foundUser) {
+            return foundUser;
+        }
+    }
     
-    return data.activeChat ?
-        interactedUsers.value.find(user => user.id === data.activeChat) || interactedUsers.value[0]
-        : interactedUsers.value[0];
+    // Then try all users
+    if (users.value && users.value.length > 0) {
+        const foundUser = users.value.find(user => user.id == data.activeChat);
+        if (foundUser) {
+            return foundUser;
+        }
+    }
+    
+    return null;
 });
+
 
 // Lifecycle hooks
 onMounted(() => {

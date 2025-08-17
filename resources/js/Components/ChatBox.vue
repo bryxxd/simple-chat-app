@@ -12,12 +12,12 @@ import { inject, onMounted, watch } from 'vue';
 const props = defineProps({
     chats: {
         type: Object,
-        required: true,
+        required: false,
         default: () => ({})
     },
     activeUser: {
         type: Object,
-        required: true,
+        required: false,
         default: () => ({})
     },
     isLoading: {
@@ -28,10 +28,12 @@ const props = defineProps({
 });
 
 // Form
-const form = useForm({
-    message: '',
-    to_user_id: props.activeUser?.id || ''
-});
+const form = {
+    to_user_id :  props.activeUser?.id || ''
+}
+
+// V-model
+const formInput = defineModel();
 
 // Inject
 const isOnline = inject('isOnline');
@@ -44,22 +46,22 @@ watch(() => props.activeUser, (newActiveUser) => {
 }, { immediate: true });
 
 // Methods
-function sendMessage() {
+async function sendMessage() {
     if (!form.to_user_id) {
         console.error('No active user selected');
         return;
     }
-    
-    form.post(route('messages.store'), {
-        preserveState: true,
-        onSuccess: () => {
-            // Message will be added via Echo listener, just clear the form
-            form.message = '';
-        },
-        onError: (errors) => {
-            console.log('Error sending message:', errors);
-        }
-    });
+
+    try {
+        await axios.post("/api/send-message", {
+           message : formInput.value,
+           to_user_id : form.to_user_id
+        })
+    } catch (err) {
+        console.log(err)
+    } finally {
+        formInput.value = '';
+    }
 }
 
 function isSender(chat) {
@@ -104,7 +106,7 @@ onMounted(() => {
                     <ChatName>{{ chats?.to_user_details?.first_name }} {{ chats?.to_user_details?.last_name }}
                     </ChatName>
                     <ChatStatus v-if="isOnline(activeUser.id)" class="text-green-700">Online</ChatStatus>
-                    <UserActiveStatus v-else :id="activeUser.id" />
+                    <!-- <UserActiveStatus v-else :id="activeUser.id" /> -->
                 </div>
             </div>
             <div v-else class="flex items-center justify-center text-gray-500">
@@ -124,7 +126,7 @@ onMounted(() => {
             </ChatList>
         </ChatContent>
         <ChatForm @submit.prevent="sendMessage" method="POST" v-if="!isLoading">
-            <Textarea placeholder="Type your message..." v-model="form.message" />
+            <Textarea placeholder="Type your message..." v-model="formInput" />
             <Button class="absolute right-[0.5rem] top-[0.7rem]" type="submit">Send
                 <Send />
             </Button>
