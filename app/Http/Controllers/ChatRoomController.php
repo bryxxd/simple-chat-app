@@ -36,7 +36,7 @@ class ChatRoomController extends Controller
             'message' => ['required', 'string'],
         ]);
 
-        ChatRoom::insert([
+        ChatRoom::create([
             'from_user_id' => Auth::id(),
             'to_user_id' => $request->to_user_id,
             'content' => $request->message,
