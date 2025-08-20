@@ -3,10 +3,10 @@ import { Chat, ChatContent, ChatDetails, ChatAvatar, ChatMessage, ChatName, Chat
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Send } from "lucide-vue-next";
-import { useForm, usePage } from "@inertiajs/vue3";
+import { usePage } from "@inertiajs/vue3";
 import UserActiveStatus from './UserActiveStatus.vue';
 import { SkeletonChatDetails, SkeletonChatList } from '@/components/ui/skeleton';
-import { inject, onMounted, watch } from 'vue';
+import { computed, inject, watch } from 'vue';
 
 // Props 
 const props = defineProps({
@@ -29,7 +29,7 @@ const props = defineProps({
 
 // Form
 const form = {
-    to_user_id :  props.activeUser?.id || ''
+    to_user_id: props.activeUser?.id || ''
 }
 
 // V-model
@@ -38,12 +38,8 @@ const formInput = defineModel();
 // Inject
 const isOnline = inject('isOnline');
 
-// Watch for activeUser changes
-watch(() => props.activeUser, (newActiveUser) => {
-    if (newActiveUser?.id) {
-        form.to_user_id = newActiveUser.id;
-    }
-}, { immediate: true });
+// Computed
+const authUser = computed(() => usePage().props.auth.user || {});
 
 // Methods
 async function sendMessage() {
@@ -51,11 +47,10 @@ async function sendMessage() {
         console.error('No active user selected');
         return;
     }
-
     try {
         await axios.post("/api/send-message", {
-           message : formInput.value,
-           to_user_id : form.to_user_id
+            message: formInput.value,
+            to_user_id: form.to_user_id
         })
     } catch (err) {
         console.log(err)
@@ -74,27 +69,12 @@ function getUserAvatar(chat) {
         : props.chats.to_user_details.avatar;
 }
 
-// Computed
-const authUser = usePage().props.auth.user;
-
-// Mounted
-onMounted(() => {
-    window.Echo.private('new-messages.' + authUser.id)
-        .listen('NewMessageEvent', e => {
-            const isMessageForCurrentChat =
-                (e.from_user_id === authUser.id && e.to_user_id === props.activeUser?.id) ||
-                (e.from_user_id === props.activeUser?.id && e.to_user_id === authUser.id);
-
-            if (isMessageForCurrentChat) {
-                props.chats.messages.push({
-                    content: e.content,
-                    from_user_id: e.from_user_id,
-                    to_user_id: e.to_user_id
-                });
-            }
-        });
-});
-
+// Watch for activeUser changes
+watch(() => props.activeUser, (newActiveUser) => {
+    if (newActiveUser?.id) {
+        form.to_user_id = newActiveUser.id;
+    }
+}, { immediate: true });
 </script>
 <template>
     <Chat>
@@ -106,7 +86,7 @@ onMounted(() => {
                     <ChatName>{{ chats?.to_user_details?.first_name }} {{ chats?.to_user_details?.last_name }}
                     </ChatName>
                     <ChatStatus v-if="isOnline(activeUser.id)" class="text-green-700">Online</ChatStatus>
-                    <!-- <UserActiveStatus v-else :id="activeUser.id" /> -->
+                    <UserActiveStatus v-else :id="activeUser.id" />
                 </div>
             </div>
             <div v-else class="flex items-center justify-center text-gray-500">

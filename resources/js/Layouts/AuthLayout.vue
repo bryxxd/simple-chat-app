@@ -33,9 +33,23 @@ async function fetchChatData() {
     }
 };
 
-function handleFilterChat(userID) {
+function newMessage(from_user_id, to_user_id, content) {
+    const isMessageForCurrentChat =
+        (from_user_id === usePage().props.auth.user.id && to_user_id === data.activeChat) ||
+        (from_user_id === data.activeChat && to_user_id === usePage().props.auth.user.id);
+
+    if (isMessageForCurrentChat) {
+        data.chat_data.messages.push({
+            content: content,
+            from_user_id: from_user_id,
+            to_user_id: to_user_id
+        })
+    }
+}
+
+async function handleFilterChat(userID) {
     data.activeChat = userID;
-    fetchChatData();
+    await fetchChatData();
 }
 
 // Computed properties
@@ -51,7 +65,7 @@ const activeUser = computed(() => {
     if (!data.activeChat) {
         return null;
     }
-        
+
     // First try interactedUsers
     if (interactedUsers.value && interactedUsers.value.length > 0) {
         const foundUser = interactedUsers.value.find(user => user.id == data.activeChat);
@@ -59,7 +73,7 @@ const activeUser = computed(() => {
             return foundUser;
         }
     }
-    
+
     // Then try all users
     if (users.value && users.value.length > 0) {
         const foundUser = users.value.find(user => user.id == data.activeChat);
@@ -67,8 +81,15 @@ const activeUser = computed(() => {
             return foundUser;
         }
     }
-    
+
     return null;
+});
+
+const isOnline = computed(() => {
+    return (userOrId) => {
+        const userId = typeof userOrId === 'object' ? userOrId.id : userOrId;
+        return data.onlineUsers.includes(userId);
+    };
 });
 
 
@@ -78,6 +99,11 @@ onMounted(() => {
         data.activeChat = interactedUsers.value[0].id;
         fetchChatData();
     }
+
+    window.Echo.private('new-messages.' + usePage().props.auth.user.id)
+        .listen('NewMessageEvent', e => {
+            newMessage(e.from_user_id, e.to_user_id, e.content);
+        });
 
     window.Echo.join('online-users')
         .here((users) => {
@@ -115,14 +141,6 @@ onMounted(() => {
             console.error('Error in presence channel:', error);
         });
 })
-
-// Computed for online status
-const isOnline = computed(() => {
-    return (userOrId) => {
-        const userId = typeof userOrId === 'object' ? userOrId.id : userOrId;
-        return data.onlineUsers.includes(userId);
-    };
-});
 
 // Provide
 provide('interactedUsers', interactedUsers);

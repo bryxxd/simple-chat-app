@@ -32,6 +32,17 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
+        $interactedUsers = User::join('chat_rooms', function ($join) {
+            $join->on('users.id', '=', 'chat_rooms.to_user_id')
+                ->where('chat_rooms.from_user_id', '=', Auth::id())
+                ->orOn('users.id', '=', 'chat_rooms.from_user_id')
+                ->where('chat_rooms.to_user_id', '=', Auth::id());
+        })
+            ->select('users.id', 'users.first_name', 'users.last_name', 'users.username', 'users.avatar')
+            ->where('users.id', '!=', Auth::id())
+            ->distinct()
+            ->get();
+
         return [
             ...parent::share($request),
             'auth' => [
@@ -42,18 +53,7 @@ class HandleInertiaRequests extends Middleware
                 'info' => $request->session()->get('info')
             ],
             'users' => Auth::check() ? User::select('id', 'first_name', 'last_name', 'email', 'avatar')->where('id', '!=', auth()->id())->get() : [],
-            'interactedUsers' => Auth::check() ?
-                User::join('chat_rooms', function ($join) {
-                    $join->on('users.id', '=', 'chat_rooms.to_user_id')
-                        ->where('chat_rooms.from_user_id', '=', Auth::id())
-                        ->orOn('users.id', '=', 'chat_rooms.from_user_id')
-                        ->where('chat_rooms.to_user_id', '=', Auth::id());
-                })
-                ->select('users.id', 'users.first_name', 'users.last_name', 'users.username', 'users.avatar')
-                ->where('users.id', '!=', Auth::id())
-                ->distinct()
-                ->get()
-                : [],
+            'interactedUsers' => Auth::check() ? $interactedUsers : [],
         ];
     }
 }
