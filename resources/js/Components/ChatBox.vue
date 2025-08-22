@@ -60,12 +60,12 @@ async function sendMessage() {
 }
 
 function isSender(chat) {
-    return authUser && chat.from_user_id === authUser.id;
+    return authUser.value && chat.from_user_id === authUser.value.id;
 }
 
 function getUserAvatar(chat) {
-    return authUser && chat.from_user_id === authUser.id
-        ? authUser.avatar
+    return authUser.value && chat.from_user_id === authUser.value.id
+        ? authUser.value.avatar
         : props.chats.to_user_details.avatar;
 }
 

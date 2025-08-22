@@ -57,6 +57,7 @@ class HandleInertiaRequests extends Middleware
                 )'));
             })
             ->select('users.id', 'users.first_name', 'users.last_name', 'users.username', 'users.avatar', 'last_message.content', 'last_message.created_at')
+            ->orderBy('last_message.created_at', 'desc')
             ->where('users.id', '!=', Auth::id())
             ->get();
 
