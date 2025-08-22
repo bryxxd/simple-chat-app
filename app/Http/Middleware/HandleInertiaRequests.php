@@ -32,34 +32,39 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
-        $interactedUsers = DB::table('users')
-            ->whereExists(function ($query) {
-                $query->select(DB::raw(1))
-                    ->from('chat_rooms')
-                    ->where(function ($q) {
-                        $q->where('chat_rooms.from_user_id', Auth::id())
-                            ->whereColumn('chat_rooms.to_user_id', 'users.id');
-                    })
-                    ->orWhere(function ($q) {
-                        $q->where('chat_rooms.to_user_id', Auth::id())
-                            ->whereColumn('chat_rooms.from_user_id', 'users.id');
-                    });
-            })
-            ->leftJoin('chat_rooms as last_message', function ($join) {
-                $join->on('last_message.id', '=', DB::raw('(
-                    SELECT id FROM chat_rooms 
-                    WHERE (
-                        (from_user_id = ' . Auth::id() . ' AND to_user_id = users.id) OR 
-                        (from_user_id = users.id AND to_user_id = ' . Auth::id() . ')
-                    ) 
-                    ORDER BY created_at DESC 
-                    LIMIT 1
-                )'));
-            })
-            ->select('users.id', 'users.first_name', 'users.last_name', 'users.username', 'users.avatar', 'last_message.content', 'last_message.created_at')
-            ->orderBy('last_message.created_at', 'desc')
-            ->where('users.id', '!=', Auth::id())
-            ->get();
+        $interactedUsers = [];
+        
+        if (Auth::check()) {
+            $userId = Auth::id();
+            $interactedUsers = DB::table('users')
+                ->whereExists(function ($query) use ($userId) {
+                    $query->select(DB::raw(1))
+                        ->from('chat_rooms')
+                        ->where(function ($q) use ($userId) {
+                            $q->where('chat_rooms.from_user_id', $userId)
+                                ->whereColumn('chat_rooms.to_user_id', 'users.id');
+                        })
+                        ->orWhere(function ($q) use ($userId) {
+                            $q->where('chat_rooms.to_user_id', $userId)
+                                ->whereColumn('chat_rooms.from_user_id', 'users.id');
+                        });
+                })
+                ->leftJoin('chat_rooms as last_message', function ($join) use ($userId) {
+                    $join->on('last_message.id', '=', DB::raw("(
+                        SELECT id FROM chat_rooms 
+                        WHERE (
+                            (from_user_id = {$userId} AND to_user_id = users.id) OR 
+                            (from_user_id = users.id AND to_user_id = {$userId})
+                        ) 
+                        ORDER BY created_at DESC 
+                        LIMIT 1
+                    )"));
+                })
+                ->select('users.id', 'users.first_name', 'users.last_name', 'users.username', 'users.avatar', 'last_message.content', 'last_message.created_at')
+                ->orderBy('last_message.created_at', 'desc')
+                ->where('users.id', '!=', $userId)
+                ->get();
+        }
 
         return [
             ...parent::share($request),
@@ -71,7 +76,7 @@ class HandleInertiaRequests extends Middleware
                 'info' => $request->session()->get('info')
             ],
             'users' => Auth::check() ? User::select('id', 'first_name', 'last_name', 'email', 'avatar')->where('id', '!=', Auth::id())->get() : [],
-            'interactedUsers' => Auth::check() ? $interactedUsers : [],
+            'interactedUsers' => $interactedUsers,
         ];
     }
 }
