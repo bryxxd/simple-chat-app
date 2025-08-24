@@ -9,54 +9,74 @@ import {
 } from "@/Components/ui/sidebar";
 import { usePage, Head } from "@inertiajs/vue3";
 import axios from "axios";
-import { reactive, computed, onMounted, provide } from "vue";
+import { reactive, computed, onMounted, provide, watchEffect } from "vue";
 
 // Data / Reactive state
 const data = reactive({
     activeChat: null,
-    chat_data: {},
-    isLoading: false,
-    onlineUsers: []
+    messagesData: {},
+    onlineUsers: [],
+    interactedUsers: [],
 });
 
-// Methods 
-async function fetchChatData() {
-    if (!data.activeChat) return;
-    try {
-        data.isLoading = true;
-        const res = await axios.get(`/api/chat-room/${data.activeChat}`);
-        data.chat_data = res.data;
-    } catch (error) {
-        console.log('Error fetching chat room:', error);
-    } finally {
-        data.isLoading = false;
-    }
-};
-
-function newMessage(from_user_id, to_user_id, content) {
+// Functions
+function addMessage(from_user_id, to_user_id, content) {
     const isMessageForCurrentChat =
         (from_user_id === usePage().props.auth.user.id && to_user_id === data.activeChat) ||
         (from_user_id === data.activeChat && to_user_id === usePage().props.auth.user.id);
 
     if (isMessageForCurrentChat) {
-        data.chat_data.messages.push({
+        data.messagesData.messages.push({
             content: content,
             from_user_id: from_user_id,
             to_user_id: to_user_id
-        })
+        });
+        return true; // Message was added
+    }
+    return false; // Message was not for current chat
+}
+
+function handleIncomingMessage(from_user_id, to_user_id, content) {
+    const messageAdded = addMessage(from_user_id, to_user_id, content);
+
+    if (messageAdded) {
+        const targetUserId = from_user_id === usePage().props.auth.user.id ? to_user_id : from_user_id;
+        moveUserToTop({ targetUserId, content });
     }
 }
 
-async function handleFilterChat(userID) {
+function moveUserToTop(newMsg) {
+    const userIndex = data.interactedUsers.findIndex(({ id }) => id === newMsg.targetUserId);
+
+    if (userIndex !== -1) {
+        const [user] = data.interactedUsers.splice(userIndex, 1);
+        // Preserve all existing properties and update specific ones
+        const updatedUser = {
+            ...user,
+            content: newMsg.content,
+            created_at: new Date().toISOString()
+        };
+        data.interactedUsers.unshift(updatedUser);
+    } else {
+        // If user not found in interactedUsers, find them in all users and add them
+        const userFromAllUsers = users.value.find(user => user.id === newMsg.targetUserId);
+        // Add the content property when adding new user
+        if (userFromAllUsers) {
+            const newUser = {
+                ...userFromAllUsers,
+                content: newMsg.content || "",
+                created_at: new Date().toISOString()
+            };
+            data.interactedUsers.unshift(newUser);
+        }
+    }
+}
+
+function handleFilterChat(userID) {
     data.activeChat = userID;
-    await fetchChatData();
 }
 
 // Computed properties
-const interactedUsers = computed(() => {
-    return usePage().props.interactedUsers || [];
-});
-
 const users = computed(() => {
     return usePage().props.users || [];
 });
@@ -67,8 +87,8 @@ const activeUser = computed(() => {
     }
 
     // First try interactedUsers
-    if (interactedUsers.value && interactedUsers.value.length > 0) {
-        const foundUser = interactedUsers.value.find(user => user.id == data.activeChat);
+    if (data.interactedUsers && data.interactedUsers.length > 0) {
+        const foundUser = data.interactedUsers.find(user => user.id == data.activeChat);
         if (foundUser) {
             return foundUser;
         }
@@ -95,14 +115,22 @@ const isOnline = computed(() => {
 
 // Lifecycle hooks
 onMounted(() => {
-    if (interactedUsers.value?.length > 0) {
-        data.activeChat = interactedUsers.value[0].id;
-        fetchChatData();
+    if (usePage().props.interactedUsers.length !== 0) {
+        data.interactedUsers.push(...usePage().props.interactedUsers)
+
+    }
+
+    if (!data.activeChat && usePage().props.interactedUsers.length !== 0) {
+        data.activeChat = usePage().props.interactedUsers[0].id
     }
 
     window.Echo.private('new-messages.' + usePage().props.auth.user.id)
         .listen('NewMessageEvent', e => {
-            newMessage(e.from_user_id, e.to_user_id, e.content);
+            handleIncomingMessage(e.from_user_id, e.to_user_id, e.content);
+            moveUserToTop({
+                targetUserId: e.from_user_id,
+                content: e.content
+            });
         });
 
     window.Echo.join('online-users')
@@ -142,9 +170,16 @@ onMounted(() => {
         });
 })
 
+// watchEffect
+watchEffect(async () => {
+    const res = await axios.get(`/api/chat-room/${data.activeChat}`);
+    data.messagesData = res.data;
+})
+
 // Provide
-provide('interactedUsers', interactedUsers);
+provide('interactedUsers', data.interactedUsers);
 provide('isOnline', isOnline);
+provide('moveUserToTop', moveUserToTop)
 </script>
 
 <template>
@@ -162,7 +197,7 @@ provide('isOnline', isOnline);
             </header>
             <div>
                 <slot>
-                    <ChatBox :isLoading="data.isLoading" :chats="data.chat_data" :activeUser="activeUser" />
+                    <ChatBox :chats="data.messagesData" :activeUser="activeUser" />
                 </slot>
             </div>
         </SidebarInset>

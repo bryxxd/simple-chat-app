@@ -69,7 +69,7 @@ class ChatRoomController extends Controller
 
         return response()->json([
             'messages' => $chatQuery,
-            'to_user_details' => $to_user_details,
+            'participant' => $to_user_details,
         ]);
     }
 
