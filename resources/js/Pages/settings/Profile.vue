@@ -2,7 +2,7 @@
 import AuthLayout from "@/Layouts/AuthLayout.vue";
 import Settings from "@/Layouts/settings/Layout.vue";
 import ProfilePicture from "@/Components/ProfilePicture.vue";
-import { Input, InputError } from "@/Components/ui/input";
+import { Input, InputStatusMessage } from "@/Components/ui/input";
 import { Button } from '@/Components/ui/button';
 import { Label } from '@/Components/ui/label';
 import Divider from "@/Components/Divider.vue";
@@ -46,25 +46,25 @@ const submit = () => {
                     <div>
                         <Label for="first_name" class="block text-sm font-medium">First Name</Label>
                         <Input v-model="form.first_name" id="first_name" />
-                        <InputError v-if="form.errors.first_name" class="pt-2" :message="form.errors.first_name" />
+                        <InputStatusMessage v-if="form.errors.first_name" class="pt-2" :message="form.errors.first_name" />
                     </div>
                     <div>
                         <Label for="last_name" class="block text-sm font-medium">Last Name</Label>
                         <Input v-model="form.last_name" id="last_name" />
-                        <InputError v-if="form.errors.last_name" class="pt-2" :message="form.errors.last_name" />
+                        <InputStatusMessage v-if="form.errors.last_name" class="pt-2" :message="form.errors.last_name" />
                     </div>
                 </div>
 
                 <div>
                     <Label for="username" class="block text-sm font-medium">Username</Label>
                     <Input v-model="form.username" id="username" />
-                    <InputError v-if="form.errors.username" class="pt-2" :message="form.errors.username" />
+                    <InputStatusMessage v-if="form.errors.username" class="pt-2" :message="form.errors.username" />
                 </div>
 
                 <div>
                     <Label for="email" class="block text-sm font-medium">Email</Label>
                     <Input v-model="form.email" id="email" />
-                    <InputError v-if="form.errors.email" class="pt-2" :message="form.errors.email" />
+                    <InputStatusMessage v-if="form.errors.email" class="pt-2" :message="form.errors.email" />
                 </div>
 
                 <div>

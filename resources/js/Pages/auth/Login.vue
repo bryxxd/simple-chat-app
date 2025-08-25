@@ -1,11 +1,12 @@
 <script setup>
-import { Head, Link, useForm } from '@inertiajs/vue3';
+import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
 import GuestLayout from '@/Layouts/GuestLayout.vue';
 import { Button } from '@/components/ui/button';
 import { Card, CardTitle, CardContent, CardHeader, CardDescription } from '@/components/ui/card';
-import { Input, InputError } from '@/components/ui/input';
+import { Input, InputStatusMessage } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
+const page = usePage();
 const form = useForm({
     username: '',
     password: ''
@@ -31,31 +32,24 @@ const submit = () => {
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
+                    <InputStatusMessage v-if="page.props.flash?.success" :message="page.props.flash.success" variant="success" class="mb-6" />
                     <form @submit.prevent="submit" method="POST" class="grid gap-4">
                         <div class="grid gap-2">
                             <Label for="username">Username</Label>
-                            <Input 
-                                id="username" 
-                                type="text" 
-                                v-model="form.username" 
-                                :class="{'border-red-500': form.errors.username}" 
-                            />
-                            <InputError v-if="form.errors.username" :message="form.errors.username" />
+                            <Input id="username" type="text" v-model="form.username"
+                                :class="{ 'border-red-500': form.errors.username }" />
+                            <InputStatusMessage v-if="form.errors.username" :message="form.errors.username" />
                         </div>
                         <div class="grid gap-2">
                             <div class="flex items-center">
                                 <Label for="password">Password</Label>
-                                <Link :href="route('forgot.password')" class="ml-auto inline-block text-sm underline">
-                                    Forgot your password?
+                                <Link :href="route('password.request')" class="ml-auto inline-block text-sm underline">
+                                Forgot your password?
                                 </Link>
                             </div>
-                            <Input 
-                                id="password" 
-                                type="password" 
-                                v-model="form.password" 
-                                :class="{'border-red-500': form.errors.password}" 
-                            />
-                            <InputError v-if="form.errors.password" :message="form.errors.password" />
+                            <Input id="password" type="password" v-model="form.password"
+                                :class="{ 'border-red-500': form.errors.password }" />
+                            <InputStatusMessage v-if="form.errors.password" :message="form.errors.password" />
                         </div>
                         <Button type="submit" class="w-full">
                             <span>Login</span>
@@ -80,7 +74,7 @@ const submit = () => {
                     <div class="mt-4 text-center text-sm">
                         Don't have an account?
                         <Link :href="route('signup.index')" class="underline">
-                            Sign up
+                        Sign up
                         </Link>
                     </div>
                 </CardContent>

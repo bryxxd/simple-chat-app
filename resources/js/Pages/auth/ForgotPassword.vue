@@ -9,16 +9,22 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
-import { Input, InputError } from '@/components/ui/input';
+import { Input, InputStatusMessage } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Link } from '@inertiajs/vue3';
+import { Link, usePage } from '@inertiajs/vue3';
+
+const page = usePage();
 
 const form = useForm({
-    email : ''
+    email: ''
 });
 
 const submit = () => {
-    form.post(route('forgot.password.store'));
+    form.post(route('password.email'), {
+        onSuccess: () => {
+            form.email = ''
+        }
+    });
 };
 </script>
 
@@ -40,7 +46,8 @@ const submit = () => {
                             <Label for="email">Email</Label>
                             <Input id="email" type="email" v-model="form.email"
                                 :class="{ 'border-red-500': form.errors.email }" />
-                            <InputError v-if="form.errors.email" :message="form.errors.email" />
+                            <InputStatusMessage v-if="form.errors.email" :message="form.errors.email" />
+                            <InputStatusMessage v-if="page.props.flash?.success" :message="page.props.flash.success" variant="success" />
                         </div>
                         <Button type="submit" class="w-full">Send</Button>
                     </div>

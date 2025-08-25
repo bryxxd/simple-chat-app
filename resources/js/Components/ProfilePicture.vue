@@ -5,7 +5,7 @@ import 'vue-advanced-cropper/dist/style.css';
 import { AlertDialog, AlertDialogContent, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogTrigger, AlertDialogAction, AlertDialogCancel } from '@/Components/ui/alert-dialog';
 import { Avatar, AvatarImage } from '@/Components/ui/avatar';
 import { Pencil, LoaderCircle } from 'lucide-vue-next';
-import { Input, InputError } from '@/Components/ui/input';
+import { Input, InputStatusMessage } from '@/Components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/Components/ui/label';
 import { router } from '@inertiajs/vue3';
@@ -181,7 +181,7 @@ const handleUpdateAvatar = () => {
                 </div>
                 <AlertDialogDescription v-if="!isCroppingFinished" class="w-full text-center">
                     JPG and PNG up to 5MB
-                    <InputError v-if="validationErrors" :message="validationErrors.image" />
+                    <InputStatusMessage v-if="validationErrors" :message="validationErrors.image" />
                 </AlertDialogDescription>
                 <AlertDialogFooter class="sm:justify-center">
                     <AlertDialogCancel @click="handleCancelUpload">Cancel</AlertDialogCancel>
