@@ -47,7 +47,8 @@ const submit = () => {
                             <Input id="email" type="email" v-model="form.email"
                                 :class="{ 'border-red-500': form.errors.email }" />
                             <InputStatusMessage v-if="form.errors.email" :message="form.errors.email" />
-                            <InputStatusMessage v-if="page.props.flash?.success" :message="page.props.flash.success" variant="success" />
+                            <InputStatusMessage v-if="page.props.flash?.success" :message="page.props.flash.success"
+                                variant="success" />
                         </div>
                         <Button type="submit" class="w-full">Send</Button>
                     </div>

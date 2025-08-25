@@ -36,7 +36,7 @@ const submit = () => {
 
 <template>
 
-    <Head title="Forgot Password" />
+    <Head title="Reset Password" />
     <GuestLayout>
         <Card class="mx-auto max-w-sm">
             <CardHeader>

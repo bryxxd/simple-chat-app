@@ -6,7 +6,10 @@ use App\Models\User;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Auth\Events\Registered;
 
 class RegisteredUserController extends Controller
 {
@@ -21,7 +24,7 @@ class RegisteredUserController extends Controller
     /**
      * Handle an incoming registration request.
      */
-    public function store(Request $request)
+    public function store(Request $request): RedirectResponse 
     {
         // 
         $request->validate([
@@ -34,7 +37,7 @@ class RegisteredUserController extends Controller
         ]);
 
         // Create the user
-        User::create([
+        $user = User::create([
             'first_name' => $request->first_name,
             'last_name' => $request->last_name,
             'email' => $request->email,
@@ -42,6 +45,10 @@ class RegisteredUserController extends Controller
             'password' => Hash::make($request->password)
         ]);
 
-        return to_route('signup.index')->with('success', 'Account created successfully!');
+        event(new Registered($user));
+
+        Auth::login($user);
+
+        return redirect()->intended(route('dashboard', absolute: false));
     }
 }
