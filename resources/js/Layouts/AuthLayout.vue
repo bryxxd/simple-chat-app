@@ -14,7 +14,7 @@ import { reactive, computed, onMounted, provide, watchEffect } from "vue";
 // Data / Reactive state
 const data = reactive({
     activeChat: null,
-    messagesData: {},
+    messagesData: { messages: [] },
     onlineUsers: [],
     interactedUsers: [],
 });
@@ -25,7 +25,7 @@ function addMessage(from_user_id, to_user_id, content) {
         (from_user_id === usePage().props.auth.user.id && to_user_id === data.activeChat) ||
         (from_user_id === data.activeChat && to_user_id === usePage().props.auth.user.id);
 
-    if (isMessageForCurrentChat) {
+    if (isMessageForCurrentChat && data.messagesData.messages) {
         data.messagesData.messages.push({
             content: content,
             from_user_id: from_user_id,
@@ -88,7 +88,7 @@ const activeUser = computed(() => {
 
     // First try interactedUsers
     if (data.interactedUsers && data.interactedUsers.length > 0) {
-        const foundUser = data.interactedUsers.find(user => user.id == data.activeChat);
+        const foundUser = data.interactedUsers.find(user => user.id === data.activeChat);
         if (foundUser) {
             return foundUser;
         }
@@ -96,7 +96,7 @@ const activeUser = computed(() => {
 
     // Then try all users
     if (users.value && users.value.length > 0) {
-        const foundUser = users.value.find(user => user.id == data.activeChat);
+        const foundUser = users.value.find(user => user.id === data.activeChat);
         if (foundUser) {
             return foundUser;
         }
@@ -127,10 +127,6 @@ onMounted(() => {
     window.Echo.private('new-messages.' + usePage().props.auth.user.id)
         .listen('NewMessageEvent', e => {
             handleIncomingMessage(e.from_user_id, e.to_user_id, e.content);
-            moveUserToTop({
-                targetUserId: e.from_user_id,
-                content: e.content
-            });
         });
 
     window.Echo.join('online-users')
@@ -172,8 +168,16 @@ onMounted(() => {
 
 // watchEffect
 watchEffect(async () => {
-    const res = await axios.get(`/api/chat-room/${data.activeChat}`);
-    data.messagesData = res.data;
+    if (!data.activeChat) return;
+    
+    try {
+        const res = await axios.get(`/api/chat-room/${data.activeChat}`);
+        data.messagesData = res.data;
+    } catch (error) {
+        console.error('Error loading chat messages:', error);
+        // Initialize with empty messages array on error
+        data.messagesData = { messages: [] };
+    }
 })
 
 // Provide
