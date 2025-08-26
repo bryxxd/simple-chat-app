@@ -20,7 +20,7 @@ const data = reactive({
 });
 
 // Functions
-function addMessage(from_user_id, to_user_id, content) {
+function handleIncomingMessage(from_user_id, to_user_id, content) {
     const isMessageForCurrentChat =
         (from_user_id === usePage().props.auth.user.id && to_user_id === data.activeChat) ||
         (from_user_id === data.activeChat && to_user_id === usePage().props.auth.user.id);
@@ -31,17 +31,6 @@ function addMessage(from_user_id, to_user_id, content) {
             from_user_id: from_user_id,
             to_user_id: to_user_id
         });
-        return true; // Message was added
-    }
-    return false; // Message was not for current chat
-}
-
-function handleIncomingMessage(from_user_id, to_user_id, content) {
-    const messageAdded = addMessage(from_user_id, to_user_id, content);
-
-    if (messageAdded) {
-        const targetUserId = from_user_id === usePage().props.auth.user.id ? to_user_id : from_user_id;
-        moveUserToTop({ targetUserId, content });
     }
 }
 
@@ -127,6 +116,13 @@ onMounted(() => {
     window.Echo.private('new-messages.' + usePage().props.auth.user.id)
         .listen('NewMessageEvent', e => {
             handleIncomingMessage(e.from_user_id, e.to_user_id, e.content);
+            
+            // Always update the user list, regardless of active chat
+            const targetUserId = e.from_user_id === usePage().props.auth.user.id ? e.to_user_id : e.from_user_id;
+            moveUserToTop({
+                targetUserId: targetUserId,
+                content: e.content
+            });
         });
 
     window.Echo.join('online-users')

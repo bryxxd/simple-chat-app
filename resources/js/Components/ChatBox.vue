@@ -80,6 +80,7 @@ function getUserAvatar(chat) {
         : props.chats.participant.avatar;
 }
 
+
 // Watch for activeUser changes
 watch(() => props.activeUser, (newActiveUser) => {
     if (newActiveUser?.id) {
@@ -93,10 +94,9 @@ watch(() => props.activeUser, (newActiveUser) => {
             <div class="flex">
                 <ChatAvatar :src="chats?.participant?.avatar" />
                 <div class="flex flex-col justify-between ml-4">
-                    <ChatName>{{ chats?.participant?.first_name }} {{ chats?.participant?.last_name }}
-                    </ChatName>
-                    <ChatStatus v-if="isOnline(activeUser?.id)" class="text-green-700">Online</ChatStatus>
-                    <UserActiveStatus v-else :id="activeUser?.id" />
+                    <ChatName>{{ chats?.participant?.first_name }} {{ chats?.participant?.last_name }}</ChatName>
+                    <ChatStatus v-if="isOnline(props.activeUser?.id)" class="text-green-700">Online</ChatStatus>
+                    <UserActiveStatus v-else :id="props.activeUser?.id" />
                 </div>
             </div>
         </ChatDetails>
