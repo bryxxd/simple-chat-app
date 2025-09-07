@@ -3,7 +3,7 @@ import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
 import GuestLayout from '@/Layouts/GuestLayout.vue';
 import { Button } from '@/components/ui/button';
 import { Card, CardTitle, CardContent, CardHeader, CardDescription } from '@/components/ui/card';
-import { Input, InputStatusMessage } from '@/components/ui/input';
+import { Input, InputStatusMessage } from '@/Components/ui/customInput';
 import { Label } from '@/components/ui/label';
 
 const page = usePage();

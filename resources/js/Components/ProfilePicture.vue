@@ -5,7 +5,7 @@ import 'vue-advanced-cropper/dist/style.css';
 import { AlertDialog, AlertDialogContent, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogTrigger, AlertDialogAction, AlertDialogCancel } from '@/Components/ui/alert-dialog';
 import { Avatar, AvatarImage } from '@/Components/ui/avatar';
 import { Pencil, LoaderCircle } from 'lucide-vue-next';
-import { Input, InputStatusMessage } from '@/Components/ui/input';
+import { Input, InputStatusMessage } from '@/Components/ui/customInput';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/Components/ui/label';
 import { router } from '@inertiajs/vue3';

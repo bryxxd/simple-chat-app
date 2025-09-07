@@ -9,7 +9,7 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
-import { InputStatusMessage } from "@/components/ui/input";
+import { InputStatusMessage } from "@/Components/ui/customInput";
 
 const page = usePage();
 

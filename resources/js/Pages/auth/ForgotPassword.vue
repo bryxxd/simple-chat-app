@@ -9,7 +9,7 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
-import { Input, InputStatusMessage } from '@/components/ui/input';
+import { Input, InputStatusMessage } from '@/Components/ui/customInput';
 import { Label } from '@/components/ui/label';
 import { Link, usePage } from '@inertiajs/vue3';
 

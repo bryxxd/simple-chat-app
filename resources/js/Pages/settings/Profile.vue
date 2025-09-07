@@ -2,7 +2,7 @@
 import AuthLayout from "@/Layouts/AuthLayout.vue";
 import Settings from "@/Layouts/settings/Layout.vue";
 import ProfilePicture from "@/Components/ProfilePicture.vue";
-import { Input, InputStatusMessage } from "@/Components/ui/input";
+import { Input, InputStatusMessage } from "@/Components/ui/customInput";
 import { Button } from '@/Components/ui/button';
 import { Label } from '@/Components/ui/label';
 import Divider from "@/Components/Divider.vue";
