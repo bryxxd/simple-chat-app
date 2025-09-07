@@ -1,5 +1,5 @@
 <script setup>
-import { inject } from 'vue';
+import { computed, inject } from 'vue';
 import { Link } from "@inertiajs/vue3";
 import SearchUser from "@/components/SearchUser.vue";
 import {
@@ -10,8 +10,7 @@ import {
     SidebarHeader,
 } from "@/components/ui/sidebar";
 import Room from "@/components/Room.vue";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
+import EmptyRoom from '@/Components/EmptyRoom.vue';
 
 // Props
 const props = defineProps({
@@ -32,6 +31,11 @@ function setActiveChat(id) {
     emit("set-active-chat", id);
 }
 
+const hasInteraction = computed(() => {
+    return interactedUsers && interactedUsers.length > 0 ? true : false
+})
+
+
 </script>
 
 <template>
@@ -40,19 +44,20 @@ function setActiveChat(id) {
             <SidebarHeader class="gap-3.5 border-b p-4">
                 <div class="flex w-full items-center justify-between">
                     <Link :href="route('dashboard')" class="text-base font-medium text-foreground">Logo</Link>
-                    <Label class="flex items-center gap-2 text-sm">
-                        <span>Unreads</span>
-                        <Switch class="shadow-none" />
-                    </Label>
                 </div>
                 <!-- Search User -->
                 <SearchUser @set-active-chat="setActiveChat" />
             </SidebarHeader>
-            <SidebarContent>
+            <SidebarContent :class="{ 'justify-center' : !hasInteraction}">
                 <SidebarGroup class="px-0">
                     <SidebarGroupContent>
-                        <Room v-for="user in interactedUsers" :key="user.id" :user="user"
-                            @click="setActiveChat(user.id)"></Room>
+                        <template v-if="hasInteraction">
+                            <Room v-for="user in interactedUsers" :key="user.id" :user="user"
+                                @click="setActiveChat(user.id)" />
+                        </template>
+                        <template v-else>
+                            <EmptyRoom />
+                        </template>
                     </SidebarGroupContent>
                 </SidebarGroup>
             </SidebarContent>
