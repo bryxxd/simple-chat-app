@@ -11,12 +11,25 @@ import { usePage, Head } from "@inertiajs/vue3";
 import axios from "axios";
 import { ref, computed, onMounted, provide, watchEffect } from "vue";
 import EmptyChatBox from "@/Components/EmptyChatBox.vue";
+import StartConversation from "@/Components/StartConversation.vue";
 
 // Data / Reactive state
 const activeChat = ref(null);
 const onlineUsers = ref([]);
 const interactedUsers = ref([]);
 const messagesData = ref({ messages: []});
+
+// No interaction components
+const currentNoInteractionTab = ref('EmptyChatBox');
+const noInteractionTabs =  {
+    EmptyChatBox,
+    StartConversation
+}
+function switchNoInteractionTab(tabName) {
+    if (noInteractionTabs[tabName]) {
+        currentNoInteractionTab.value = tabName;
+    }
+}
 
 // Handle incoming messages
 function handleIncomingMessage(from_user_id, to_user_id, content) {
@@ -195,6 +208,7 @@ watchEffect(async () => {
 provide("interactedUsers", interactedUsers.value);
 provide("isOnline", isOnline);
 provide("moveUserToTop", moveUserToTop);
+provide('noInteractionTabs', { noInteractionTabs, switchNoInteractionTab });
 </script>
 
 <template>
@@ -210,16 +224,15 @@ provide("moveUserToTop", moveUserToTop);
                 </div>
                 <NavUser class="w-[3rem] md:w-[2rem]" />
             </header>
-            <div>
                 <slot>
                     <template v-if="interactedUsers.value && interactedUsers.value.length > 0 || activeUser">
                         <ChatBox :chats="messagesData" :activeUser="activeUser" />
                     </template>
                     <template v-else>
-                        <EmptyChatBox />
+                        <component :is="noInteractionTabs[currentNoInteractionTab]"></component>
                     </template>
                 </slot>
-            </div>
+          
         </SidebarInset>
     </SidebarProvider>
 </template>
