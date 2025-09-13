@@ -7,7 +7,14 @@ import {
     SidebarProvider,
     SidebarTrigger,
 } from "@/Components/ui/sidebar";
-import { usePage, Head } from "@inertiajs/vue3";
+import { usePage, Head, Link } from "@inertiajs/vue3";
+import {
+    Breadcrumb,
+    BreadcrumbItem,
+    BreadcrumbList,
+    BreadcrumbPage,
+    BreadcrumbSeparator,
+} from "@/Components/ui/breadcrumb";
 import axios from "axios";
 import { ref, computed, onMounted, provide, watchEffect } from "vue";
 import EmptyChatBox from "@/Components/EmptyChatBox.vue";
@@ -17,11 +24,11 @@ import StartConversation from "@/Components/StartConversation.vue";
 const activeChat = ref(null);
 const onlineUsers = ref([]);
 const interactedUsers = ref([]);
-const messagesData = ref({ messages: []});
+const messagesData = ref({ messages: [] });
 
 // No interaction components
 const currentNoInteractionTab = ref('EmptyChatBox');
-const noInteractionTabs =  {
+const noInteractionTabs = {
     EmptyChatBox,
     StartConversation
 }
@@ -217,22 +224,34 @@ provide('noInteractionTabs', { noInteractionTabs, switchNoInteractionTab });
     <SidebarProvider :style="{ '--sidebar-width': '350px' }">
         <AppSidebar @set-active-chat="handleFilterChat" />
         <SidebarInset>
-            <header
-                class="sticky top-0 flex shrink-0 items-center justify-between border-b bg-background p-2 md:p-4 z-50">
+            <header class="sticky top-0 flex shrink-0 items-center border-b bg-background p-2 md:p-4 z-50">
                 <div class="flex items-center">
                     <SidebarTrigger class="-ml-1" />
                 </div>
+                <Breadcrumb class="mx-4 flex-1">
+                    <BreadcrumbList>
+                        <BreadcrumbItem>
+                            <Link class="transition-colors hover:text-foreground" :href="route('dashboard')">Home</Link>
+                        </BreadcrumbItem>
+                        <slot name="currentPage"></slot>
+                        <template v-if="currentNoInteractionTab == 'StartConversation'">
+                            <BreadcrumbSeparator class="hidden md:block" />
+                            <BreadcrumbItem>
+                                <BreadcrumbPage>Start new conversation</BreadcrumbPage>
+                            </BreadcrumbItem>
+                        </template>
+                    </BreadcrumbList>
+                </Breadcrumb>
                 <NavUser class="w-[3rem] md:w-[2rem]" />
             </header>
-                <slot>
-                    <template v-if="interactedUsers.value && interactedUsers.value.length > 0 || activeUser">
-                        <ChatBox :chats="messagesData" :activeUser="activeUser" />
-                    </template>
-                    <template v-else>
-                        <component :is="noInteractionTabs[currentNoInteractionTab]"></component>
-                    </template>
-                </slot>
-          
+            <slot>
+                <template v-if="interactedUsers.value && interactedUsers.value.length > 0 || activeUser">
+                    <ChatBox :chats="messagesData" :activeUser="activeUser" />
+                </template>
+                <template v-else>
+                    <component :is="noInteractionTabs[currentNoInteractionTab]"></component>
+                </template>
+            </slot>
         </SidebarInset>
     </SidebarProvider>
 </template>

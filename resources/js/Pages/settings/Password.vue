@@ -3,10 +3,22 @@ import AuthLayout from "@/Layouts/AuthLayout.vue";
 import Settings from "@/Layouts/settings/Layout.vue";
 import { Button } from '@/components/ui/button';
 import { Head } from '@inertiajs/vue3';
+import {
+    BreadcrumbItem,
+    BreadcrumbPage,
+    BreadcrumbSeparator,
+} from "@/Components/ui/breadcrumb";
 </script>
 <template>
+
     <Head title="Password" />
     <AuthLayout>
+        <template v-slot:currentPage>
+            <BreadcrumbSeparator/>
+            <BreadcrumbItem>
+                <BreadcrumbPage>Password</BreadcrumbPage>
+            </BreadcrumbItem>
+        </template>
         <Settings>
             <div>
                 <h3 class="text-lg font-medium"> Password </h3>
