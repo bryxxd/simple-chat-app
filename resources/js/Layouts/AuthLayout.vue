@@ -9,27 +9,25 @@ import {
 } from "@/Components/ui/sidebar";
 import { usePage, Head } from "@inertiajs/vue3";
 import axios from "axios";
-import { reactive, computed, onMounted, provide, watchEffect } from "vue";
+import { ref, computed, onMounted, provide, watchEffect } from "vue";
 import EmptyChatBox from "@/Components/EmptyChatBox.vue";
 
 // Data / Reactive state
-const data = reactive({
-    activeChat: null,
-    messagesData: { messages: [] },
-    onlineUsers: [],
-    interactedUsers: [],
-});
+const activeChat = ref(null);
+const onlineUsers = ref([]);
+const interactedUsers = ref([]);
+const messagesData = ref({ messages: []});
 
-// Functions
+// Handle incoming messages
 function handleIncomingMessage(from_user_id, to_user_id, content) {
     const isMessageForCurrentChat =
         (from_user_id === usePage().props.auth.user.id &&
-            to_user_id === data.activeChat) ||
-        (from_user_id === data.activeChat &&
+            to_user_id === activeChat.value) ||
+        (from_user_id === activeChat.value &&
             to_user_id === usePage().props.auth.user.id);
 
-    if (isMessageForCurrentChat && data.messagesData.messages) {
-        data.messagesData.messages.push({
+    if (isMessageForCurrentChat && messagesData.value.messages) {
+        messagesData.value.messages.push({
             content: content,
             from_user_id: from_user_id,
             to_user_id: to_user_id,
@@ -37,20 +35,21 @@ function handleIncomingMessage(from_user_id, to_user_id, content) {
     }
 }
 
+// Move user to top of interactedUsers list
 function moveUserToTop(newMsg) {
-    const userIndex = data.interactedUsers.findIndex(
+    const userIndex = interactedUsers.value.findIndex(
         ({ id }) => id === newMsg.targetUserId,
     );
 
     if (userIndex !== -1) {
-        const [user] = data.interactedUsers.splice(userIndex, 1);
+        const [user] = interactedUsers.value.splice(userIndex, 1);
         // Preserve all existing properties and update specific ones
         const updatedUser = {
             ...user,
             content: newMsg.content,
             created_at: new Date().toISOString(),
         };
-        data.interactedUsers.unshift(updatedUser);
+        interactedUsers.value.unshift(updatedUser);
     } else {
         // If user not found in interactedUsers, find them in all users and add them
         const userFromAllUsers = users.value.find(
@@ -63,13 +62,13 @@ function moveUserToTop(newMsg) {
                 content: newMsg.content || "",
                 created_at: new Date().toISOString(),
             };
-            data.interactedUsers.unshift(newUser);
+            interactedUsers.value.unshift(newUser);
         }
     }
 }
 
 function handleFilterChat(userID) {
-    data.activeChat = userID;
+    activeChat.value = userID;
 }
 
 // Computed properties
@@ -77,15 +76,16 @@ const users = computed(() => {
     return usePage().props.users || [];
 });
 
+// Computed property to get the active user object based on activeChat
 const activeUser = computed(() => {
-    if (!data.activeChat) {
+    if (!activeChat.value) {
         return null;
     }
 
     // First try interactedUsers
-    if (data.interactedUsers && data.interactedUsers.length > 0) {
-        const foundUser = data.interactedUsers.find(
-            (user) => user.id === data.activeChat,
+    if (interactedUsers.value && interactedUsers.value.length > 0) {
+        const foundUser = interactedUsers.value.find(
+            (user) => user.id === activeChat.value,
         );
         if (foundUser) {
             return foundUser;
@@ -95,7 +95,7 @@ const activeUser = computed(() => {
     // Then try all users
     if (users.value && users.value.length > 0) {
         const foundUser = users.value.find(
-            (user) => user.id === data.activeChat,
+            (user) => user.id === activeChat.value,
         );
         if (foundUser) {
             return foundUser;
@@ -105,23 +105,25 @@ const activeUser = computed(() => {
     return null;
 });
 
+// Computed property to check if a user is online
 const isOnline = computed(() => {
     return (userOrId) => {
         const userId = typeof userOrId === "object" ? userOrId.id : userOrId;
-        return data.onlineUsers.includes(userId);
+        return onlineUsers.value.includes(userId);
     };
 });
 
 // Lifecycle hooks
 onMounted(() => {
+    // Initialize interactedUsers from props if available
     if (usePage().props.interactedUsers.length !== 0) {
-        data.interactedUsers.push(...usePage().props.interactedUsers);
+        interactedUsers.value.push(...usePage().props.interactedUsers);
     }
-
-    if (!data.activeChat && usePage().props.interactedUsers.length !== 0) {
-        data.activeChat = usePage().props.interactedUsers[0].id;
+    // Set the first interacted user as activeChat if none is set
+    if (!activeChat.value && usePage().props.interactedUsers.length !== 0) {
+        activeChat.value = usePage().props.interactedUsers[0].id;
     }
-
+    // Listen for incoming messages
     window.Echo.private("new-messages." + usePage().props.auth.user.id).listen(
         "NewMessageEvent",
         (e) => {
@@ -138,19 +140,19 @@ onMounted(() => {
             });
         },
     );
-
+    // Presence channel for online users
     window.Echo.join("online-users")
         .here((users) => {
             // Handle initial list of online users
-            data.onlineUsers = []; // Clear existing array
+            onlineUsers.value = []; // Clear existing array
             users.forEach((e) => {
-                data.onlineUsers.push(e.id);
+                onlineUsers.value.push(e.id);
             });
         })
         .joining((user) => {
             // Handle when a new user comes online
-            if (!data.onlineUsers.includes(user.id)) {
-                data.onlineUsers.push(user.id);
+            if (!onlineUsers.value.includes(user.id)) {
+                onlineUsers.value.push(user.id);
             }
         })
         .leaving((user) => {
@@ -164,9 +166,9 @@ onMounted(() => {
             })();
 
             setTimeout(() => {
-                const index = data.onlineUsers.indexOf(user.id);
+                const index = onlineUsers.value.indexOf(user.id);
                 if (index > -1) {
-                    data.onlineUsers.splice(index, 1);
+                    onlineUsers.value.splice(index, 1);
                 }
             }, 60000);
         })
@@ -176,20 +178,21 @@ onMounted(() => {
 });
 
 // watchEffect
+// Load chat messages whenever activeChat changes
 watchEffect(async () => {
-    if (!data.activeChat) return;
+    if (!activeChat.value) return;
     try {
-        const res = await axios.get(`/api/chat-room/${data.activeChat}`);
-        data.messagesData = res.data;
+        const res = await axios.get(`/api/chat-room/${activeChat.value}`);
+        messagesData.value = res.data;
     } catch (error) {
         console.error("Error loading chat messages:", error);
         // Initialize with empty messages array on error
-        data.messagesData = { messages: [] };
+        messagesData.value = { messages: [] };
     }
 });
 
 // Provide
-provide("interactedUsers", data.interactedUsers);
+provide("interactedUsers", interactedUsers.value);
 provide("isOnline", isOnline);
 provide("moveUserToTop", moveUserToTop);
 </script>
@@ -209,8 +212,8 @@ provide("moveUserToTop", moveUserToTop);
             </header>
             <div>
                 <slot>
-                    <template v-if="activeUser && activeUser > 0">
-                        <ChatBox :chats="data.messagesData" :activeUser="activeUser" />
+                    <template v-if="interactedUsers.value && interactedUsers.value.length > 0 || activeUser">
+                        <ChatBox :chats="messagesData" :activeUser="activeUser" />
                     </template>
                     <template v-else>
                         <EmptyChatBox />
