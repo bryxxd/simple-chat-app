@@ -1,6 +1,6 @@
 <script setup>
 import { usePage } from "@inertiajs/vue3";
-import { computed } from "vue";
+import { computed, inject } from "vue";
 import { Search } from "lucide-vue-next";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -18,7 +18,7 @@ const users = computed(() => usePage().props.users);
 
 // Methods
 const getUserAvatar = (user) => user?.avatar || '/images/profile-placeholder.jpg';
-
+const { updateActiveChat } = inject('activeChat');
 </script>
 
 <template>
@@ -37,7 +37,7 @@ const getUserAvatar = (user) => user?.avatar || '/images/profile-placeholder.jpg
 
             <ComboboxGroup>
                 <ComboboxItem v-for="user in users" :key="user.id" :value="user" class="justify-start"
-                    @click="$emit('set-active-chat', user.id)">
+                    @click="updateActiveChat( user.id)">
                     <Avatar>
                         <AvatarImage :src="getUserAvatar(user)" alt="" />
                     </Avatar>

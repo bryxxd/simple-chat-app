@@ -20,12 +20,8 @@ const props = defineProps({
         required: false,
         default: () => ({})
     },
-    isLoading: {
-        type: Boolean,
-        required: false,
-        default: false
-    },
 });
+
 
 // Form
 const form = {

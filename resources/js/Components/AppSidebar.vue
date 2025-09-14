@@ -20,21 +20,14 @@ const props = defineProps({
     class: { type: null, required: false },
 });
 
-// Emits
-const emit = defineEmits(['set-active-chat']);
-
 // Inject
 const interactedUsers = inject("interactedUsers");
-
-// Methods
-function setActiveChat(id) {
-    emit("set-active-chat", id);
-}
 
 const hasInteraction = computed(() => {
     return interactedUsers && interactedUsers.length > 0 ? true : false
 })
 
+const { updateActiveChat } = inject('activeChat');
 
 </script>
 
@@ -46,14 +39,14 @@ const hasInteraction = computed(() => {
                     <Link :href="route('dashboard')" class="text-base font-medium text-foreground">Logo</Link>
                 </div>
                 <!-- Search User -->
-                <SearchUser @set-active-chat="setActiveChat" />
+                <SearchUser />
             </SidebarHeader>
-            <SidebarContent :class="{ 'justify-center' : !hasInteraction}">
+            <SidebarContent :class="{ 'justify-center': !hasInteraction }">
                 <SidebarGroup class="px-0">
                     <SidebarGroupContent>
                         <template v-if="hasInteraction">
                             <Room v-for="user in interactedUsers" :key="user.id" :user="user"
-                                @click="setActiveChat(user.id)" />
+                                @click="updateActiveChat(user.id)" />
                         </template>
                         <template v-else>
                             <EmptyRoom />

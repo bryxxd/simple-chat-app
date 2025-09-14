@@ -37,6 +37,9 @@ function switchNoInteractionTab(tabName) {
         currentNoInteractionTab.value = tabName;
     }
 }
+const checkNoInteractionTab = computed(() => {
+    return currentNoInteractionTab.value === 'StartConversation' && activeUser.value === null ? true : false;
+})
 
 // Handle incoming messages
 function handleIncomingMessage(from_user_id, to_user_id, content) {
@@ -87,7 +90,7 @@ function moveUserToTop(newMsg) {
     }
 }
 
-function handleFilterChat(userID) {
+function updateActiveChat(userID) {
     activeChat.value = userID;
 }
 
@@ -216,13 +219,14 @@ provide("interactedUsers", interactedUsers.value);
 provide("isOnline", isOnline);
 provide("moveUserToTop", moveUserToTop);
 provide('noInteractionTabs', { noInteractionTabs, switchNoInteractionTab });
+provide('activeChat', { activeChat, updateActiveChat });
 </script>
 
 <template>
 
     <Head title="Chat" />
     <SidebarProvider :style="{ '--sidebar-width': '350px' }">
-        <AppSidebar @set-active-chat="handleFilterChat" />
+        <AppSidebar />
         <SidebarInset>
             <header class="sticky top-0 flex shrink-0 items-center border-b bg-background p-2 md:p-4 z-50">
                 <div class="flex items-center">
@@ -234,7 +238,7 @@ provide('noInteractionTabs', { noInteractionTabs, switchNoInteractionTab });
                             <Link class="transition-colors hover:text-foreground" :href="route('dashboard')">Home</Link>
                         </BreadcrumbItem>
                         <slot name="currentPage"></slot>
-                        <template v-if="currentNoInteractionTab == 'StartConversation'">
+                        <template v-if="checkNoInteractionTab">
                             <BreadcrumbSeparator class="hidden md:block" />
                             <BreadcrumbItem>
                                 <BreadcrumbPage>Start new conversation</BreadcrumbPage>
