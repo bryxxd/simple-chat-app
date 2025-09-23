@@ -5,35 +5,20 @@ import { Button } from '@/components/ui/button';
 import { Send } from "lucide-vue-next";
 import { usePage } from "@inertiajs/vue3";
 import UserActiveStatus from './UserActiveStatus.vue';
-import { computed, inject, watch } from 'vue';
+import { computed, watch } from 'vue';
 import axios from 'axios';
+import { useChatManager } from "@/composables/useChatManager";
 
-// Props 
-const props = defineProps({
-    chats: {
-        type: Object,
-        required: false,
-        default: () => ({})
-    },
-    activeUser: {
-        type: Object,
-        required: false,
-        default: () => ({})
-    },
-});
-
+const { isOnline, updateRecentChats: moveUserToTop, currentChatMessages: messagesData, selectedUserDetails: activeUser } = useChatManager();
 
 // Form
 const form = {
-    to_user_id: props.activeUser?.id || ''
+    to_user_id: activeUser?.value?.id || ''
 }
 
 // V-model
 const formInput = defineModel();
 
-// Inject
-const isOnline = inject('isOnline');
-const moveUserToTop = inject('moveUserToTop');
 
 // Computed
 const authUser = computed(() => usePage().props.auth.user || {});
@@ -73,32 +58,32 @@ function isSender(chat) {
 function getUserAvatar(chat) {
     return authUser.value && chat.from_user_id === authUser.value.id
         ? authUser.value.avatar
-        : props.chats.participant.avatar;
+        : messagesData?.value?.participant?.avatar
 }
 
-
 // Watch for activeUser changes
-watch(() => props.activeUser, (newActiveUser) => {
+watch(() => activeUser?.value, (newActiveUser) => {
     if (newActiveUser?.id) {
         form.to_user_id = newActiveUser.id;
     }
 }, { immediate: true });
+
 </script>
 <template>
     <Chat>
         <ChatDetails>
             <div class="flex">
-                <ChatAvatar :src="chats?.participant?.avatar" />
+                <ChatAvatar :src="messagesData?.participant?.avatar" />
                 <div class="flex flex-col justify-between ml-4">
-                    <ChatName>{{ chats?.participant?.first_name }} {{ chats?.participant?.last_name }}</ChatName>
-                    <ChatStatus v-if="isOnline(props.activeUser?.id)" class="text-green-700">Online</ChatStatus>
-                    <UserActiveStatus v-else :id="props.activeUser?.id" />
+                    <ChatName>{{ messagesData?.participant?.first_name }} {{ messagesData?.participant?.last_name }}</ChatName>
+                    <ChatStatus v-if="isOnline(activeUser?.id)" class="text-green-700">Online</ChatStatus>
+                    <UserActiveStatus v-else :id="activeUser?.id" />
                 </div>
             </div>
         </ChatDetails>
         <ChatContent ref="chatContent">
             <ChatList ref="chatList">
-                <ChatItem v-for="(chat, index) in chats.messages" :key="index"
+                <ChatItem v-for="(chat, index) in messagesData.messages" :key="index"
                     :class="{ 'flex-row-reverse': isSender(chat) }">
                     <ChatAvatar :src="getUserAvatar(chat)" class="w-8 h-8" />
                     <ChatMessage :variant="isSender(chat) ? 'sender' : 'default'">

@@ -1,5 +1,7 @@
 <script setup>
-import { defineProps, inject, computed } from 'vue';
+import { defineProps, computed } from 'vue';
+import { useChatManager } from '@/composables/useChatManager';
+const { isOnline, updateSelectedUser } = useChatManager();
 
 // Props
 const props = defineProps({
@@ -13,9 +15,6 @@ const props = defineProps({
 const userAvatarSrc = computed(() => {
     return props.user?.avatar || '/images/profile-placeholder.jpg';
 })
-
-// Injected dependencies
-const isOnline = inject('isOnline');
 
 </script>
 <template>

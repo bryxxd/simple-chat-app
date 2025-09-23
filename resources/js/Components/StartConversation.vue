@@ -9,7 +9,7 @@ const users = computed(() => usePage().props.users);
 const getUserAvatar = (user) => user?.avatar || '/images/profile-placeholder.jpg';
 
 // Inject
-const { updateActiveChat } = inject('activeChat');
+const { updateSelectedUser } = inject('activeChat');
 
 
 </script>
@@ -33,7 +33,7 @@ const { updateActiveChat } = inject('activeChat');
                     </Avatar>
                     <div class="flex-1">
                         <h4 class="font-medium text-gray-900">{{ user?.first_name }} {{ user?.last_name }}</h4>
-                    </div><button @click="updateActiveChat(user.id)"
+                    </div><button @click="updateSelectedUser(user.id)"
                         class="bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-full text-sm transition-colors">Message</button>
                 </div>
             </div>
