@@ -15,7 +15,7 @@ import {
     BreadcrumbPage,
     BreadcrumbSeparator,
 } from "@/Components/ui/breadcrumb";
-import { ref, computed, provide } from "vue";
+import { ref, computed, provide, defineAsyncComponent } from "vue";
 import EmptyChatBox from "@/Components/EmptyChatBox.vue";
 import StartConversation from "@/Components/StartConversation.vue";
 import { useChatManager } from "@/composables/useChatManager";
@@ -42,6 +42,10 @@ const checkNoInteractionTab = computed(() => {
 
 // Provide
 provide('noInteractionTabs', { noInteractionTabs, switchNoInteractionTab });
+
+const AsyncChatBox = defineAsyncComponent(() =>
+    import("@/Components/ChatBox.vue")
+);
 </script>
 
 <template>
@@ -71,7 +75,7 @@ provide('noInteractionTabs', { noInteractionTabs, switchNoInteractionTab });
             </header>
             <slot>
                 <template v-if="(chatUsers && chatUsers.length > 0) || activeUser">
-                    <ChatBox />
+                    <AsyncChatBox />
                 </template>
                 <template v-else>
                     <component :is="noInteractionTabs[currentNoInteractionTab]"></component>
