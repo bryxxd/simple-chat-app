@@ -18,7 +18,7 @@ const userAvatarSrc = computed(() => {
 
 </script>
 <template>
-    <div class="flex items-center gap-2 whitespace-nowrap p-4 text-sm leading-tight last:border-b-0 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground cursor-pointer">
+    <div @click="updateSelectedUser(user?.id)" class="flex items-center gap-2 whitespace-nowrap p-4 text-sm leading-tight last:border-b-0 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground cursor-pointer">
         <slot>
             <div class="relative">
                 <img class="rounded-full w-12 h-12" :src="userAvatarSrc" alt="">

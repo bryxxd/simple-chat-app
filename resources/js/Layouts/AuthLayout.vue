@@ -21,7 +21,7 @@ import StartConversation from "@/Components/StartConversation.vue";
 import { useChatManager } from "@/composables/useChatManager";
 
 const {
-    activeUser,
+    selectedUserDetails: activeUser,
     chatUsers,
 } = useChatManager();
 
@@ -70,7 +70,7 @@ provide('noInteractionTabs', { noInteractionTabs, switchNoInteractionTab });
                 <NavUser class="w-[3rem] md:w-[2rem]" />
             </header>
             <slot>
-                <template v-if="chatUsers && chatUsers.length > 0 || activeUser">
+                <template v-if="(chatUsers && chatUsers.length > 0) || activeUser">
                     <ChatBox />
                 </template>
                 <template v-else>

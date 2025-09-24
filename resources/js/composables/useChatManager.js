@@ -1,13 +1,21 @@
-import { ref, computed, shallowRef, onMounted, watchEffect } from "vue";
+import { ref, computed, onMounted, watchEffect, shallowRef } from "vue";
 import { usePage } from "@inertiajs/vue3";
 import axios from "axios";
 
+// Singleton state - shared across all components
+let chatManagerInstance = null;
+
 export function useChatManager() {
+    // Return existing instance if it exists
+    if (chatManagerInstance) {
+        return chatManagerInstance;
+    }
+
     // Data / Reactive state
     const selectedUserId = ref(null);
     const onlineUsers = ref([]);
     const chatUsers = shallowRef([]);
-    const currentChatMessages = shallowRef({ messages: [] });
+    const currentChatMessages = ref({ messages: [] }); // Change from shallowRef to ref for deep reactivity
 
     // Add new message to current chat if it belongs to the active conversation
     function addMessageToChat(from_user_id, to_user_id, content) {
@@ -201,7 +209,8 @@ export function useChatManager() {
         }
     });
 
-    return {
+    // Create the instance object
+    chatManagerInstance = {
         // Data / Reactive state
         selectedUserId,
         onlineUsers,
@@ -215,5 +224,7 @@ export function useChatManager() {
         users,
         selectedUserDetails,
         isOnline,
-    }
+    };
+
+    return chatManagerInstance;
 }

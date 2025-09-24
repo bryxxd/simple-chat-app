@@ -5,16 +5,16 @@ import { Button } from '@/components/ui/button';
 import { Send } from "lucide-vue-next";
 import { usePage } from "@inertiajs/vue3";
 import UserActiveStatus from './UserActiveStatus.vue';
-import { computed, watch } from 'vue';
+import { computed, watch, reactive } from 'vue';
 import axios from 'axios';
 import { useChatManager } from "@/composables/useChatManager";
 
-const { isOnline, updateRecentChats: moveUserToTop, currentChatMessages: messagesData, selectedUserDetails: activeUser } = useChatManager();
+const { isOnline, updateRecentChats: moveUserToTop, currentChatMessages: messagesData, selectedUserDetails: activeUser, selectedUserId } = useChatManager();
 
-// Form
-const form = {
-    to_user_id: activeUser?.value?.id || ''
-}
+// Form - make it reactive
+const form = reactive({
+    to_user_id: ''
+});
 
 // V-model
 const formInput = defineModel();
@@ -61,7 +61,7 @@ function getUserAvatar(chat) {
         : messagesData?.value?.participant?.avatar
 }
 
-// Watch for activeUser changes
+// Watch for activeUser changes and update form
 watch(() => activeUser?.value, (newActiveUser) => {
     if (newActiveUser?.id) {
         form.to_user_id = newActiveUser.id;
@@ -70,7 +70,7 @@ watch(() => activeUser?.value, (newActiveUser) => {
 
 </script>
 <template>
-    <Chat>
+    <Chat :key="selectedUserId.value">
         <ChatDetails>
             <div class="flex">
                 <ChatAvatar :src="messagesData?.participant?.avatar" />
@@ -83,7 +83,7 @@ watch(() => activeUser?.value, (newActiveUser) => {
         </ChatDetails>
         <ChatContent ref="chatContent">
             <ChatList ref="chatList">
-                <ChatItem v-for="(chat, index) in messagesData.messages" :key="index"
+                <ChatItem v-for="(chat, index) in messagesData?.messages || []" :key="index"
                     :class="{ 'flex-row-reverse': isSender(chat) }">
                     <ChatAvatar :src="getUserAvatar(chat)" class="w-8 h-8" />
                     <ChatMessage :variant="isSender(chat) ? 'sender' : 'default'">

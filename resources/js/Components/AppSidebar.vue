@@ -13,7 +13,7 @@ import Room from "@/components/Room.vue";
 import EmptyRoom from '@/Components/EmptyRoom.vue';
 import { useChatManager } from '@/composables/useChatManager';
 
-const { chatUsers, updateSelectedUser } = useChatManager();
+const { chatUsers } = useChatManager();
 
 const hasInteraction = computed(() => {
     return chatUsers.value && chatUsers.value.length > 0 ? true : false
@@ -42,8 +42,7 @@ const props = defineProps({
                 <SidebarGroup class="px-0">
                     <SidebarGroupContent>
                         <template v-if="hasInteraction">
-                            <Room v-for="user in chatUsers" :key="user.id" :user="user"
-                                @click="updateSelectedUser(user.id)" />
+                            <Room v-for="user in chatUsers" :key="user.id" :user="user" />
                         </template>
                         <template v-else>
                             <EmptyRoom />
