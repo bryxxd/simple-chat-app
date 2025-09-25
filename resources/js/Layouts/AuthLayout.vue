@@ -1,6 +1,7 @@
 <script setup>
 import AppSidebar from "@/Components/AppSidebar.vue";
 import ChatBox from "@/Components/ChatBox.vue";
+import Loading from "@/Components/LoadingChatBox.vue";
 import NavUser from "@/Components/NavUser.vue";
 import {
     SidebarInset,
@@ -43,9 +44,12 @@ const checkNoInteractionTab = computed(() => {
 // Provide
 provide('noInteractionTabs', { noInteractionTabs, switchNoInteractionTab });
 
-const AsyncChatBox = defineAsyncComponent(() =>
-    import("@/Components/ChatBox.vue")
-);
+const AsyncChatBox = defineAsyncComponent({
+    loader: () => import('@/Components/ChatBox.vue'),
+    loadingComponent: Loading, 
+    timeout: 10000, 
+    errorComponent: Loading, 
+})
 </script>
 
 <template>
