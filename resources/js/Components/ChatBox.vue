@@ -22,6 +22,9 @@ const formInput = defineModel();
 
 // Computed
 const authUser = computed(() => usePage().props.auth.user || {});
+const sortedMessages = computed(() => {
+    return messagesData.value.messages.sort((a, b) => a.id - b.id);
+});
 
 // Methods
 async function sendMessage() {
@@ -75,7 +78,8 @@ watch(() => activeUser?.value, (newActiveUser) => {
             <div class="flex">
                 <ChatAvatar :src="messagesData?.participant?.avatar" />
                 <div class="flex flex-col justify-between ml-4">
-                    <ChatName>{{ messagesData?.participant?.first_name }} {{ messagesData?.participant?.last_name }}</ChatName>
+                    <ChatName>{{ messagesData?.participant?.first_name }} {{ messagesData?.participant?.last_name }}
+                    </ChatName>
                     <ChatStatus v-if="isOnline(activeUser?.id)" class="text-green-700">Online</ChatStatus>
                     <UserActiveStatus v-else :id="activeUser?.id" />
                 </div>
@@ -83,7 +87,10 @@ watch(() => activeUser?.value, (newActiveUser) => {
         </ChatDetails>
         <ChatContent ref="chatContent">
             <ChatList ref="chatList">
-                <ChatItem v-for="(chat, index) in messagesData?.messages || []" :key="index"
+                <!-- <template v-if="sortedMessages.length <= messagesData?.totalMessages">
+                    <div class="absolute -top-10 left-0 right-0 animate-pulse w-full text-center">Loading...</div>
+                </template> -->
+                <ChatItem v-for="(chat, index) in sortedMessages" :key="index"
                     :class="{ 'flex-row-reverse': isSender(chat) }">
                     <ChatAvatar :src="getUserAvatar(chat)" class="w-8 h-8" />
                     <ChatMessage :variant="isSender(chat) ? 'sender' : 'default'">

@@ -78,13 +78,14 @@ class ChatRoomController extends Controller
                     ->where('to_user_id', Auth::id());
             })
             ->limit(50)
-            ->orderBy('created_at', 'asc')
+            ->orderBy('created_at', 'desc')
             ->get();
 
         $to_user_details = User::select('id', 'first_name', 'last_name', 'avatar')->where('id', $to_user_id)->first();
 
         return response()->json([
             'messages' => $chatQuery,
+            'totalMessages' => $chatQuery->count(),
             'participant' => $to_user_details,
         ]);
     }
