@@ -19,11 +19,12 @@ class NewMessageEvent implements ShouldBroadcastNow
      * Create a new event instance.
      */
     public function __construct(
-        public int $fromUserId,
-        public int $toUserId,
-        public string $message
-    )
-    {
+        public int $id,
+        public int $from_user_id,
+        public int $to_user_id,
+        public string $message,
+        public string $created_at
+    ) {
         //
     }
 
@@ -35,8 +36,8 @@ class NewMessageEvent implements ShouldBroadcastNow
     public function broadcastOn(): array
     {
         return [
-            new PrivateChannel('new-messages.' . $this->fromUserId),
-            new PrivateChannel('new-messages.' . $this->toUserId)
+            new PrivateChannel('new-messages.' . $this->from_user_id),
+            new PrivateChannel('new-messages.' . $this->to_user_id)
         ];
     }
 
@@ -48,9 +49,11 @@ class NewMessageEvent implements ShouldBroadcastNow
     public function broadcastWith(): array
     {
         return [
-            'from_user_id' => $this->fromUserId,
-            'to_user_id' => $this->toUserId,
+            'id' => $this->id,
+            'from_user_id' => $this->from_user_id,
+            'to_user_id' => $this->to_user_id,
             'content' => $this->message,
+            'created_at' => $this->created_at,
         ];
     }
 }

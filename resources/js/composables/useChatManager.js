@@ -18,12 +18,12 @@ export function useChatManager() {
     const currentChatMessages = ref({ messages: [] }); // Change from shallowRef to ref for deep reactivity
 
     // Add new message to current chat if it belongs to the active conversation
-    function addMessageToChat(from_user_id, to_user_id, content) {
+    function addMessageToChat(e) {
         const isMessageForCurrentChat =
-            (from_user_id === usePage().props.auth.user.id &&
-                to_user_id === selectedUserId.value) ||
-            (from_user_id === selectedUserId.value &&
-                to_user_id === usePage().props.auth.user.id);
+            (e.from_user_id === usePage().props.auth.user.id &&
+                e.to_user_id === selectedUserId.value) ||
+            (e.from_user_id === selectedUserId.value &&
+                e.to_user_id === usePage().props.auth.user.id);
 
         // Ensure messages array exists
         if (!currentChatMessages.value.messages) {
@@ -37,10 +37,11 @@ export function useChatManager() {
                 messages: [
                     ...currentChatMessages.value.messages,
                     {
-                        from_user_id,
-                        to_user_id,
-                        content,
-                        created_at: new Date().toISOString(),
+                        id: e.id,
+                        from_user_id: e.from_user_id,
+                        to_user_id: e.to_user_id,
+                        content: e.content,
+                        created_at: e.created_at,
                     },
                 ],
             };
@@ -140,7 +141,7 @@ export function useChatManager() {
             "NewMessageEvent",
             (e) => {
                 console.log("Received new message event:", e);
-                addMessageToChat(e.from_user_id, e.to_user_id, e.content);
+                addMessageToChat(e);
 
                 // Always update the user list, regardless of active chat
                 const targetUserId =
