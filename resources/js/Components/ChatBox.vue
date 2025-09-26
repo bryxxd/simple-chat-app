@@ -70,6 +70,7 @@ watch(() => activeUser?.value, (newActiveUser) => {
 
 </script>
 <template>
+    <pre>{{ messagesData }}</pre>
     <Chat :key="selectedUserId.value">
         <ChatDetails>
             <div class="flex">

@@ -62,7 +62,8 @@ class ChatRoomController extends Controller
                 $query->where('from_user_id', $to_user_id)
                     ->where('to_user_id', Auth::id());
             })
-            ->orderBy('created_at', 'asc')
+            ->limit(50)
+            ->orderBy('created_at', 'desc')
             ->get();
 
         $to_user_details = User::select('id','first_name', 'last_name','avatar')->where('id', $to_user_id)->first();

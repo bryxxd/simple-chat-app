@@ -15,6 +15,6 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         User::factory(2)->create();
-        ChatRoom::factory(1000)->create();
+        ChatRoom::factory(2)->create();
     }
 }

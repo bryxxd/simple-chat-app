@@ -37,11 +37,12 @@ export function useChatManager() {
                 messages: [
                     ...currentChatMessages.value.messages,
                     {
-                        content: content,
-                        from_user_id: from_user_id,
-                        to_user_id: to_user_id,
-                    }
-                ]
+                        from_user_id,
+                        to_user_id,
+                        content,
+                        created_at: new Date().toISOString(),
+                    },
+                ],
             };
         }
     }
@@ -138,6 +139,7 @@ export function useChatManager() {
         window.Echo.private("new-messages." + usePage().props.auth.user.id).listen(
             "NewMessageEvent",
             (e) => {
+                console.log("Received new message event:", e);
                 addMessageToChat(e.from_user_id, e.to_user_id, e.content);
 
                 // Always update the user list, regardless of active chat

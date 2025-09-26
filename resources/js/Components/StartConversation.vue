@@ -4,12 +4,14 @@ import { Search, Sparkles } from "lucide-vue-next";
 import { Input } from '@/components/ui/input';
 import { computed, inject } from "vue";
 import { usePage } from "@inertiajs/vue3";
+import { useChatManager } from "@/composables/useChatManager";
+
+const { updateSelectedUser } = useChatManager();
 
 const users = computed(() => usePage().props.users);
 const getUserAvatar = (user) => user?.avatar || '/images/profile-placeholder.jpg';
 
 // Inject
-const { updateSelectedUser } = inject('activeChat');
 
 
 </script>
