@@ -69,23 +69,30 @@ class ChatRoomController extends Controller
     public function show($to_user_id)
     {
         //
-        $chatQuery = ChatRoom::where(function ($query) use ($to_user_id) {
+        // Build the base query
+        $baseQuery = ChatRoom::where(function ($query) use ($to_user_id) {
             $query->where('from_user_id', Auth::id())
                 ->where('to_user_id', $to_user_id);
         })
             ->orWhere(function ($query) use ($to_user_id) {
                 $query->where('from_user_id', $to_user_id)
                     ->where('to_user_id', Auth::id());
-            })
-            ->limit(50)
+            });
+
+        // Get total count (without limit)
+        $totalMessages = $baseQuery->count();
+
+        // Get limited results
+        $chatQuery = $baseQuery->limit(50)
             ->orderBy('created_at', 'desc')
             ->get();
 
-        $to_user_details = User::select('id', 'first_name', 'last_name', 'avatar')->where('id', $to_user_id)->first();
+        $to_user_details = User::select('id', 'first_name', 'last_name', 'avatar')
+            ->where('id', $to_user_id)->first();
 
         return response()->json([
             'messages' => $chatQuery,
-            'totalMessages' => $chatQuery->count(),
+            'totalMessages' => $totalMessages, // This will be the actual total
             'participant' => $to_user_details,
         ]);
     }

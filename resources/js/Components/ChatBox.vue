@@ -5,30 +5,33 @@ import { Button } from '@/components/ui/button';
 import { Send } from "lucide-vue-next";
 import { usePage } from "@inertiajs/vue3";
 import UserActiveStatus from './UserActiveStatus.vue';
-import { computed, watch, reactive } from 'vue';
+import { computed, watch, reactive, ref } from 'vue';
 import axios from 'axios';
 import { useChatManager } from "@/composables/useChatManager";
+import { useLoadMessages } from '@/composables/useLoadMessages';
 
-const { isOnline, updateRecentChats: moveUserToTop, currentChatMessages: messagesData, selectedUserDetails: activeUser, selectedUserId } = useChatManager();
+const { isOnline, updateRecentChats: moveUserToTop, selectedUserDetails: activeUser, messagesData, totalMessages } = useChatManager();
 
-// Form - make it reactive
-const form = reactive({
-    to_user_id: ''
-});
-
+const userIdReceiver = ref(null);
 // V-model
 const formInput = defineModel();
 
-
 // Computed
 const authUser = computed(() => usePage().props.auth.user || {});
+
 const sortedMessages = computed(() => {
     return messagesData.value.messages.sort((a, b) => a.id - b.id);
 });
 
+
+const hasMoreMessages = computed(() => {
+    return messagesData.value.messages.length < totalMessages.value;
+});
+
+
 // Methods
 async function sendMessage() {
-    if (!form.to_user_id) {
+    if (!userIdReceiver.value) {
         console.error('No active user selected');
         return;
     }
@@ -39,7 +42,7 @@ async function sendMessage() {
     try {
         await axios.post("/api/send-message", {
             message: messageContent,
-            to_user_id: form.to_user_id
+            to_user_id: userIdReceiver.value
         });
     } catch (err) {
         console.log(err);
@@ -49,7 +52,7 @@ async function sendMessage() {
 
     // Use the stored content
     moveUserToTop({
-        targetUserId: form.to_user_id,
+        targetUserId: userIdReceiver.value,
         content: messageContent
     });
 }
@@ -67,13 +70,15 @@ function getUserAvatar(chat) {
 // Watch for activeUser changes and update form
 watch(() => activeUser?.value, (newActiveUser) => {
     if (newActiveUser?.id) {
-        form.to_user_id = newActiveUser.id;
+        userIdReceiver.value = newActiveUser.id;
+
+        console.log(hasMoreMessages.value)
     }
 }, { immediate: true });
 
 </script>
 <template>
-    <Chat :key="selectedUserId.value">
+    <Chat>
         <ChatDetails>
             <div class="flex">
                 <ChatAvatar :src="messagesData?.participant?.avatar" />
@@ -87,9 +92,9 @@ watch(() => activeUser?.value, (newActiveUser) => {
         </ChatDetails>
         <ChatContent ref="chatContent">
             <ChatList ref="chatList">
-                <!-- <template v-if="sortedMessages.length <= messagesData?.totalMessages">
-                    <div class="absolute -top-10 left-0 right-0 animate-pulse w-full text-center">Loading...</div>
-                </template> -->
+                <template v-if="hasMoreMessages">
+                    <div class="animate-pulse w-full text-center">Loading...</div>
+                </template>
                 <ChatItem v-for="(chat, index) in sortedMessages" :key="index"
                     :class="{ 'flex-row-reverse': isSender(chat) }">
                     <ChatAvatar :src="getUserAvatar(chat)" class="w-8 h-8" />
