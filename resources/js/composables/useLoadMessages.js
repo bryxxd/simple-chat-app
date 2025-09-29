@@ -1,4 +1,4 @@
-import { ref, toValue } from "vue";
+import { ref, toValue, computed } from "vue";
 import axios from "axios";
 
 export function useLoadMessages() {
@@ -23,7 +23,7 @@ export function useLoadMessages() {
             if (res.data && Array.isArray(res.data.messages)) {
                 // Sort messages by ID to ensure chronological order
                 const sortedMessages = res.data.messages.sort((a, b) => a.id - b.id);
-                
+
                 // Replace messages instead of appending for new user
                 messagesData.value.messages = sortedMessages;
                 messagesData.value.participant = res.data.participant;
@@ -37,6 +37,9 @@ export function useLoadMessages() {
         }
     }
 
+    const hasMoreMessages = computed(() => {
+        return messagesData.value.messages.length < totalMessages.value;
+    });
 
     return {
         totalMessages,
@@ -46,5 +49,6 @@ export function useLoadMessages() {
         loading,
         allMessagesLoaded,
         loadMessages,
+        hasMoreMessages,
     };
 }

@@ -9,7 +9,7 @@ import { computed, watch, ref } from 'vue';
 import axios from 'axios';
 import { useChatManager } from "@/composables/useChatManager";
 
-const { isOnline, updateRecentChats, selectedUserDetails, messagesData, totalMessages } = useChatManager();
+const { isOnline, updateRecentChats, selectedUserDetails, totalMessages, messagesData, hasMoreMessages } = useChatManager();
 
 const userIdReceiver = ref(null);
 const isSending = ref(false);
@@ -20,9 +20,6 @@ const formInput = defineModel();
 
 // Computed
 const authUser = computed(() => usePage().props.auth.user || {});
-const hasMoreMessages = computed(() => {
-    return messagesData.value.messages.length < totalMessages.value;
-});
 
 // Methods
 async function sendMessage() {
@@ -113,7 +110,8 @@ watch(() => selectedUserDetails?.value, (newActiveUser) => {
         </ChatContent>
         <ChatForm @submit.prevent="sendMessage" method="POST">
             <Textarea placeholder="Type your message..." v-model="formInput" :disabled="isSending" class="pr-20" />
-            <Button class="absolute right-[0.5rem] top-[0.7rem]" type="submit" :disabled="isSending || !formInput?.trim()">
+            <Button class="absolute right-[0.5rem] top-[0.7rem]" type="submit"
+                :disabled="isSending || !formInput?.trim()">
                 <span v-if="isSending">Sending...</span>
                 <template v-else>
                     Send

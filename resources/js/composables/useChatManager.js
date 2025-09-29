@@ -6,13 +6,14 @@ import axios from "axios";
 // Singleton state - shared across all components
 let chatManagerInstance = null;
 
-const { loadMessages, messagesData, totalMessages, loadError } = useLoadMessages();
-
 export function useChatManager() {
     // Return existing instance if it exists
     if (chatManagerInstance) {
         return chatManagerInstance;
     }
+
+    // Get the reactive references from useLoadMessages
+    const { loadMessages, messagesData, totalMessages, loadError, hasMoreMessages } = useLoadMessages();
 
     // Data / Reactive state
     const selectedUserId = ref(null);
@@ -228,6 +229,7 @@ export function useChatManager() {
         messagesData,
         totalMessages,
         loadError,
+        hasMoreMessages,
         // Methods
         addMessageToChat,
         updateRecentChats,
