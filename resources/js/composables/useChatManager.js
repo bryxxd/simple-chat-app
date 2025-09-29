@@ -140,10 +140,6 @@ export function useChatManager() {
         };
     });
 
-    // Store references for cleanup
-    let messageListener = null;
-    let presenceChannel = null;
-
     // Lifecycle hooks
     onMounted(() => {
         // Initialize interactedUsers from props if available
@@ -159,7 +155,7 @@ export function useChatManager() {
         }
         
         // Listen for incoming messages
-        messageListener = window.Echo.private(
+        window.Echo.private(
             "new-messages." + usePage().props.auth.user.id,
         ).listen("NewMessageEvent", (e) => {
             console.log("Received new message event:", e);
@@ -176,7 +172,7 @@ export function useChatManager() {
             });
         });
         // Presence channel for online users
-        presenceChannel = window.Echo.join("online-users")
+        window.Echo.join("online-users")
             .here((users) => {
                 // Handle initial list of online users
                 onlineUsers.value = []; // Clear existing array
@@ -210,16 +206,6 @@ export function useChatManager() {
             .error((error) => {
                 console.error("Error in presence channel:", error);
             });
-    });
-
-    onUnmounted(() => {
-        // Clean up listeners safely
-        if (presenceChannel) {
-            presenceChannel.leave();
-        }
-        if (messageListener) {
-            messageListener.stopListening("NewMessageEvent");
-        }
     });
 
     // Load chat messages whenever activeChat changes
