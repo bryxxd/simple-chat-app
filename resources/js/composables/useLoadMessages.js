@@ -1,5 +1,4 @@
-// useLoadMessages.js - Remove singleton
-import { computed, ref, toValue } from "vue";
+import { ref, toValue } from "vue";
 import axios from "axios";
 
 export function useLoadMessages() {
@@ -20,11 +19,13 @@ export function useLoadMessages() {
         loading.value = true;
 
         try {
-            console.log("trigger");
             const res = await axios.get(`/api/chat-room/${userIdValue}`);
             if (res.data && Array.isArray(res.data.messages)) {
+                // Sort messages by ID to ensure chronological order
+                const sortedMessages = res.data.messages.sort((a, b) => a.id - b.id);
+                
                 // Replace messages instead of appending for new user
-                messagesData.value.messages = res.data.messages;
+                messagesData.value.messages = sortedMessages;
                 messagesData.value.participant = res.data.participant;
                 messagesData.value.totalMessages = res.data.totalMessages;
                 totalMessages.value = res.data.totalMessages;

@@ -6,7 +6,7 @@ import axios from "axios";
 // Singleton state - shared across all components
 let chatManagerInstance = null;
 
-const { loadMessages, messagesData, totalMessages } = useLoadMessages();
+const { loadMessages, messagesData, totalMessages, loadError } = useLoadMessages();
 
 export function useChatManager() {
     // Return existing instance if it exists
@@ -33,19 +33,28 @@ export function useChatManager() {
         }
 
         if (isMessageForCurrentChat) {
+            const newMessage = {
+                id: e.id,
+                from_user_id: e.from_user_id,
+                to_user_id: e.to_user_id,
+                content: e.content,
+                created_at: e.created_at,
+            };
+            
+            // Insert in correct position to maintain sort order
+            const messages = [...messagesData.value.messages];
+            const insertIndex = messages.findIndex(msg => msg.id > e.id);
+            
+            if (insertIndex === -1) {
+                messages.push(newMessage);
+            } else {
+                messages.splice(insertIndex, 0, newMessage);
+            }
+            
             // Create a new object reference for shallowRef reactivity
             messagesData.value = {
                 ...messagesData.value,
-                messages: [
-                    ...messagesData.value.messages,
-                    {
-                        id: e.id,
-                        from_user_id: e.from_user_id,
-                        to_user_id: e.to_user_id,
-                        content: e.content,
-                        created_at: e.created_at,
-                    },
-                ],
+                messages
             };
         }
     }
@@ -83,9 +92,9 @@ export function useChatManager() {
     }
 
     function updateSelectedUser(userID) {
-        if( selectedUserId.value === userID) return;
+        if (!userID || selectedUserId.value === userID) return;
         selectedUserId.value = userID;        
-        console.log(selectedUserId.value);
+        console.log('Selected user updated to:', selectedUserId.value);
     }
 
     // Computed properties
@@ -131,6 +140,10 @@ export function useChatManager() {
         };
     });
 
+    // Store references for cleanup
+    let messageListener = null;
+    let presenceChannel = null;
+
     // Lifecycle hooks
     onMounted(() => {
         // Initialize interactedUsers from props if available
@@ -144,8 +157,9 @@ export function useChatManager() {
         ) {
             selectedUserId.value = usePage().props.interactedUsers[0].id;
         }
+        
         // Listen for incoming messages
-        window.Echo.private(
+        messageListener = window.Echo.private(
             "new-messages." + usePage().props.auth.user.id,
         ).listen("NewMessageEvent", (e) => {
             console.log("Received new message event:", e);
@@ -162,7 +176,7 @@ export function useChatManager() {
             });
         });
         // Presence channel for online users
-        window.Echo.join("online-users")
+        presenceChannel = window.Echo.join("online-users")
             .here((users) => {
                 // Handle initial list of online users
                 onlineUsers.value = []; // Clear existing array
@@ -199,10 +213,13 @@ export function useChatManager() {
     });
 
     onUnmounted(() => {
-        window.Echo.leave("online-users");
-        window.Echo.private(
-            `new-messages.${usePage().props.auth.user.id}`,
-        ).stopListening("NewMessageEvent");
+        // Clean up listeners safely
+        if (presenceChannel) {
+            presenceChannel.leave();
+        }
+        if (messageListener) {
+            messageListener.stopListening("NewMessageEvent");
+        }
     });
 
     // Load chat messages whenever activeChat changes
@@ -224,6 +241,7 @@ export function useChatManager() {
         chatUsers,
         messagesData,
         totalMessages,
+        loadError,
         // Methods
         addMessageToChat,
         updateRecentChats,
