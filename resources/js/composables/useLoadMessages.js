@@ -10,13 +10,19 @@ export function useLoadMessages() {
         participant: null,
         totalMessages: 0,
     });
+
     const loading = ref(false);
     const allMessagesLoaded = ref(false);
 
     async function loadMessages(userId) {
         const userIdValue = toValue(userId);
+        
         if (loading.value || allMessagesLoaded.value) return;
         loading.value = true;
+
+        // Reset pagination state for new user
+        currentPage.value = 1;
+        allMessagesLoaded.value = false;
 
         try {
             const res = await axios.get(`/api/chat-room/${userIdValue}`);
@@ -37,6 +43,48 @@ export function useLoadMessages() {
         }
     }
 
+    async function loadMoreMessages(userId) {
+        const userIdValue = toValue(userId);
+
+        // Add validation for userId
+        if (!userIdValue) {
+            console.warn('loadMoreMessages called without valid userId');
+            return;
+        }
+
+        if (loading.value || allMessagesLoaded.value) return;
+        loading.value = true;
+
+        try {
+            const nextPage = currentPage.value + 1;
+            const res = await axios.get(`/api/chat-room/${userIdValue}`, {
+                params: {
+                    page: nextPage,
+                    per_page: perPage.value,
+                },
+            });
+            if (res.data && Array.isArray(res.data.messages)) {
+                // Sort messages by ID to ensure chronological order
+                const sortedMessages = res.data.messages.sort((a, b) => a.id - b.id);
+
+                // Append new messages to existing ones
+                messagesData.value.messages.unshift(...sortedMessages);
+                messagesData.value.totalMessages = res.data.totalMessages;
+                totalMessages.value = res.data.totalMessages;
+                currentPage.value = nextPage;
+
+                // Check if all messages are loaded based on totalMessages
+                if (messagesData.value.messages.length >= totalMessages.value) {
+                    allMessagesLoaded.value = true;
+                }
+            }
+        } catch (error) {
+            console.error("Error loading more messages:", error);
+        } finally {
+            loading.value = false;
+        }
+    }
+
     const hasMoreMessages = computed(() => {
         return messagesData.value.messages.length < totalMessages.value;
     });
@@ -49,6 +97,7 @@ export function useLoadMessages() {
         loading,
         allMessagesLoaded,
         loadMessages,
+        loadMoreMessages,
         hasMoreMessages,
     };
 }

@@ -13,7 +13,7 @@ export function useChatManager() {
     }
 
     // Get the reactive references from useLoadMessages
-    const { loadMessages, messagesData, totalMessages, loadError, hasMoreMessages } = useLoadMessages();
+    const { loadMessages, messagesData, totalMessages, loadError, hasMoreMessages, loadMoreMessages } = useLoadMessages();
 
     // Data / Reactive state
     const selectedUserId = ref(null);
@@ -234,6 +234,7 @@ export function useChatManager() {
         addMessageToChat,
         updateRecentChats,
         updateSelectedUser,
+        loadMoreMessages,
         // Computed properties
         users,
         selectedUserDetails,

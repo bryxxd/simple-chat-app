@@ -66,34 +66,59 @@ class ChatRoomController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show($to_user_id)
+    public function show(Request $request, $to_user_id)
     {
-        //
-        // Build the base query
+        // Validate the to_user_id
+        if (!$to_user_id || !is_numeric($to_user_id)) {
+            return response()->json(['error' => 'Invalid user ID'], 400);
+        }
+
+        // Get pagination parameters
+        $page = (int) $request->get('page', 1);
+        $perPage = (int) $request->get('per_page', 50);
+        
+        // Ensure valid pagination values
+        $page = max(1, $page);
+        $perPage = min(100, max(10, $perPage)); // Limit between 10-100 messages per page
+
+        // Build the base query for messages between authenticated user and target user
         $baseQuery = ChatRoom::where(function ($query) use ($to_user_id) {
             $query->where('from_user_id', Auth::id())
                 ->where('to_user_id', $to_user_id);
         })
-            ->orWhere(function ($query) use ($to_user_id) {
-                $query->where('from_user_id', $to_user_id)
-                    ->where('to_user_id', Auth::id());
-            });
+        ->orWhere(function ($query) use ($to_user_id) {
+            $query->where('from_user_id', $to_user_id)
+                ->where('to_user_id', Auth::id());
+        });
 
-        // Get total count (without limit)
+        // Get total count (without pagination)
         $totalMessages = $baseQuery->count();
 
-        // Get limited results
-        $chatQuery = $baseQuery->limit(50)
-            ->orderBy('created_at', 'desc')
+        // Calculate offset for pagination
+        $offset = ($page - 1) * $perPage;
+
+        // Get paginated results ordered by creation date (newest first for chat display)
+        $messages = $baseQuery->orderBy('created_at', 'desc')
+            ->offset($offset)
+            ->limit($perPage)
             ->get();
 
-        $to_user_details = User::select('id', 'first_name', 'last_name', 'avatar')
-            ->where('id', $to_user_id)->first();
+        // Get participant details
+        $participant = User::select('id', 'first_name', 'last_name', 'avatar')
+            ->where('id', $to_user_id)
+            ->first();
+
+        if (!$participant) {
+            return response()->json(['error' => 'User not found'], 404);
+        }
 
         return response()->json([
-            'messages' => $chatQuery,
-            'totalMessages' => $totalMessages, // This will be the actual total
-            'participant' => $to_user_details,
+            'messages' => $messages,
+            'totalMessages' => $totalMessages,
+            'participant' => $participant,
+            'currentPage' => $page,
+            'perPage' => $perPage,
+            'hasMorePages' => ($offset + $perPage) < $totalMessages
         ]);
     }
 

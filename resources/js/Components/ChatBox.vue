@@ -1,19 +1,22 @@
 <script setup>
+import { useElementVisibility } from '@vueuse/core';
 import { Chat, ChatContent, ChatDetails, ChatAvatar, ChatMessage, ChatName, ChatItem, ChatList, ChatStatus, ChatForm } from '@/components/ui/chat';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Send } from "lucide-vue-next";
 import { usePage } from "@inertiajs/vue3";
 import UserActiveStatus from './UserActiveStatus.vue';
-import { computed, watch, ref } from 'vue';
+import { computed, watch, ref, useTemplateRef, onMounted, nextTick } from 'vue';
 import axios from 'axios';
 import { useChatManager } from "@/composables/useChatManager";
 
-const { isOnline, updateRecentChats, selectedUserDetails, totalMessages, messagesData, hasMoreMessages } = useChatManager();
+const { isOnline, updateRecentChats, selectedUserDetails, messagesData, hasMoreMessages, loadMoreMessages, loading } = useChatManager();
 
 const userIdReceiver = ref(null);
 const isSending = ref(false);
 const hasErrorSending = ref(false);
+const target = useTemplateRef('target');
+const targetIsVisible = useElementVisibility(target, { threshold: 0.1 });
 
 // V-model
 const formInput = defineModel();
@@ -77,6 +80,20 @@ watch(() => selectedUserDetails?.value, (newActiveUser) => {
     }
 }, { immediate: true });
 
+// Watch loading message to load more messages when needed
+watch(targetIsVisible, (isVisible) => {
+    try {
+        const userId = selectedUserDetails?.value?.id;
+        const hasMore = hasMoreMessages?.value;
+
+        if (isVisible && userId && hasMore) {
+            loadMoreMessages(userId);
+        }
+    } catch (error) {
+        console.error('Error in targetIsVisible watcher:', error);
+    }
+});
+
 </script>
 <template>
     <Chat>
@@ -94,7 +111,8 @@ watch(() => selectedUserDetails?.value, (newActiveUser) => {
         <ChatContent ref="chatContent">
             <ChatList ref="chatList">
                 <template v-if="hasMoreMessages">
-                    <div class="animate-pulse w-full text-center">Loading...</div>
+                    <div class="animate-pulse w-full text-center" ref="target" @click.prevent="handleLoadMore">
+                        Loading...</div>
                 </template>
                 <ChatItem v-for="(chat, index) in messagesData.messages" :key="index"
                     :class="{ 'flex-row-reverse': isSender(chat) }">
