@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 
 const page = usePage();
 const form = useForm({
-    username: '',
+    email: '',
     password: ''
 });
 
@@ -28,17 +28,17 @@ const submit = () => {
                         Login
                     </CardTitle>
                     <CardDescription>
-                        Enter your username below to login to your account
+                        Enter your email below to login to your account
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
                     <InputStatusMessage v-if="page.props.flash?.success" :message="page.props.flash.success" variant="success" class="mb-6" />
                     <form @submit.prevent="submit" method="POST" class="grid gap-4">
                         <div class="grid gap-2">
-                            <Label for="username">Username</Label>
-                            <Input id="username" type="text" v-model="form.username"
-                                :class="{ 'border-red-500': form.errors.username }" />
-                            <InputStatusMessage v-if="form.errors.username" :message="form.errors.username" />
+                            <Label for="email">Email</Label>
+                            <Input id="email" type="text" v-model="form.email"
+                                :class="{ 'border-red-500': form.errors.email }" />
+                            <InputStatusMessage v-if="form.errors.email" :message="form.errors.email" />
                         </div>
                         <div class="grid gap-2">
                             <div class="flex items-center">

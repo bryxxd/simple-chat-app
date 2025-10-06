@@ -22,7 +22,6 @@ const user = computed(() => page.props.auth.user)
 const form = useForm({
     first_name: user.value.first_name,
     last_name: user.value.last_name,
-    username: user.value.username,
     email: user.value.email
 });
 
@@ -67,12 +66,6 @@ const submit = () => {
                         <InputStatusMessage v-if="form.errors.last_name" class="pt-2"
                             :message="form.errors.last_name" />
                     </div>
-                </div>
-
-                <div>
-                    <Label for="username" class="block text-sm font-medium">Username</Label>
-                    <Input v-model="form.username" id="username" />
-                    <InputStatusMessage v-if="form.errors.username" class="pt-2" :message="form.errors.username" />
                 </div>
 
                 <div>

@@ -16,7 +16,6 @@ const form = useForm({
     first_name: "",
     last_name: "",
     email: "",
-    username: "",
     password: "",
     password_confirmation: "",
 });
@@ -56,12 +55,6 @@ const submit = () => {
                         <Input id="email" type="email" v-model="form.email"
                             :class="{ 'border-red-500': form.errors.email }" />
                         <InputStatusMessage v-if="form.errors.email" :message="form.errors.email" />
-                    </div>
-                    <div class="grid gap-2">
-                        <Label for="username">Username</Label>
-                        <Input id="username" type="text" v-model="form.username"
-                            :class="{ 'border-red-500': form.errors.username }" />
-                        <InputStatusMessage v-if="form.errors.username" :message="form.errors.username" />
                     </div>
                     <div class="grid gap-2">
                         <Label for="password">Password</Label>
