@@ -16,7 +16,7 @@ import {
     BreadcrumbPage,
     BreadcrumbSeparator,
 } from "@/Components/ui/breadcrumb";
-import { ref, computed, provide, defineAsyncComponent } from "vue";
+import { ref, computed, provide, defineAsyncComponent, onUpdated, onMounted } from "vue";
 import EmptyChatBox from "@/Components/EmptyChatBox.vue";
 import StartConversation from "@/Components/StartConversation.vue";
 import { useChatManager } from "@/composables/useChatManager";
@@ -24,6 +24,7 @@ import { useChatManager } from "@/composables/useChatManager";
 const {
     selectedUserDetails: activeUser,
     chatUsers,
+    updateSelectedUser
 } = useChatManager();
 
 // No interaction components
@@ -35,6 +36,8 @@ const noInteractionTabs = {
 function switchNoInteractionTab(tabName) {
     if (noInteractionTabs[tabName]) {
         currentNoInteractionTab.value = tabName;
+       // Clear active user when switching to no interaction tab
+        updateSelectedUser(null);
     }
 }
 const checkNoInteractionTab = computed(() => {
@@ -49,7 +52,8 @@ const AsyncChatBox = defineAsyncComponent({
     loadingComponent: Loading, 
     timeout: 10000, 
     errorComponent: Loading, 
-})
+});
+
 </script>
 
 <template>
@@ -78,7 +82,7 @@ const AsyncChatBox = defineAsyncComponent({
                 <NavUser class="w-[3rem] md:w-[2rem]" />
             </header>
             <slot>
-                <template v-if="(chatUsers && chatUsers.length > 0) || activeUser">
+                <template v-if="activeUser">
                     <AsyncChatBox />
                 </template>
                 <template v-else>

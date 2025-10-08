@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from 'vue';
+import { computed, watch } from 'vue';
 import { Link } from "@inertiajs/vue3";
 import SearchUser from "@/components/SearchUser.vue";
 import {
@@ -16,8 +16,8 @@ import { useChatManager } from '@/composables/useChatManager';
 const { chatUsers } = useChatManager();
 
 const hasInteraction = computed(() => {
-    return chatUsers.value && chatUsers.value.length > 0 ? true : false
-})
+    return chatUsers.value && chatUsers.value.length > 0;
+});
 
 // Props
 const props = defineProps({

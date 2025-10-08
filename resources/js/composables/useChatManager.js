@@ -18,7 +18,7 @@ export function useChatManager() {
     // Data / Reactive state
     const selectedUserId = ref(null);
     const onlineUsers = ref([]);
-    const chatUsers = shallowRef([]);
+    const chatUsers = ref([]);
 
     // Add new message to current chat if it belongs to the active conversation
     function addMessageToChat(e) {
@@ -93,9 +93,8 @@ export function useChatManager() {
     }
 
     function updateSelectedUser(userID) {
-        if (!userID || selectedUserId.value === userID) return;
+        if (selectedUserId.value === userID) return;
         selectedUserId.value = userID;        
-        console.log('Selected user updated to:', selectedUserId.value);
     }
 
     // Computed properties
