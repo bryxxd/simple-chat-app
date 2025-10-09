@@ -75,7 +75,7 @@ class HandleInertiaRequests extends Middleware
                 'success' => $request->session()->get('success'),
                 'info' => $request->session()->get('info')
             ],
-            'users' => Auth::check() ? User::select('id', 'first_name', 'last_name', 'email', 'avatar')->where('id', '!=', Auth::id())->get() : [],
+            'users' => Auth::check() ? User::select('id', 'first_name', 'last_name', 'email', 'avatar')->where('id', '!=', Auth::id())->limit(10)->get() : [],
             'interactedUsers' => $interactedUsers,
         ];
     }

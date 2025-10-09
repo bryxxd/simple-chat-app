@@ -18,7 +18,7 @@ const getUserAvatar = (user) => user?.avatar || '/images/profile-placeholder.jpg
 <template>
     <div>
         <div class="relative w-full p-6 border-b border-gray-200">
-            <Input id="search" type="text" placeholder="Search..." class="pl-10 py-6 bg-gray-100 w-full" />
+            <Input id="search" type="text" placeholder="Search..." class="pl-10 py-6 w-full" />
             <span class="absolute left-6 inset-y-0 flex items-center justify-center px-2">
                 <Search class="size-6 text-muted-foreground" />
             </span>
