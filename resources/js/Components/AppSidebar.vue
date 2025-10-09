@@ -1,5 +1,5 @@
 <script setup>
-import { computed, inject } from 'vue';
+import { computed, watch } from 'vue';
 import { Link } from "@inertiajs/vue3";
 import SearchUser from "@/components/SearchUser.vue";
 import {
@@ -11,6 +11,13 @@ import {
 } from "@/components/ui/sidebar";
 import Room from "@/components/Room.vue";
 import EmptyRoom from '@/Components/EmptyRoom.vue';
+import { useChatManager } from '@/composables/useChatManager';
+
+const { chatUsers } = useChatManager();
+
+const hasInteraction = computed(() => {
+    return chatUsers.value && chatUsers.value.length > 0;
+});
 
 // Props
 const props = defineProps({
@@ -19,16 +26,6 @@ const props = defineProps({
     collapsible: { type: String, required: false, default: "icon" },
     class: { type: null, required: false },
 });
-
-// Inject
-const interactedUsers = inject("interactedUsers");
-
-const hasInteraction = computed(() => {
-    return interactedUsers && interactedUsers.length > 0 ? true : false
-})
-
-const { updateActiveChat } = inject('activeChat');
-
 </script>
 
 <template>
@@ -45,8 +42,7 @@ const { updateActiveChat } = inject('activeChat');
                 <SidebarGroup class="px-0">
                     <SidebarGroupContent>
                         <template v-if="hasInteraction">
-                            <Room v-for="user in interactedUsers" :key="user.id" :user="user"
-                                @click="updateActiveChat(user.id)" />
+                            <Room v-for="user in chatUsers" :key="user.id" :user="user" />
                         </template>
                         <template v-else>
                             <EmptyRoom />

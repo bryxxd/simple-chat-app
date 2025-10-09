@@ -1,8 +1,12 @@
 <?php
 
+use App\Models\User;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Route;
+use Laravel\Socialite\Facades\Socialite;
+use Illuminate\Container\Attributes\Auth;
 use App\Http\Controllers\Auth\LoginController;
+use Illuminate\Support\Facades\Auth as AuthFacade;
 use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Auth\VerifyEmailController;
 use App\Http\Controllers\Auth\RegisteredUserController;
@@ -32,6 +36,11 @@ Route::middleware('guest')->group(function () {
         ->name('password.reset');
     Route::post('/reset-password', [NewPasswordController::class, 'store'])
         ->name('password.store');
+    /*
+     * Google OAuth routes
+     */
+    Route::get('/auth/redirect', [App\Http\Controllers\GoogleAuthController::class, 'redirect'])->name('auth.redirect');
+    Route::get('/auth/google/callback', [App\Http\Controllers\GoogleAuthController::class, 'callback'])->name('auth.callback');
 });
 
 Route::middleware('auth')->group(function () {
