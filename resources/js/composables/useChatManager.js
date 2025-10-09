@@ -1,4 +1,5 @@
 import { useLoadMessages } from "./useLoadMessages";
+import { useActiveRoom } from "./useActiveRoom";
 import { ref, computed, onMounted, onUnmounted, shallowRef, watch } from "vue";
 import { usePage } from "@inertiajs/vue3";
 import axios from "axios";
@@ -14,9 +15,10 @@ export function useChatManager() {
 
     // Get the reactive references from useLoadMessages
     const { loadMessages, messagesData, totalMessages, loadError, hasMoreMessages, loadMoreMessages } = useLoadMessages();
+    // Get the reactive references from useActiveRoom
+    const { selectedUserId, updateSelectedUser } = useActiveRoom();
 
     // Data / Reactive state
-    const selectedUserId = ref(null);
     const onlineUsers = ref([]);
     const chatUsers = ref([]);
 
@@ -41,17 +43,17 @@ export function useChatManager() {
                 content: e.content,
                 created_at: e.created_at,
             };
-            
+
             // Insert in correct position to maintain sort order
             const messages = [...messagesData.value.messages];
             const insertIndex = messages.findIndex(msg => msg.id > e.id);
-            
+
             if (insertIndex === -1) {
                 messages.push(newMessage);
             } else {
                 messages.splice(insertIndex, 0, newMessage);
             }
-            
+
             // Create a new object reference for shallowRef reactivity
             messagesData.value = {
                 ...messagesData.value,
@@ -90,11 +92,6 @@ export function useChatManager() {
                 chatUsers.value.unshift(newUser);
             }
         }
-    }
-
-    function updateSelectedUser(userID) {
-        if (selectedUserId.value === userID) return;
-        selectedUserId.value = userID;        
     }
 
     // Computed properties
@@ -145,15 +142,20 @@ export function useChatManager() {
         // Initialize interactedUsers from props if available
         if (usePage().props.interactedUsers.length !== 0) {
             chatUsers.value = usePage().props.interactedUsers;
+
+            // Smart user selection logic
+            if (selectedUserId.value) {
+                // If a user is already selected (e.g., from cookie), verify they exist in interacted users
+                const userExists = usePage().props.interactedUsers.some(user => user.id == selectedUserId.value);
+                if (!userExists) {
+                    updateSelectedUser(usePage().props.interactedUsers[0].id);
+                }
+            } else {
+                // No user selected, pick the first one
+                updateSelectedUser(usePage().props.interactedUsers[0].id);
+            }
         }
-        // Set the first interacted user as activeChat if none is set
-        if (
-            !selectedUserId.value &&
-            usePage().props.interactedUsers.length !== 0
-        ) {
-            selectedUserId.value = usePage().props.interactedUsers[0].id;
-        }
-        
+
         // Listen for incoming messages
         window.Echo.private(
             "new-messages." + usePage().props.auth.user.id,
@@ -171,6 +173,7 @@ export function useChatManager() {
                 content: e.content,
             });
         });
+
         // Presence channel for online users
         window.Echo.join("online-users")
             .here((users) => {
@@ -208,12 +211,14 @@ export function useChatManager() {
             });
     });
 
+
     // Load chat messages whenever activeChat changes
     watch(
         selectedUserId,
         (newUserId) => {
             if (newUserId) {
                 loadMessages(newUserId);
+                console.log(`Loading messages for user ID: ${newUserId}`); // Debug log
             }
         },
         { immediate: true },

@@ -1,5 +1,6 @@
 <script setup>
 import { defineProps, computed } from 'vue';
+import { router, usePage } from '@inertiajs/vue3';
 import { useChatManager } from '@/composables/useChatManager';
 const { isOnline, updateSelectedUser } = useChatManager();
 
@@ -16,9 +17,41 @@ const userAvatarSrc = computed(() => {
     return props.user?.avatar || '/images/profile-placeholder.jpg';
 })
 
+// Navigation handler
+const handleUserClick = () => {
+    const userId = props.user?.id;
+    console.log('Room clicked, user ID:', userId);
+    
+    const currentRoute = usePage().url;
+    console.log('Current route:', currentRoute);
+    
+    // If we're already on dashboard, just update the selected user
+    if (currentRoute === '/') {
+        updateSelectedUser(userId);
+        console.log('Already on dashboard, user set to:', userId);
+        return;
+    }
+    
+    // If we're on a different page, navigate to dashboard first
+    // The selected user will be set after navigation
+    router.visit('/', {
+        preserveState: false,
+        preserveScroll: false,
+        replace: false,
+        onSuccess: () => {
+            // Set the selected user after successful navigation
+            console.log('Navigation successful, setting user:', userId);
+            updateSelectedUser(userId);
+        },
+        onError: (errors) => {
+            console.error('Navigation failed:', errors);
+        }
+    });
+}
+
 </script>
 <template>
-    <div @click="updateSelectedUser(user?.id)" class="flex items-center gap-2 whitespace-nowrap p-4 text-sm leading-tight last:border-b-0 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground cursor-pointer">
+    <div @click="handleUserClick" class="flex items-center gap-2 whitespace-nowrap p-4 text-sm leading-tight last:border-b-0 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground cursor-pointer">
         <slot>
             <div class="relative">
                 <img class="rounded-full w-12 h-12" :src="userAvatarSrc" alt="">
