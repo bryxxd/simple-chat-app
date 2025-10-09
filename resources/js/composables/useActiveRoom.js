@@ -25,7 +25,6 @@ export function useActiveRoom() {
             // Convert to number if it's a numeric string to match user IDs
             const roomId = isNaN(cookieRoomId) ? cookieRoomId : parseInt(cookieRoomId);
             selectedUserId.value = roomId;
-            console.log(`Read cookie: ${selectedUserId.value} (type: ${typeof selectedUserId.value})`); // Debug log
         }
     });
 

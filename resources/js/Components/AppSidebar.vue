@@ -1,22 +1,22 @@
 <script setup>
-import { computed, watch } from 'vue';
+import { computed } from 'vue';
 import { Link } from "@inertiajs/vue3";
-import SearchUser from "@/components/SearchUser.vue";
+import SearchUser from "@/Components/SearchUser.vue";
 import {
     Sidebar,
     SidebarContent,
     SidebarGroup,
     SidebarGroupContent,
     SidebarHeader,
-} from "@/components/ui/sidebar";
-import Room from "@/components/Room.vue";
+} from "@/Components/ui/sidebar";
+import Room from "@/Components/Room.vue";
 import EmptyRoom from '@/Components/EmptyRoom.vue';
-import { useChatManager } from '@/composables/useChatManager';
+import { useChatStore } from '@/stores/chatStore';
 
-const { chatUsers } = useChatManager();
+const chatStore = useChatStore();
 
 const hasInteraction = computed(() => {
-    return chatUsers.value && chatUsers.value.length > 0;
+    return chatStore.chatUsers && chatStore.chatUsers.length > 0;
 });
 
 // Props
@@ -42,7 +42,7 @@ const props = defineProps({
                 <SidebarGroup class="px-0">
                     <SidebarGroupContent>
                         <template v-if="hasInteraction">
-                            <Room v-for="user in chatUsers" :key="user.id" :user="user" />
+                            <Room v-for="user in chatStore.chatUsers" :key="user.id" :user="user" />
                         </template>
                         <template v-else>
                             <EmptyRoom />

@@ -1,16 +1,16 @@
 <script setup>
 import { useElementVisibility } from '@vueuse/core';
-import { Chat, ChatContent, ChatDetails, ChatAvatar, ChatMessage, ChatName, ChatItem, ChatList, ChatStatus, ChatForm } from '@/components/ui/chat';
-import { Textarea } from '@/components/ui/textarea';
+import { Chat, ChatContent, ChatDetails, ChatAvatar, ChatMessage, ChatName, ChatItem, ChatList, ChatStatus, ChatForm } from '@/Components/ui/chat';
+import { Textarea } from '@/Components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Send } from "lucide-vue-next";
 import { usePage } from "@inertiajs/vue3";
 import UserActiveStatus from './UserActiveStatus.vue';
-import { computed, watch, ref, useTemplateRef, onMounted, nextTick } from 'vue';
+import { computed, watch, ref, useTemplateRef } from 'vue';
 import axios from 'axios';
-import { useChatManager } from "@/composables/useChatManager";
+import { useChatStore } from "@/stores/chatStore";
 
-const { isOnline, updateRecentChats, selectedUserDetails, messagesData, hasMoreMessages, loadMoreMessages, loading } = useChatManager();
+const chatStore = useChatStore();
 
 const userIdReceiver = ref(null);
 const isSending = ref(false);
@@ -49,7 +49,7 @@ async function sendMessage() {
         });
 
         // Use the stored content - only update on success
-        updateRecentChats({
+        chatStore.updateRecentChats({
             targetUserId: userIdReceiver.value,
             content: messageContent
         });
@@ -70,11 +70,11 @@ function isSender(chat) {
 function getUserAvatar(chat) {
     return authUser.value && chat.from_user_id === authUser.value.id
         ? authUser.value.avatar
-        : messagesData?.value?.participant?.avatar
+        : chatStore.messagesData?.participant?.avatar
 }
 
 // Watch for selectedUserDetails changes and update form
-watch(() => selectedUserDetails?.value, (newActiveUser) => {
+watch(() => chatStore.selectedUserDetails, (newActiveUser) => {
     if (newActiveUser?.id) {
         userIdReceiver.value = newActiveUser.id;
     }
@@ -83,11 +83,11 @@ watch(() => selectedUserDetails?.value, (newActiveUser) => {
 // Watch loading message to load more messages when needed
 watch(targetIsVisible, (isVisible) => {
     try {
-        const userId = selectedUserDetails?.value?.id;
-        const hasMore = hasMoreMessages?.value;
+        const userId = chatStore.selectedUserDetails?.id;
+        const hasMore = chatStore.hasMoreMessages;
 
         if (isVisible && userId && hasMore) {
-            loadMoreMessages(userId);
+            chatStore.loadMoreMessages();
         }
     } catch (error) {
         console.error('Error in targetIsVisible watcher:', error);
@@ -99,22 +99,22 @@ watch(targetIsVisible, (isVisible) => {
     <Chat>
         <ChatDetails>
             <div class="flex">
-                <ChatAvatar :src="messagesData?.participant?.avatar" />
+                <ChatAvatar :src="chatStore.messagesData?.participant?.avatar" />
                 <div class="flex flex-col justify-between ml-4">
-                    <ChatName>{{ messagesData?.participant?.first_name }} {{ messagesData?.participant?.last_name }}
+                    <ChatName>{{ chatStore.messagesData?.participant?.first_name }} {{ chatStore.messagesData?.participant?.last_name }}
                     </ChatName>
-                    <ChatStatus v-if="isOnline(selectedUserDetails?.id)" class="text-green-700">Online</ChatStatus>
-                    <UserActiveStatus v-else :id="selectedUserDetails?.id" />
+                    <ChatStatus v-if="chatStore.isOnline(chatStore.selectedUserDetails?.id)" class="text-green-700">Online</ChatStatus>
+                    <UserActiveStatus v-else :id="chatStore.selectedUserDetails?.id" />
                 </div>
             </div>
         </ChatDetails>
         <ChatContent ref="chatContent">
             <ChatList ref="chatList">
-                <template v-if="hasMoreMessages">
-                    <div class="animate-pulse w-full text-center" ref="target" @click.prevent="handleLoadMore">
+                <template v-if="chatStore.hasMoreMessages">
+                    <div class="animate-pulse w-full text-center" ref="target">
                         Loading...</div>
                 </template>
-                <ChatItem v-for="(chat, index) in messagesData.messages" :key="index"
+                <ChatItem v-for="(chat, index) in chatStore.messagesData.messages" :key="index"
                     :class="{ 'flex-row-reverse': isSender(chat) }">
                     <ChatAvatar :src="getUserAvatar(chat)" class="w-8 h-8" />
                     <ChatMessage :variant="isSender(chat) ? 'sender' : 'default'">

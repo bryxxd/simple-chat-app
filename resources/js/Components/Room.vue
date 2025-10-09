@@ -1,8 +1,9 @@
 <script setup>
 import { defineProps, computed } from 'vue';
 import { router, usePage } from '@inertiajs/vue3';
-import { useChatManager } from '@/composables/useChatManager';
-const { isOnline, updateSelectedUser } = useChatManager();
+import { useChatStore } from '@/stores/chatStore';
+
+const chatStore = useChatStore();
 
 // Props
 const props = defineProps({
@@ -20,33 +21,19 @@ const userAvatarSrc = computed(() => {
 // Navigation handler
 const handleUserClick = () => {
     const userId = props.user?.id;
-    console.log('Room clicked, user ID:', userId);
-    
     const currentRoute = usePage().url;
-    console.log('Current route:', currentRoute);
+
+    // Update the selected user first
+    chatStore.updateSelectedUser(userId);
     
-    // If we're already on dashboard, just update the selected user
-    if (currentRoute === '/') {
-        updateSelectedUser(userId);
-        console.log('Already on dashboard, user set to:', userId);
-        return;
+    // If not on dashboard, navigate there
+    if (currentRoute !== '/' && !currentRoute.startsWith('/?')) {
+        router.visit('/', {
+            preserveState: true,
+            preserveScroll: false,
+            replace: false
+        });
     }
-    
-    // If we're on a different page, navigate to dashboard first
-    // The selected user will be set after navigation
-    router.visit('/', {
-        preserveState: false,
-        preserveScroll: false,
-        replace: false,
-        onSuccess: () => {
-            // Set the selected user after successful navigation
-            console.log('Navigation successful, setting user:', userId);
-            updateSelectedUser(userId);
-        },
-        onError: (errors) => {
-            console.error('Navigation failed:', errors);
-        }
-    });
 }
 
 </script>
@@ -55,7 +42,7 @@ const handleUserClick = () => {
         <slot>
             <div class="relative">
                 <img class="rounded-full w-12 h-12" :src="userAvatarSrc" alt="">
-                <span v-if="isOnline(user?.id)" class="w-2 h-2 bg-green-700 inline-block rounded-full absolute right-2 bottom-0"></span>
+                <span v-if="chatStore.isOnline(user?.id)" class="w-2 h-2 bg-green-700 inline-block rounded-full absolute right-2 bottom-0"></span>
             </div>
             <div class="flex flex-col gap-3 justify-between w-48 overflow-hidden">
                 <h3 class="text-ellipsis overflow-hidden whitespace-nowrap">{{ user?.first_name }} {{ user?.last_name }}</h3>

@@ -1,9 +1,9 @@
 <script setup>
 import axios from 'axios';
-import { ref, onMounted, computed, watch, inject } from 'vue';
-import { useChatManager } from "@/composables/useChatManager";
+import { ref, onMounted, computed, watch } from 'vue';
+import { useChatStore } from "@/stores/chatStore";
 
-const { chatUsers } = useChatManager();
+const chatStore = useChatStore();
 // Reactive variable
 const userLeft = ref({
     last_active_at: null
@@ -19,7 +19,7 @@ const props = defineProps({
 })
 
 const checkIfHasInteracted = computed(() => {
-    return chatUsers.value.some(user => user.id === props.id);
+    return chatStore.chatUsers.some(user => user.id === props.id);
 });
 
 // Computed 

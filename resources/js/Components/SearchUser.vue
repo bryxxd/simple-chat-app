@@ -12,9 +12,8 @@ import {
     ComboboxItem,
     ComboboxList,
 } from "@/components/ui/combobox";
-import { useChatManager } from "@/composables/useChatManager";
-
-const { updateSelectedUser } = useChatManager();
+import { useChatStore } from "@/stores/chatStore";
+const chatStore = useChatStore();
 
 // Computed properties
 const users = computed(() => usePage().props.users);
@@ -39,7 +38,7 @@ const getUserAvatar = (user) => user?.avatar || '/images/profile-placeholder.jpg
 
             <ComboboxGroup>
                 <ComboboxItem v-for="user in users" :key="user.id" :value="user" class="justify-start"
-                    @click="updateSelectedUser( user.id)">
+                    @click="chatStore.updateSelectedUser(user.id)">
                     <Avatar>
                         <AvatarImage :src="getUserAvatar(user)" alt="" />
                     </Avatar>

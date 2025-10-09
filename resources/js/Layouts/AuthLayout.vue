@@ -1,6 +1,5 @@
 <script setup>
 import AppSidebar from "@/Components/AppSidebar.vue";
-import ChatBox from "@/Components/ChatBox.vue";
 import Loading from "@/Components/LoadingChatBox.vue";
 import NavUser from "@/Components/NavUser.vue";
 import {
@@ -16,16 +15,18 @@ import {
     BreadcrumbPage,
     BreadcrumbSeparator,
 } from "@/Components/ui/breadcrumb";
-import { ref, computed, provide, defineAsyncComponent, onUpdated, onMounted } from "vue";
+import { ref, computed, provide, defineAsyncComponent, onMounted } from "vue";
 import EmptyChatBox from "@/Components/EmptyChatBox.vue";
 import StartConversation from "@/Components/StartConversation.vue";
-import { useChatManager } from "@/composables/useChatManager";
+import { useChatStore } from "@/stores/chatStore";
 
-const {
-    selectedUserDetails: activeUser,
-    chatUsers,
-    updateSelectedUser
-} = useChatManager();
+const chatStore = useChatStore();
+
+// Initialize the chat store when component mounts
+onMounted(() => {
+    chatStore.initializeFromProps();
+    chatStore.setupEchoListeners();
+});
 
 // No interaction components
 const currentNoInteractionTab = ref('EmptyChatBox');
@@ -37,11 +38,11 @@ function switchNoInteractionTab(tabName) {
     if (noInteractionTabs[tabName]) {
         currentNoInteractionTab.value = tabName;
        // Clear active user when switching to no interaction tab
-        updateSelectedUser(null);
+        chatStore.updateSelectedUser(null);
     }
 }
 const checkNoInteractionTab = computed(() => {
-    return currentNoInteractionTab.value === 'StartConversation' && activeUser.value === null ? true : false;
+    return currentNoInteractionTab.value === 'StartConversation' && chatStore.selectedUserDetails === null ? true : false;
 });
 
 // Provide
@@ -82,7 +83,7 @@ const AsyncChatBox = defineAsyncComponent({
                 <NavUser class="w-[3rem] md:w-[2rem]" />
             </header>
             <slot>
-                <template v-if="activeUser">
+                <template v-if="chatStore.selectedUserDetails">
                     <AsyncChatBox />
                 </template>
                 <template v-else>
