@@ -27,7 +27,7 @@ export const useChatStore = defineStore('chat', () => {
     const users = computed(() => {
         return usePage().props.users || []
     })
-    
+
     const selectedUserDetails = computed(() => {
         if (!selectedUserId.value) {
             return null
@@ -64,12 +64,12 @@ export const useChatStore = defineStore('chat', () => {
     })
 
     // Actions
-    const updateSelectedUser = (userId) => {        
+    const updateSelectedUser = (userId) => {
         if (selectedUserId.value === userId) return;
-        
+
         selectedUserId.value = userId
         setCookieActiveRoom(userId)
-        
+
         // Load messages immediately when user is selected
         if (userId) {
             loadMessages(userId)
@@ -78,11 +78,11 @@ export const useChatStore = defineStore('chat', () => {
 
     const loadMessages = async (userId) => {
         if (!userId) return
-                
+
         try {
             loadError.value = null
             const response = await axios.get(`/api/chat-room/${userId}`)
-            
+
             if (response.data) {
                 const sortedMessages = response.data.messages.sort((a, b) => a.id - b.id)
                 messagesData.value = {
@@ -92,23 +92,24 @@ export const useChatStore = defineStore('chat', () => {
             } else {
                 messagesData.value = response.data
             }
-            
+
             totalMessages.value = response.data.total || 0
             hasMoreMessages.value = (response.data.messages?.length || 0) >= 20
         } catch (error) {
-            loadError.value = error.message
+            console.error('Error loading messages:', error);
+            loadError.value = 'Failed to load messages'
         }
     }
 
     const loadMoreMessages = async () => {
         if (!selectedUserId.value || !hasMoreMessages.value) return
-        
+
         try {
             const currentMessages = messagesData.value.messages || []
             const offset = currentMessages.length
-            
+
             const response = await axios.get(`/api/chat-room/${selectedUserId.value}?offset=${offset}`)
-            
+
             if (response.data.messages && response.data.messages.length > 0) {
                 const sortedNewMessages = response.data.messages.sort((a, b) => a.id - b.id)
 
@@ -122,6 +123,7 @@ export const useChatStore = defineStore('chat', () => {
             }
         } catch (error) {
             console.error('Pinia: Error loading more messages:', error)
+            loadError.value = 'Failed to load more messages'
         }
     }
 
@@ -140,17 +142,17 @@ export const useChatStore = defineStore('chat', () => {
                 content: e.content,
                 created_at: e.created_at,
             }
-            
+
             // Insert in correct position to maintain sort order
             const messages = [...messagesData.value.messages]
             const insertIndex = messages.findIndex(msg => msg.id > e.id)
-            
+
             if (insertIndex === -1) {
                 messages.push(newMessage)
             } else {
                 messages.splice(insertIndex, 0, newMessage)
             }
-            
+
             messagesData.value = {
                 ...messagesData.value,
                 messages
@@ -189,31 +191,31 @@ export const useChatStore = defineStore('chat', () => {
         }
     }
 
-    const initializeFromProps = () => {        
+    const initializeFromProps = () => {
         const props = usePage().props
-        
+
         // Initialize interactedUsers from props if available
         if (props.interactedUsers && props.interactedUsers.length !== 0) {
             chatUsers.value = props.interactedUsers
-            
+
             // Check if we have a cookie value first
             const cookieRoomId = getCookieActiveRoom()
             if (cookieRoomId) {
                 const roomId = isNaN(cookieRoomId) ? cookieRoomId : parseInt(cookieRoomId)
                 const userExists = props.interactedUsers.some(user => user.id == roomId)
-                
+
                 if (userExists) {
                     updateSelectedUser(roomId)
                     return
                 }
             }
-            
+
             // Fallback to first user if no valid cookie
             updateSelectedUser(props.interactedUsers[0].id)
         }
     }
 
-    const setupEchoListeners = () => {        
+    const setupEchoListeners = () => {
         // Listen for incoming messages
         window.Echo.private(
             "new-messages." + usePage().props.auth.user.id,
@@ -277,12 +279,12 @@ export const useChatStore = defineStore('chat', () => {
         totalMessages,
         loadError,
         hasMoreMessages,
-        
+
         // Computed
         users,
         selectedUserDetails,
         isOnline,
-        
+
         // Actions
         updateSelectedUser,
         loadMessages,

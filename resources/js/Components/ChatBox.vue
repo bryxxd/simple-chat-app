@@ -101,32 +101,40 @@ watch(targetIsVisible, (isVisible) => {
             <div class="flex">
                 <ChatAvatar :src="chatStore.messagesData?.participant?.avatar" />
                 <div class="flex flex-col justify-between ml-4">
-                    <ChatName>{{ chatStore.messagesData?.participant?.first_name }} {{ chatStore.messagesData?.participant?.last_name }}
+                    <ChatName>{{ chatStore.messagesData?.participant?.first_name }} {{
+                        chatStore.messagesData?.participant?.last_name }}
                     </ChatName>
-                    <ChatStatus v-if="chatStore.isOnline(chatStore.selectedUserDetails?.id)" class="text-green-700">Online</ChatStatus>
+                    <ChatStatus v-if="chatStore.isOnline(chatStore.selectedUserDetails?.id)" class="text-green-700">
+                        Online</ChatStatus>
                     <UserActiveStatus v-else :id="chatStore.selectedUserDetails?.id" />
                 </div>
             </div>
         </ChatDetails>
         <ChatContent ref="chatContent">
-            <ChatList ref="chatList">
-                <template v-if="chatStore.hasMoreMessages">
-                    <div class="animate-pulse w-full text-center" ref="target">
-                        Loading...</div>
-                </template>
-                <ChatItem v-for="(chat, index) in chatStore.messagesData.messages" :key="index"
-                    :class="{ 'flex-row-reverse': isSender(chat) }">
-                    <ChatAvatar :src="getUserAvatar(chat)" class="w-8 h-8" />
-                    <ChatMessage :variant="isSender(chat) ? 'sender' : 'default'">
-                        {{ chat.content }}
-                    </ChatMessage>
-                </ChatItem>
-                <template v-if="hasErrorSending">
-                    <div class="text-red-500 text-sm text-right">Failed to send message. Please try again.</div>
-                </template>
-            </ChatList>
+            <template class="p-4" v-if="chatStore.loadError">
+                <div class="text-red-500 text-center">{{ chatStore.loadError }}</div>
+            </template>
+            <template v-else>
+                <ChatList ref="chatList">
+                    <template v-if="chatStore.hasMoreMessages">
+                        <div class="animate-pulse w-full text-center" ref="target">
+                            Loading...</div>
+                    </template>
+                    <ChatItem v-for="(chat, index) in chatStore.messagesData.messages" :key="index"
+                        :class="{ 'flex-row-reverse': isSender(chat) }">
+                        <ChatAvatar :src="getUserAvatar(chat)" class="w-8 h-8" />
+                        <ChatMessage :variant="isSender(chat) ? 'sender' : 'default'">
+                            {{ chat.content }}
+                        </ChatMessage>
+                    </ChatItem>
+                    <template v-if="hasErrorSending">
+                        <div class="text-red-500 text-sm text-right">Failed to send message. Please try again.</div>
+                    </template>
+                </ChatList>
+            </template>
+
         </ChatContent>
-        <ChatForm @submit.prevent="sendMessage" method="POST">
+        <ChatForm @submit.prevent="sendMessage" method="POST" v-if="!chatStore.loadError">
             <Textarea placeholder="Type your message..." v-model="formInput" :disabled="isSending" class="pr-20" />
             <Button class="absolute right-[0.5rem] top-[0.7rem]" type="submit"
                 :disabled="isSending || !formInput?.trim()">
