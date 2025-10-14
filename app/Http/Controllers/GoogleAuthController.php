@@ -45,7 +45,7 @@ class GoogleAuthController extends Controller
                 'avatar' => $user->avatar,
                 'provider' => 'google',
                 'provider_id' => $user->id,
-                'password' => bcrypt(bin2hex(random_bytes(16))), 
+                'password' => bcrypt(uniqid()), 
                 'email_verified_at' => now(),
             ]);
 
