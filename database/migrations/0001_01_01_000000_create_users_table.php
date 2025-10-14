@@ -19,6 +19,8 @@ return new class extends Migration
             $table->string('avatar')->default('/images/profile-placeholder.png');
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            $table->string('provider')->default('email');
+            $table->string('provider_id')->nullable()->unique();
             $table->rememberToken();
             $table->timestamps();
         });

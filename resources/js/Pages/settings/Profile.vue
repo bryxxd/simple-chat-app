@@ -48,7 +48,7 @@ const submit = () => {
         <Settings>
             <div>
                 <h3 class="text-lg font-medium"> Profile </h3>
-                <p class="text-sm text-muted-foreground"> This is how others will see you on the site. </p>
+                <p class="text-sm text-muted-foreground">This is how others will see you on the site.</p>
             </div>
             <Divider />
             <form @submit.prevent="submit" class="space-y-8">
@@ -79,6 +79,5 @@ const submit = () => {
                 </div>
             </form>
         </Settings>
-
     </AuthLayout>
 </template>

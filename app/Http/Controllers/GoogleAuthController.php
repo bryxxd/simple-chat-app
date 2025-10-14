@@ -11,56 +11,46 @@ use Laravel\Socialite\Facades\Socialite;
 
 class GoogleAuthController extends Controller
 {
-    public function redirect() {
+    public function redirect()
+    {
         // Redirect authenticated users to dashboard
         if (Auth::check()) {
             return redirect()->route('dashboard');
         }
-        
+
         return Socialite::driver('google')->redirect();
     }
 
-    public function callback () {
-        try {
-            $user = Socialite::driver('google')->user();
-            
-            // Validate required data from Google
-            if (!$user->email) {
-                return redirect()->route('login.index')
-                    ->with('error', 'Unable to get email from Google. Please try again.');
-            }
+    public function callback()
+    {
+        $user = Socialite::driver('google')->user();
 
-            $existingUser = User::where('email', $user->email)->first();
+        // Check if the user already exists
+        $existingUser = User::where('provider', 'google')
+            ->where('provider_id', $user->id)
+            ->first();
 
-            if($existingUser) {
-                // Update existing user's avatar if available
-                if ($user->avatar && $user->avatar !== $existingUser->avatar) {
-                    $existingUser->update(['avatar' => $user->avatar]);
-                }
-                Auth::login($existingUser, true);
-            } else {
-                // Split the full name into first and last name
-                $nameParts = explode(' ', $user->name ?? 'User', 2);
-                $firstName = $nameParts[0];
-                $lastName = isset($nameParts[1]) ? $nameParts[1] : '';
-                
-                $newUser = User::create([
-                    'email' => $user->email,
-                    'first_name' => $firstName,
-                    'last_name' => $lastName,
-                    'avatar' => $user->avatar,
-                    'password' => bcrypt(uniqid()),
-                    'email_verified_at' => now(), // Auto-verify Google OAuth emails
-                ]);
-                Auth::login($newUser, true);
-            }
+        if ($existingUser) {
+            Auth::login($existingUser);
+            return redirect()->route('dashboard');
+        } else {
+            $nameParts = explode(' ', $user->name ?? 'User', 2);
+            $firstName = $nameParts[0];
+            $lastName = isset($nameParts[1]) ? $nameParts[1] : '';
 
-            return redirect()->route('dashboard');  
-        } catch (\Exception $e) {
-            Log::error('Google OAuth Error: ' . $e->getMessage());
-            return redirect()->route('login.index')
-                ->with('error', 'Authentication failed. Please try again.');
+            $newUser = User::create([
+                'first_name' => $firstName,
+                'last_name' => $lastName,
+                'email' => $user->email,
+                'avatar' => $user->avatar,
+                'provider' => 'google',
+                'provider_id' => $user->id,
+                'password' => bcrypt(bin2hex(random_bytes(16))), 
+                'email_verified_at' => now(),
+            ]);
+
+            Auth::login($newUser);
+            return redirect()->route('dashboard');
         }
     }
 }
-

@@ -21,11 +21,10 @@ import {
         <Settings>
             <div>
                 <h3 class="text-lg font-medium"> Apperance </h3>
-                <p class="text-sm text-muted-foreground"> This is how others will see you on the site. </p>
+                <p class="text-sm text-muted-foreground">Manage the appearance of your application.</p>
             </div>
             <div data-orientation="horizontal" role="none" class="shrink-0 bg-border h-px w-full"></div>
             <AppearanceTabs />
         </Settings>
-
     </AuthLayout>
 </template>
