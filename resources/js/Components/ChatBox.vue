@@ -81,18 +81,18 @@ watch(() => chatStore.selectedUserDetails, (newActiveUser) => {
 }, { immediate: true });
 
 // Watch loading message to load more messages when needed
-// watch(targetIsVisible, (isVisible) => {
-//     try {
-//         const userId = chatStore.selectedUserDetails?.id;
-//         const hasMore = chatStore.hasMoreMessages;
+watch(targetIsVisible, (isVisible) => {
+    try {
+        const userId = chatStore.selectedUserDetails?.id;
+        const hasMore = chatStore.hasMorePages;
 
-//         if (isVisible && userId && hasMore) {
-//             chatStore.loadMoreMessages();
-//         }
-//     } catch (error) {
-//         console.error('Error in targetIsVisible watcher:', error);
-//     }
-// });
+        if (isVisible && userId && hasMore) {
+            chatStore.loadMoreMessages();
+        }
+    } catch (error) {
+        console.error('Error in targetIsVisible watcher:', error);
+    }
+});
 
 </script>
 <template>
@@ -116,11 +116,11 @@ watch(() => chatStore.selectedUserDetails, (newActiveUser) => {
             </template>
             <template v-else>
                 <ChatList ref="chatList">
-                    <template v-if="chatStore.hasMoreMessages">
+                    <template v-if="chatStore.hasMorePages">
                         <div class="animate-pulse w-full text-center" ref="target">
                             Loading...</div>
                     </template>
-                    <ChatItem v-for="(chat, index) in chatStore.messagesData.messages" :key="index"
+                    <ChatItem v-for="chat in chatStore.messagesData.messages" :key="chat.id"
                         :class="{ 'flex-row-reverse': isSender(chat) }">
                         <ChatAvatar :src="getUserAvatar(chat)" class="w-8 h-8" />
                         <ChatMessage :variant="isSender(chat) ? 'sender' : 'default'">

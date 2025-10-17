@@ -10,8 +10,10 @@ export const useChatStore = defineStore('chat', () => {
     const onlineUsers = ref([])
     const messagesData = ref({})
     const totalMessages = ref(0)
+    const perPage = ref(20);
+    const currentPage = ref(1);
     const loadError = ref(null)
-    const hasMoreMessages = ref(true)
+    const hasMorePages = ref(true)
 
     // Cookie management
     const setCookieActiveRoom = (roomId) => {
@@ -82,6 +84,7 @@ export const useChatStore = defineStore('chat', () => {
         try {
             loadError.value = null
             const res = await axios.get(`/api/chat-room/${userId}`)
+            currentPage.value = 1;
 
             if (res.data) {
                 const sortedMessages = res.data.messages.sort((a, b) => a.id - b.id)
@@ -89,15 +92,36 @@ export const useChatStore = defineStore('chat', () => {
                     ...res.data,
                     messages: sortedMessages
                 }
-            } else {
-                messagesData.value = res.data
+                totalMessages.value = res.data.totalMessages;
+                hasMorePages.value = res.data.hasMorePages;
             }
-
-            totalMessages.value = res.data.totalMessages || 0
-            hasMoreMessages.value = (res.data.messages?.length || 0) >= 50
         } catch (error) {
             console.error('Error loading messages:', error);
             loadError.value = 'Failed to load messages'
+        }
+    }
+
+    const loadMoreMessages = async () => {
+        if (!selectedUserId.value || !hasMorePages.value) return
+
+        try {
+            const nextPage = currentPage.value + 1;
+            const res = await axios.get(`/api/chat-room/${selectedUserId.value}`, {
+                params: {
+                    page: nextPage,
+                    per_page: perPage.value,
+                }
+            })
+
+            if (res.data.messages) {
+                const sortedNewMessages = res.data.messages.sort((a, b) => a.id - b.id)
+                messagesData.value.messages.unshift(...sortedNewMessages)
+                hasMorePages.value = res.data.hasMorePages;
+                currentPage.value = nextPage;
+            }
+        } catch (error) {
+            console.error('Pinia: Error loading more messages:', error)
+            loadError.value = 'Failed to load more messages'
         }
     }
 
@@ -251,8 +275,10 @@ export const useChatStore = defineStore('chat', () => {
         onlineUsers,
         messagesData,
         totalMessages,
+        perPage,
+        currentPage,
         loadError,
-        hasMoreMessages,
+        hasMorePages,
 
         // Computed
         users,
@@ -262,6 +288,7 @@ export const useChatStore = defineStore('chat', () => {
         // Actions
         updateSelectedUser,
         loadMessages,
+        loadMoreMessages,
         addMessageToChat,
         updateRecentChats,
         initializeFromProps,
