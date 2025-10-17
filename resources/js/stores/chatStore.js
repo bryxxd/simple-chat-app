@@ -81,49 +81,23 @@ export const useChatStore = defineStore('chat', () => {
 
         try {
             loadError.value = null
-            const response = await axios.get(`/api/chat-room/${userId}`)
+            const res = await axios.get(`/api/chat-room/${userId}`)
 
-            if (response.data) {
-                const sortedMessages = response.data.messages.sort((a, b) => a.id - b.id)
+            if (res.data) {
+                const sortedMessages = res.data.messages.sort((a, b) => a.id - b.id)
                 messagesData.value = {
-                    ...response.data,
+                    ...res.data,
                     messages: sortedMessages
                 }
             } else {
-                messagesData.value = response.data
+                messagesData.value = res.data
             }
 
-            totalMessages.value = response.data.total || 0
-            hasMoreMessages.value = (response.data.messages?.length || 0) >= 20
+            totalMessages.value = res.data.totalMessages || 0
+            hasMoreMessages.value = (res.data.messages?.length || 0) >= 50
         } catch (error) {
             console.error('Error loading messages:', error);
             loadError.value = 'Failed to load messages'
-        }
-    }
-
-    const loadMoreMessages = async () => {
-        if (!selectedUserId.value || !hasMoreMessages.value) return
-
-        try {
-            const currentMessages = messagesData.value.messages || []
-            const offset = currentMessages.length
-
-            const response = await axios.get(`/api/chat-room/${selectedUserId.value}?offset=${offset}`)
-
-            if (response.data.messages && response.data.messages.length > 0) {
-                const sortedNewMessages = response.data.messages.sort((a, b) => a.id - b.id)
-
-                messagesData.value = {
-                    ...messagesData.value,
-                    messages: [...currentMessages, ...sortedNewMessages]
-                }
-                hasMoreMessages.value = response.data.messages.length >= 20
-            } else {
-                hasMoreMessages.value = false
-            }
-        } catch (error) {
-            console.error('Pinia: Error loading more messages:', error)
-            loadError.value = 'Failed to load more messages'
         }
     }
 
@@ -288,7 +262,6 @@ export const useChatStore = defineStore('chat', () => {
         // Actions
         updateSelectedUser,
         loadMessages,
-        loadMoreMessages,
         addMessageToChat,
         updateRecentChats,
         initializeFromProps,

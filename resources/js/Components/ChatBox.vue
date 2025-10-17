@@ -81,18 +81,18 @@ watch(() => chatStore.selectedUserDetails, (newActiveUser) => {
 }, { immediate: true });
 
 // Watch loading message to load more messages when needed
-watch(targetIsVisible, (isVisible) => {
-    try {
-        const userId = chatStore.selectedUserDetails?.id;
-        const hasMore = chatStore.hasMoreMessages;
+// watch(targetIsVisible, (isVisible) => {
+//     try {
+//         const userId = chatStore.selectedUserDetails?.id;
+//         const hasMore = chatStore.hasMoreMessages;
 
-        if (isVisible && userId && hasMore) {
-            chatStore.loadMoreMessages();
-        }
-    } catch (error) {
-        console.error('Error in targetIsVisible watcher:', error);
-    }
-});
+//         if (isVisible && userId && hasMore) {
+//             chatStore.loadMoreMessages();
+//         }
+//     } catch (error) {
+//         console.error('Error in targetIsVisible watcher:', error);
+//     }
+// });
 
 </script>
 <template>
