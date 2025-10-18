@@ -13,7 +13,7 @@ export const useChatStore = defineStore('chat', () => {
     const perPage = ref(10);
     const currentPage = ref(1);
     const loadError = ref(null)
-    const hasMorePages = ref(true)
+    const hasMorePages = ref(false)
 
     // Cookie management
     const setCookieActiveRoom = (roomId) => {
@@ -105,6 +105,7 @@ export const useChatStore = defineStore('chat', () => {
         if (!selectedUserId.value || !hasMorePages.value) return
 
         try {
+            hasMorePages.value = false; 
             const nextPage = currentPage.value + 1;
             const res = await axios.get(`/api/chat-room/${selectedUserId.value}`, {
                 params: {

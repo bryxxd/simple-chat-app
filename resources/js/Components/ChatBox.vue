@@ -9,6 +9,8 @@ import { computed, watch, ref, useTemplateRef } from 'vue';
 import axios from 'axios';
 import { useChatStore } from "@/stores/chatStore";
 import { useInfiniteScroll } from '@vueuse/core';
+import { LoaderCircle } from "lucide-vue-next";
+
 
 const chatStore = useChatStore();
 
@@ -31,7 +33,7 @@ const { isLoading } = useInfiniteScroll(
         chatStore.onLoadMore();
     },
     {
-        distance: 10,
+        distance: 30,
         direction: 'top',
         canLoadMore: () => chatStore.hasMorePages
     }
@@ -96,7 +98,7 @@ watch(() => chatStore.selectedUserDetails, (newActiveUser) => {
     <Chat>
         <ChatDetails>
             <div class="flex">
-                <ChatAvatar :src="chatStore.messagesData?.participant?.avatar" />
+                <ChatAvatar class="w-12 h-12 md:w-14 md:h-14" :src="chatStore.messagesData?.participant?.avatar" />
                 <div class="flex flex-col justify-between ml-4">
                     <ChatName>{{ chatStore.messagesData?.participant?.first_name }} {{
                         chatStore.messagesData?.participant?.last_name }}
@@ -114,9 +116,7 @@ watch(() => chatStore.selectedUserDetails, (newActiveUser) => {
             <template v-else>
                 <ChatList>
                     <template v-if="isLoading">
-                        <div class="animate-pulse w-full text-center text-gray-400 text-sm py-2">
-                            Loading...
-                        </div>
+                        <LoaderCircle class="animate-spin mx-auto w-8 h-8" />
                     </template>
                     <ChatItem v-for="chat in chatStore.messagesData.messages" :key="chat.id"
                         :class="{ 'flex-row-reverse': isSender(chat) }">
@@ -135,9 +135,10 @@ watch(() => chatStore.selectedUserDetails, (newActiveUser) => {
             <Textarea placeholder="Type your message..." v-model="formInput" :disabled="isSending" class="pr-20" />
             <Button class="absolute right-[0.5rem] top-[0.7rem]" type="submit"
                 :disabled="isSending || !formInput?.trim()">
-                <span v-if="isSending">Sending...</span>
+                <span v-if="isSending">
+                    <LoaderCircle class="animate-spin" />
+                </span>
                 <template v-else>
-                    Send
                     <Send />
                 </template>
             </Button>
