@@ -1,5 +1,4 @@
 <script setup>
-import { useElementVisibility } from '@vueuse/core';
 import { Chat, ChatContent, ChatDetails, ChatAvatar, ChatMessage, ChatName, ChatItem, ChatList, ChatStatus, ChatForm } from '@/Components/ui/chat';
 import { Textarea } from '@/Components/ui/textarea';
 import { Button } from '@/components/ui/button';
@@ -9,20 +8,34 @@ import UserActiveStatus from './UserActiveStatus.vue';
 import { computed, watch, ref, useTemplateRef } from 'vue';
 import axios from 'axios';
 import { useChatStore } from "@/stores/chatStore";
+import { useInfiniteScroll } from '@vueuse/core';
 
 const chatStore = useChatStore();
 
 const userIdReceiver = ref(null);
 const isSending = ref(false);
 const hasErrorSending = ref(false);
-const target = useTemplateRef('target');
-const targetIsVisible = useElementVisibility(target, { threshold: 0.1 });
+const chatListContainer = useTemplateRef('chatListContainer');
 
 // V-model
 const formInput = defineModel();
 
 // Computed
 const authUser = computed(() => usePage().props.auth.user || {});
+
+// Infinite scroll setup
+const { isLoading } = useInfiniteScroll(
+    chatListContainer,
+    () => {
+        // Load more messages
+        chatStore.onLoadMore();
+    },
+    {
+        distance: 10,
+        direction: 'top',
+        canLoadMore: () => chatStore.hasMorePages
+    }
+);
 
 // Methods
 async function sendMessage() {
@@ -38,7 +51,6 @@ async function sendMessage() {
 
     if (isSending.value) return;
 
-    // Store the content before clearing it
     const messageContent = formInput.value;
     isSending.value = true;
 
@@ -48,7 +60,6 @@ async function sendMessage() {
             to_user_id: userIdReceiver.value
         });
 
-        // Use the stored content - only update on success
         chatStore.updateRecentChats({
             targetUserId: userIdReceiver.value,
             content: messageContent
@@ -73,26 +84,12 @@ function getUserAvatar(chat) {
         : chatStore.messagesData?.participant?.avatar
 }
 
-// Watch for selectedUserDetails changes and update form
+// Watch for selectedUserDetails changes
 watch(() => chatStore.selectedUserDetails, (newActiveUser) => {
     if (newActiveUser?.id) {
         userIdReceiver.value = newActiveUser.id;
     }
 }, { immediate: true });
-
-// Watch loading message to load more messages when needed
-watch(targetIsVisible, (isVisible) => {
-    try {
-        const userId = chatStore.selectedUserDetails?.id;
-        const hasMore = chatStore.hasMorePages;
-
-        if (isVisible && userId && hasMore) {
-            chatStore.loadMoreMessages();
-        }
-    } catch (error) {
-        console.error('Error in targetIsVisible watcher:', error);
-    }
-});
 
 </script>
 <template>
@@ -110,15 +107,16 @@ watch(targetIsVisible, (isVisible) => {
                 </div>
             </div>
         </ChatDetails>
-        <ChatContent ref="chatContent">
-            <template class="p-4" v-if="chatStore.loadError">
+        <ChatContent ref="chatListContainer">
+            <template v-if="chatStore.loadError">
                 <div class="text-red-500 text-center">{{ chatStore.loadError }}</div>
             </template>
             <template v-else>
-                <ChatList ref="chatList">
-                    <template v-if="chatStore.hasMorePages">
-                        <div class="animate-pulse w-full text-center" ref="target">
-                            Loading...</div>
+                <ChatList>
+                    <template v-if="isLoading">
+                        <div class="animate-pulse w-full text-center text-gray-400 text-sm py-2">
+                            Loading...
+                        </div>
                     </template>
                     <ChatItem v-for="chat in chatStore.messagesData.messages" :key="chat.id"
                         :class="{ 'flex-row-reverse': isSender(chat) }">
@@ -132,7 +130,6 @@ watch(targetIsVisible, (isVisible) => {
                     </template>
                 </ChatList>
             </template>
-
         </ChatContent>
         <ChatForm @submit.prevent="sendMessage" method="POST" v-if="!chatStore.loadError">
             <Textarea placeholder="Type your message..." v-model="formInput" :disabled="isSending" class="pr-20" />

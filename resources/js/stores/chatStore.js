@@ -10,7 +10,7 @@ export const useChatStore = defineStore('chat', () => {
     const onlineUsers = ref([])
     const messagesData = ref({})
     const totalMessages = ref(0)
-    const perPage = ref(20);
+    const perPage = ref(10);
     const currentPage = ref(1);
     const loadError = ref(null)
     const hasMorePages = ref(true)
@@ -74,11 +74,11 @@ export const useChatStore = defineStore('chat', () => {
 
         // Load messages immediately when user is selected
         if (userId) {
-            loadMessages(userId)
+            onLoadMessages(userId)
         }
     }
 
-    const loadMessages = async (userId) => {
+    const onLoadMessages = async (userId) => {
         if (!userId) return
 
         try {
@@ -101,7 +101,7 @@ export const useChatStore = defineStore('chat', () => {
         }
     }
 
-    const loadMoreMessages = async () => {
+    const onLoadMore = async () => {
         if (!selectedUserId.value || !hasMorePages.value) return
 
         try {
@@ -287,8 +287,8 @@ export const useChatStore = defineStore('chat', () => {
 
         // Actions
         updateSelectedUser,
-        loadMessages,
-        loadMoreMessages,
+        onLoadMessages,
+        onLoadMore,
         addMessageToChat,
         updateRecentChats,
         initializeFromProps,
