@@ -58,7 +58,7 @@ const AsyncChatBox = defineAsyncComponent({
 </script>
 
 <template>
-    <Head title="Chat" />
+    <Head title="ChatUs" />
     <SidebarProvider :style="{ '--sidebar-width': '350px' }">
         <AppSidebar />
         <SidebarInset>

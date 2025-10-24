@@ -46,7 +46,7 @@ const handleUserClick = () => {
             </div>
             <div class="flex flex-col gap-3 justify-between w-48 overflow-hidden">
                 <h3 class="text-ellipsis overflow-hidden whitespace-nowrap">{{ user?.first_name }} {{ user?.last_name }}</h3>
-                <p class="text-ellipsis overflow-hidden whitespace-nowrap">{{ user?.content }}</p>
+                <p class="text-ellipsis overflow-hidden whitespace-nowrap" :class="{ 'font-bold' : !user?.is_read}">{{ user?.content }}</p>
             </div>
         </slot>
     </div>

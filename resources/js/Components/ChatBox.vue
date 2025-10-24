@@ -8,16 +8,58 @@ import UserActiveStatus from './UserActiveStatus.vue';
 import { computed, watch, ref, useTemplateRef } from 'vue';
 import axios from 'axios';
 import { useChatStore } from "@/stores/chatStore";
-import { useInfiniteScroll } from '@vueuse/core';
+import { useInfiniteScroll, useIntersectionObserver, useTemplateRefsList } from '@vueuse/core';
 import { LoaderCircle } from "lucide-vue-next";
 
-
 const chatStore = useChatStore();
-
 const userIdReceiver = ref(null);
 const isSending = ref(false);
 const hasErrorSending = ref(false);
 const chatListContainer = useTemplateRef('chatListContainer');
+const chatItemRefs = useTemplateRefsList('chatItem');
+const visibleMessageIds = ref([]);
+let markAsReadTimeout = null;
+
+function setupVisibilityObserver() {
+    useIntersectionObserver(chatItemRefs, (entries) => {
+        entries.forEach(entry => {
+            const messageId = entry.target.getAttribute('data-mid');
+            if (entry.isIntersecting) {
+                visibleMessageIds.value.push(messageId);
+                scheduleMarkAsRead();
+            }
+        });
+    }, {
+        threshold: 1, 
+    });
+}
+
+function scheduleMarkAsRead() {
+    if (markAsReadTimeout) {
+        clearTimeout(markAsReadTimeout);
+    }
+
+    markAsReadTimeout = setTimeout(() => {
+        const messageIdsToMark = Array.from(visibleMessageIds.value);
+        if (messageIdsToMark.length > 0) {
+            markedAsRead(messageIdsToMark);
+            visibleMessageIds.value = [];
+        }
+    }, 2000); // 2 seconds delay
+}
+
+async function markedAsRead(chatIds) {
+    try {
+        const res = await axios.get("/api/chat-marked-as-read/", {
+            params: {
+                message_ids: chatIds
+            }
+        });
+        console.log('Marked as read response:', res.data);
+    } catch (err) {
+        console.error('Failed to mark messages as read:', err);
+    }
+}
 
 // V-model
 const formInput = defineModel();
@@ -64,7 +106,7 @@ async function sendMessage() {
 
         chatStore.updateRecentChats({
             targetUserId: userIdReceiver.value,
-            content: messageContent
+            content: messageContent,
         });
 
         formInput.value = '';
@@ -90,6 +132,8 @@ function getUserAvatar(chat) {
 watch(() => chatStore.selectedUserDetails, (newActiveUser) => {
     if (newActiveUser?.id) {
         userIdReceiver.value = newActiveUser.id;
+        setupVisibilityObserver();
+        visibleMessageIds.value = [];
     }
 }, { immediate: true });
 
@@ -118,13 +162,13 @@ watch(() => chatStore.selectedUserDetails, (newActiveUser) => {
                     <template v-if="isLoading">
                         <LoaderCircle class="animate-spin mx-auto w-8 h-8" />
                     </template>
-                    <ChatItem v-for="chat in chatStore.messagesData.messages" :key="chat.id"
+                    <div v-for="chat in chatStore.messagesData.messages" :key="chat.id" :data-mid="chat.id" class="flex gap-4" :ref="chatItemRefs.set"
                         :class="{ 'flex-row-reverse': isSender(chat) }">
                         <ChatAvatar :src="getUserAvatar(chat)" class="w-8 h-8" />
                         <ChatMessage :variant="isSender(chat) ? 'sender' : 'default'">
                             {{ chat.content }}
                         </ChatMessage>
-                    </ChatItem>
+                    </div>
                     <template v-if="hasErrorSending">
                         <div class="text-red-500 text-sm text-right">Failed to send message. Please try again.</div>
                     </template>

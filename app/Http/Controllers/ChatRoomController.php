@@ -11,22 +11,6 @@ use Illuminate\Support\Facades\Auth;
 class ChatRoomController extends Controller
 {
     /**
-     * Display a listing of the resource.
-     */
-    public function index()
-    {
-        //
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
@@ -57,7 +41,7 @@ class ChatRoomController extends Controller
             $eventData['from_user_id'],
             $eventData['to_user_id'],
             $eventData['content'],
-            $eventData['created_at']
+            $eventData['created_at'],
         ));
 
         return back();
@@ -76,7 +60,7 @@ class ChatRoomController extends Controller
         // Get pagination parameters
         $page = (int) $request->get('page', 1);
         $perPage = (int) $request->get('per_page', 50);
-        
+
         // Ensure valid pagination values
         $page = max(1, $page);
         $perPage = min(100, max(10, $perPage)); // Limit between 10-100 messages per page
@@ -86,10 +70,10 @@ class ChatRoomController extends Controller
             $query->where('from_user_id', Auth::id())
                 ->where('to_user_id', $to_user_id);
         })
-        ->orWhere(function ($query) use ($to_user_id) {
-            $query->where('from_user_id', $to_user_id)
-                ->where('to_user_id', Auth::id());
-        });
+            ->orWhere(function ($query) use ($to_user_id) {
+                $query->where('from_user_id', $to_user_id)
+                    ->where('to_user_id', Auth::id());
+            });
 
         // Get total count (without pagination)
         $totalMessages = $baseQuery->count();
@@ -123,26 +107,19 @@ class ChatRoomController extends Controller
     }
 
     /**
-     * Show the form for editing the specified resource.
+     * Mark messages as read.
      */
-    public function edit(ChatRoom $chatRoom)
+    public function markedAsRead(Request $request)
     {
         //
-    }
+        $messagesIds = $request->get('message_ids', []);
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, ChatRoom $chatRoom)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(ChatRoom $chatRoom)
-    {
-        //
+        foreach ($messagesIds as $messageId) {
+            $messageId = ChatRoom::find($messageId)
+                ->where('to_user_id', Auth::id())
+                ->where('is_read', false)
+                ->update(['is_read' => true]);
+        }
+        return response()->json(['message' => 'Messages marked as read', 'message_ids' => $messagesIds]);
     }
 }

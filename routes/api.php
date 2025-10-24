@@ -17,4 +17,5 @@ Route::middleware('web')->group(function () {
     Route::post('/update-last-active/{id}', [UserController::class, 'update_last_active']);
     Route::post('/send-message', [ChatRoomController::class, 'store']);
     Route::get('/interacted-user', [ChatRoomController::class, 'index']);
+    Route::get('/chat-marked-as-read/', [ChatRoomController::class, 'markedAsRead']);
 });

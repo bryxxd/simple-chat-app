@@ -4,6 +4,7 @@ import { usePage } from '@inertiajs/vue3'
 import axios from 'axios'
 
 export const useChatStore = defineStore('chat', () => {
+    const props = usePage().props
     // State
     const selectedUserId = ref(null)
     const chatUsers = ref([])
@@ -105,7 +106,7 @@ export const useChatStore = defineStore('chat', () => {
         if (!selectedUserId.value || !hasMorePages.value) return
 
         try {
-            hasMorePages.value = false; 
+            hasMorePages.value = false;
             const nextPage = currentPage.value + 1;
             const res = await axios.get(`/api/chat-room/${selectedUserId.value}`, {
                 params: {
@@ -163,7 +164,6 @@ export const useChatStore = defineStore('chat', () => {
         const userIndex = chatUsers.value.findIndex(
             ({ id }) => id === newMsg.targetUserId,
         )
-
         if (userIndex !== -1) {
             const [user] = chatUsers.value.splice(userIndex, 1)
             // Preserve all existing properties and update specific ones
@@ -191,8 +191,6 @@ export const useChatStore = defineStore('chat', () => {
     }
 
     const initializeFromProps = () => {
-        const props = usePage().props
-
         // Initialize interactedUsers from props if available
         if (props.interactedUsers && props.interactedUsers.length !== 0) {
             chatUsers.value = props.interactedUsers
@@ -217,19 +215,21 @@ export const useChatStore = defineStore('chat', () => {
     const setupEchoListeners = () => {
         // Listen for incoming messages
         window.Echo.private(
-            "new-messages." + usePage().props.auth.user.id,
+            "new-messages." + props.auth.user.id,
         ).listen("NewMessageEvent", (e) => {
+              console.log("Broadcast received:", e);
             addMessageToChat(e)
 
             // Always update the user list, regardless of active chat
             const targetUserId =
-                e.from_user_id === usePage().props.auth.user.id
+                e.from_user_id === props.auth.user.id
                     ? e.to_user_id
                     : e.from_user_id
             updateRecentChats({
                 targetUserId: targetUserId,
                 content: e.content,
-            })
+            });
+          
         })
 
         // Presence channel for online users
