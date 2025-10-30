@@ -46,18 +46,13 @@ async function sendMessage() {
         return;
     }
 
-    if (!formInput.value?.trim()) {
-        console.warn('Cannot send empty message');
-        return;
-    }
-
     if (isSending.value) return;
 
     const messageContent = formInput.value;
     isSending.value = true;
 
     try {
-        await axios.post("/api/send-message", {
+        await axios.post("/api/chat-room/send-message", {
             message: messageContent,
             to_user_id: userIdReceiver.value
         });

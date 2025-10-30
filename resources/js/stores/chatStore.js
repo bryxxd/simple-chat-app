@@ -83,7 +83,7 @@ export const useChatStore = defineStore('chat', () => {
 
         try {
             loadError.value = null
-            const res = await axios.get(`/api/chat-room/${userId}`)
+            const res = await axios.get(`/api/chat-room/get-messages/${userId}`)
             currentPage.value = 1;
 
             if (res.data) {
@@ -107,7 +107,7 @@ export const useChatStore = defineStore('chat', () => {
         try {
             hasMorePages.value = false; 
             const nextPage = currentPage.value + 1;
-            const res = await axios.get(`/api/chat-room/${selectedUserId.value}`, {
+            const res = await axios.get(`/api/chat-room/get-messages/${selectedUserId.value}`, {
                 params: {
                     page: nextPage,
                     per_page: perPage.value,
@@ -251,7 +251,7 @@ export const useChatStore = defineStore('chat', () => {
                 // Handle when a user goes offline
                 (async () => {
                     try {
-                        await axios.post(`/api/update-last-active/${user.id}`)
+                        await axios.post(`/api/user/update-last-active/${user.id}`)
                     } catch (error) {
                         console.log("Error updating last active:", error)
                     }

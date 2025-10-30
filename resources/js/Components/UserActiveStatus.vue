@@ -55,7 +55,7 @@ async function fetchUserLeftAt(user) {
     }
     
     try {
-        const res = await axios.get(`/api/get-last-active/${user}`);
+        const res = await axios.get(`/api/user/get-last-active/${user}`);
         userLeft.value = {
             last_active_at: res.data.last_active_at
         };

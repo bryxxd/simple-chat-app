@@ -11,10 +11,8 @@ Route::get('/user', function (Request $request) {
 
 
 Route::middleware('web')->group(function () {
-    Route::get('/chat-room/{to_user_id}', [ChatRoomController::class, 'show']);
-    Route::post('/chat/messages', [ChatRoomController::class, 'store'])->name('messages.store');
-    Route::get('/get-last-active/{id}', [UserController::class, 'get_last_active']);
-    Route::post('/update-last-active/{id}', [UserController::class, 'update_last_active']);
-    Route::post('/send-message', [ChatRoomController::class, 'store']);
-    Route::get('/interacted-user', [ChatRoomController::class, 'index']);
+    Route::get('/user/get-last-active/{id}', [UserController::class, 'get_last_active']);
+    Route::post('/user/update-last-active/{id}', [UserController::class, 'update_last_active']);
+    Route::get('/chat-room/get-messages/{to_user_id}', [ChatRoomController::class, 'show']);
+    Route::post('/chat-room/send-message', [ChatRoomController::class, 'store']);
 });
