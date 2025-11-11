@@ -33,7 +33,7 @@ class HandleInertiaRequests extends Middleware
     public function share(Request $request): array
     {
         $interactedUsers = [];
-        
+
         if (Auth::check()) {
             $userId = Auth::id();
             $interactedUsers = DB::table('users')
@@ -60,7 +60,7 @@ class HandleInertiaRequests extends Middleware
                         LIMIT 1
                     )"));
                 })
-                ->select('users.id', 'users.first_name', 'users.last_name','users.avatar', 'last_message.content', 'last_message.is_read', 'last_message.created_at')
+                ->select('users.id', 'users.first_name', 'users.last_name', 'users.avatar', 'last_message.content', 'last_message.is_read', 'last_message.from_user_id', 'last_message.to_user_id', 'last_message.created_at')
                 ->orderBy('last_message.created_at', 'desc')
                 ->where('users.id', '!=', $userId)
                 ->get();

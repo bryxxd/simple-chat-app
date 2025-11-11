@@ -18,20 +18,38 @@ const hasErrorSending = ref(false);
 const chatListContainer = useTemplateRef('chatListContainer');
 const chatItemRefs = useTemplateRefsList('chatItem');
 const visibleMessageIds = ref([]);
+const markedIds = ref(new Set());
 let markAsReadTimeout = null;
+let observerCleanup = null;
 
 function setupVisibilityObserver() {
-    useIntersectionObserver(chatItemRefs, (entries) => {
+    // Clean up previous observer if it exists
+    if (observerCleanup) {
+        observerCleanup();
+    }
+
+    if (markedIds.value.size > 0) {
+        // Filter out already marked IDs
+        visibleMessageIds.value = visibleMessageIds.value.filter(id => !markedIds.value.has(id));
+    }
+
+    const { stop } = useIntersectionObserver(chatItemRefs, (entries) => {
         entries.forEach(entry => {
             const messageId = entry.target.getAttribute('data-mid');
-            if (entry.isIntersecting) {
+            // Skip if already marked or already in visible list
+            if (markedIds.value.has(messageId)) {
+                return;
+            }
+            if (entry.isIntersecting && !visibleMessageIds.value.includes(messageId)) {
                 visibleMessageIds.value.push(messageId);
                 scheduleMarkAsRead();
             }
         });
     }, {
-        threshold: 1, 
+        threshold: 1,
     });
+
+    observerCleanup = stop;
 }
 
 function scheduleMarkAsRead() {
@@ -41,6 +59,7 @@ function scheduleMarkAsRead() {
 
     markAsReadTimeout = setTimeout(() => {
         const messageIdsToMark = Array.from(visibleMessageIds.value);
+        markedIds.value = new Set([...markedIds.value, ...messageIdsToMark]);
         if (messageIdsToMark.length > 0) {
             markedAsRead(messageIdsToMark);
             visibleMessageIds.value = [];
@@ -50,12 +69,15 @@ function scheduleMarkAsRead() {
 
 async function markedAsRead(chatIds) {
     try {
-        const res = await axios.get("/api/chat-marked-as-read/", {
+        await axios.get("/api/chat-marked-as-read/", {
             params: {
                 message_ids: chatIds
             }
         });
-        console.log('Marked as read response:', res.data);
+        // Update the read status in the store for the current user
+        if (userIdReceiver.value) {
+            chatStore.updateMessageReadStatus(userIdReceiver.value);
+        }
     } catch (err) {
         console.error('Failed to mark messages as read:', err);
     }
@@ -162,8 +184,8 @@ watch(() => chatStore.selectedUserDetails, (newActiveUser) => {
                     <template v-if="isLoading">
                         <LoaderCircle class="animate-spin mx-auto w-8 h-8" />
                     </template>
-                    <div v-for="chat in chatStore.messagesData.messages" :key="chat.id" :data-mid="chat.id" class="flex gap-4" :ref="chatItemRefs.set"
-                        :class="{ 'flex-row-reverse': isSender(chat) }">
+                    <div v-for="chat in chatStore.messagesData.messages" :key="chat.id" :data-mid="chat.id"
+                        class="flex gap-4" :ref="chatItemRefs.set" :class="{ 'flex-row-reverse': isSender(chat) }">
                         <ChatAvatar :src="getUserAvatar(chat)" class="w-8 h-8" />
                         <ChatMessage :variant="isSender(chat) ? 'sender' : 'default'">
                             {{ chat.content }}

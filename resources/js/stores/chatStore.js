@@ -79,6 +79,16 @@ export const useChatStore = defineStore('chat', () => {
         }
     }
 
+    const updateMessageReadStatus = (userId) => { 
+        const userIndex = chatUsers.value.findIndex(user => user.id === userId);
+        if (userIndex !== -1) {
+            chatUsers.value[userIndex] = {
+                ...chatUsers.value[userIndex],
+                is_read: 1
+            };
+        }
+    }
+
     const onLoadMessages = async (userId) => {
         if (!userId) return
 
@@ -161,6 +171,7 @@ export const useChatStore = defineStore('chat', () => {
     }
 
     const updateRecentChats = (newMsg) => {
+        const authUserId = usePage().props.auth.user.id;
         const userIndex = chatUsers.value.findIndex(
             ({ id }) => id === newMsg.targetUserId,
         )
@@ -171,6 +182,9 @@ export const useChatStore = defineStore('chat', () => {
                 ...user,
                 content: newMsg.content,
                 created_at: new Date().toISOString(),
+                from_user_id: newMsg.from_user_id,
+                // Only mark as unread if message is from another user and not in active chat
+                is_read: (newMsg.from_user_id === authUserId || newMsg.targetUserId === selectedUserId.value) ? 1 : 0
             }
             chatUsers.value.unshift(updatedUser)
         } else {
@@ -184,6 +198,9 @@ export const useChatStore = defineStore('chat', () => {
                     ...userFromAllUsers,
                     content: newMsg.content || "",
                     created_at: new Date().toISOString(),
+                    from_user_id: newMsg.from_user_id,
+                    // Only mark as unread if message is from another user
+                    is_read: newMsg.from_user_id === authUserId ? 1 : 0
                 }
                 chatUsers.value.unshift(newUser)
             }
@@ -228,6 +245,7 @@ export const useChatStore = defineStore('chat', () => {
             updateRecentChats({
                 targetUserId: targetUserId,
                 content: e.content,
+                from_user_id: e.from_user_id,
             });
           
         })
@@ -288,6 +306,7 @@ export const useChatStore = defineStore('chat', () => {
 
         // Actions
         updateSelectedUser,
+        updateMessageReadStatus,
         onLoadMessages,
         onLoadMore,
         addMessageToChat,
