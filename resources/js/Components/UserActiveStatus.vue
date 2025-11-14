@@ -1,32 +1,22 @@
 <script setup>
-import axios from 'axios';
 import { ref, onMounted, computed, watch } from 'vue';
 import { useChatStore } from "@/stores/chatStore";
 
 const chatStore = useChatStore();
-// Reactive variable
-const userLeft = ref({
-    last_active_at: null
-});
 
-// Props
-const props = defineProps({
-    id: {
-        type: Number,
-        required: false,
-        default: null
-    }
-})
+// Reactive variable
+const userLeft = ref(chatStore.selectedUserDetails.last_active_at);
+
 
 const checkIfHasInteracted = computed(() => {
-    return chatStore.chatUsers.some(user => user.id === props.id);
+    return chatStore.chatUsers.some(user => user.id === chatStore.selectedUserDetails?.id);
 });
 
 // Computed 
 const lastActive = computed(() => {
-    if (!userLeft.value.last_active_at || !checkIfHasInteracted.value) return '';
+    if (!userLeft.value || !checkIfHasInteracted.value) return '';
 
-    const lastActiveDate = new Date(userLeft.value.last_active_at);
+    const lastActiveDate = new Date(userLeft.value);
     const now = new Date();
     // Calculate the difference in milliseconds
     const diffInMs = now - lastActiveDate;
@@ -48,31 +38,14 @@ const lastActive = computed(() => {
     }
 })
 
-async function fetchUserLeftAt(user) {
-    if (!user) {
-        userLeft.value = { last_active_at: null };
-        return;
+watch(
+    () => chatStore.selectedUserDetails,
+    (newVal) => {
+        if (newVal) {
+            userLeft.value = newVal.last_active_at;
+        }
     }
-    
-    try {
-        const res = await axios.get(`/api/user/get-last-active/${user}`);
-        userLeft.value = {
-            last_active_at: res.data.last_active_at
-        };
-    } catch (error) {
-        console.error('Error fetching user left time:', error);
-        console.log('Error details:', error.response?.data); // Debug log
-    }
-}
-
-// Watch for changes in the id prop
-watch(() => props.id, (newId) => {
-    fetchUserLeftAt(newId);
-}, { immediate: true });
-
-onMounted(() => {
-    fetchUserLeftAt(props.id);
-})
+);
 
 </script>
 <template>

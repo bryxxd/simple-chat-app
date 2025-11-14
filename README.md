@@ -1,6 +1,6 @@
 # Chat App
 
-A real-time chat application built with Laravel, Vue.js, and Inertia.js.
+A learning project exploring real-time chat features with Laravel, Vue.js, and Inertia.js.
 
 ## Local Development
 

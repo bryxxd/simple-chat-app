@@ -60,7 +60,7 @@ class HandleInertiaRequests extends Middleware
                         LIMIT 1
                     )"));
                 })
-                ->select('users.id', 'users.first_name', 'users.last_name','users.avatar', 'last_message.content', 'last_message.created_at')
+                ->select('users.id', 'users.first_name', 'users.last_name','users.avatar', 'users.last_active_at', 'last_message.content', 'last_message.created_at')
                 ->orderBy('last_message.created_at', 'desc')
                 ->where('users.id', '!=', $userId)
                 ->get();
@@ -75,7 +75,7 @@ class HandleInertiaRequests extends Middleware
                 'success' => $request->session()->get('success'),
                 'info' => $request->session()->get('info')
             ],
-            'users' => Auth::check() ? User::select('id', 'first_name', 'last_name', 'email', 'avatar')->where('id', '!=', Auth::id())->limit(10)->get() : [],
+            'users' => Auth::check() ? User::select('id', 'first_name', 'last_name', 'avatar')->where('id', '!=', Auth::id())->limit(10)->get() : [],
             'interactedUsers' => $interactedUsers,
         ];
     }
