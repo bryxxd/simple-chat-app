@@ -8,16 +8,80 @@ import UserActiveStatus from './UserActiveStatus.vue';
 import { computed, watch, ref, useTemplateRef } from 'vue';
 import axios from 'axios';
 import { useChatStore } from "@/stores/chatStore";
-import { useInfiniteScroll } from '@vueuse/core';
+import { useInfiniteScroll, useIntersectionObserver, useTemplateRefsList } from '@vueuse/core';
 import { LoaderCircle } from "lucide-vue-next";
 
-
 const chatStore = useChatStore();
-
 const userIdReceiver = ref(null);
 const isSending = ref(false);
 const hasErrorSending = ref(false);
 const chatListContainer = useTemplateRef('chatListContainer');
+const chatItemRefs = useTemplateRefsList('chatItem');
+const visibleMessageIds = ref([]);
+const markedIds = ref(new Set());
+let markAsReadTimeout = null;
+let observerCleanup = null;
+
+function setupVisibilityObserver() {
+    // Clean up previous observer if it exists
+    if (observerCleanup) {
+        observerCleanup();
+    }
+
+    if (markedIds.value.size > 0) {
+        // Filter out already marked IDs
+        visibleMessageIds.value = visibleMessageIds.value.filter(id => !markedIds.value.has(id));
+    }
+
+    const { stop } = useIntersectionObserver(chatItemRefs, (entries) => {
+        entries.forEach(entry => {
+            const messageId = entry.target.getAttribute('data-mid');
+            // Skip if already marked or already in visible list
+            if (markedIds.value.has(messageId)) {
+                return;
+            }
+            if (entry.isIntersecting && !visibleMessageIds.value.includes(messageId)) {
+                visibleMessageIds.value.push(messageId);
+                scheduleMarkAsRead();
+            }
+        });
+    }, {
+        threshold: 1,
+    });
+
+    observerCleanup = stop;
+}
+
+function scheduleMarkAsRead() {
+    if (markAsReadTimeout) {
+        clearTimeout(markAsReadTimeout);
+    }
+
+    markAsReadTimeout = setTimeout(() => {
+        const messageIdsToMark = Array.from(visibleMessageIds.value);
+        markedIds.value = new Set([...markedIds.value, ...messageIdsToMark]);
+        if (messageIdsToMark.length > 0) {
+            markedAsRead(messageIdsToMark);
+            visibleMessageIds.value = [];
+        }
+    }, 2000); // 2 seconds delay
+}
+
+async function markedAsRead(chatIds) {
+    try {
+        await axios.get("/api/chat-room/marked-as-read/", {
+            params: {
+                message_ids: chatIds
+            }
+        });
+        // Update the read status in the store for the current user
+        if (userIdReceiver.value) {
+            chatStore.updateMessageReadStatus(userIdReceiver.value);
+        }
+    } catch (err) {
+        console.error('Failed to mark messages as read:', err);
+    }
+}
 
 // V-model
 const formInput = defineModel();
@@ -59,7 +123,8 @@ async function sendMessage() {
 
         chatStore.updateRecentChats({
             targetUserId: userIdReceiver.value,
-            content: messageContent
+            content: messageContent,
+            from_user_id: authUser.value?.id,
         });
 
         formInput.value = '';
@@ -85,6 +150,8 @@ function getUserAvatar(chat) {
 watch(() => chatStore.selectedUserDetails, (newActiveUser) => {
     if (newActiveUser?.id) {
         userIdReceiver.value = newActiveUser.id;
+        setupVisibilityObserver();
+        visibleMessageIds.value = [];
     }
 }, { immediate: true });
 
@@ -113,13 +180,13 @@ watch(() => chatStore.selectedUserDetails, (newActiveUser) => {
                     <template v-if="isLoading">
                         <LoaderCircle class="animate-spin mx-auto w-8 h-8" />
                     </template>
-                    <ChatItem v-for="chat in chatStore.messagesData.messages" :key="chat.id"
-                        :class="{ 'flex-row-reverse': isSender(chat) }">
+                    <div v-for="chat in chatStore.messagesData.messages" :key="chat.id" :data-mid="chat.id"
+                        class="flex gap-4" :ref="chatItemRefs.set" :class="{ 'flex-row-reverse': isSender(chat) }">
                         <ChatAvatar :src="getUserAvatar(chat)" class="w-8 h-8" />
                         <ChatMessage :variant="isSender(chat) ? 'sender' : 'default'">
                             {{ chat.content }}
                         </ChatMessage>
-                    </ChatItem>
+                    </div>
                     <template v-if="hasErrorSending">
                         <div class="text-red-500 text-sm text-right">Failed to send message. Please try again.</div>
                     </template>
