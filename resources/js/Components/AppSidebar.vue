@@ -33,7 +33,9 @@ const props = defineProps({
         <Sidebar collapsible="none" class="flex-1 flex">
             <SidebarHeader class="gap-3.5 border-b p-4">
                 <div class="flex w-full items-center justify-between">
-                    <Link :href="route('dashboard')" class="text-base font-medium text-foreground">Logo</Link>
+                    <Link :href="route('dashboard')" class="text-base font-medium text-foreground">
+                        <img src="/favicon.svg" alt="Logo" class="w-8 h-8" />
+                    </Link>
                 </div>
                 <!-- Search User -->
                 <SearchUser />
