@@ -3,7 +3,7 @@ import { Chat, ChatContent, ChatDetails, ChatAvatar, ChatMessage, ChatName, Chat
 import { Textarea } from '@/Components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Send } from "lucide-vue-next";
-import { usePage } from "@inertiajs/vue3";
+import { usePage, Head } from "@inertiajs/vue3";
 import UserActiveStatus from './UserActiveStatus.vue';
 import { computed, watch, ref, useTemplateRef } from 'vue';
 import axios from 'axios';
@@ -155,8 +155,15 @@ watch(() => chatStore.selectedUserDetails, (newActiveUser) => {
     }
 }, { immediate: true });
 
+const pageTitle = computed(() => {
+    return chatStore.selectedUserDetails.first_name + ' ' + chatStore.selectedUserDetails.last_name;
+})
+
+
 </script>
 <template>
+
+    <Head :title="pageTitle" />
     <Chat>
         <ChatDetails>
             <div class="flex">

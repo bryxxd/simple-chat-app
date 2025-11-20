@@ -2,8 +2,10 @@
 import { defineProps, computed } from 'vue';
 import { router, usePage } from '@inertiajs/vue3';
 import { useChatStore } from '@/stores/chatStore';
+import { useSidebar } from '@/Components/ui/sidebar/utils';
 
 const chatStore = useChatStore();
+const { setOpenMobile } = useSidebar();
 
 // Props
 const props = defineProps({
@@ -24,6 +26,9 @@ const handleUserClick = () => {
 
     // Update the selected user first
     chatStore.updateSelectedUser(userId);
+
+    // Close sidebar on mobile
+    setOpenMobile(false);
 
     // If not on dashboard, navigate there
     if (currentRoute !== '/' && !currentRoute.startsWith('/?')) {
