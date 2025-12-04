@@ -3,6 +3,7 @@ import { ref, computed } from "vue";
 import { usePage } from "@inertiajs/vue3";
 import axios from "axios";
 import { useCookies } from "@vueuse/integrations/useCookies";
+import { useSound } from "@vueuse/sound";
 
 export const useChatStore = defineStore("chat", () => {
     const props = usePage().props;
@@ -17,6 +18,7 @@ export const useChatStore = defineStore("chat", () => {
     const loadError = ref(null);
     const hasMorePages = ref(false);
     const cookieActiveRoom = useCookies(["activeRoom"]);
+    const notificationSound = useSound('/sounds/sound-1.mp3');
 
     // Cookie management
     const setCookieActiveRoom = (roomId) => {
@@ -72,6 +74,7 @@ export const useChatStore = defineStore("chat", () => {
     });
 
     // Actions
+    
     const updateSelectedUser = (userId) => {
         if (selectedUserId.value === userId) return;
 
@@ -271,6 +274,11 @@ export const useChatStore = defineStore("chat", () => {
                     content: e.content,
                     from_user_id: e.from_user_id,
                 });
+
+                // Play notification sound if message is from another user
+                if (e.from_user_id !== props.auth.user.id) {
+                    notificationSound.play();
+                }
             },
         );
 
