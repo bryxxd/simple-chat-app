@@ -41,30 +41,31 @@ class HandleInertiaRequests extends Middleware
                     $query->select(DB::raw(1))
                         ->from('chat_rooms')
                         ->where(function ($q) use ($userId) {
-                            $q->where('chat_rooms.from_user_id', $userId)
-                                ->whereColumn('chat_rooms.to_user_id', 'users.id');
+                            $q->where('chat_rooms.sender_id', $userId)
+                                ->whereColumn('chat_rooms.receiver_id', 'users.id');
                         })
                         ->orWhere(function ($q) use ($userId) {
-                            $q->where('chat_rooms.to_user_id', $userId)
-                                ->whereColumn('chat_rooms.from_user_id', 'users.id');
+                            $q->where('chat_rooms.receiver_id', $userId)
+                                ->whereColumn('chat_rooms.sender_id', 'users.id');
                         });
                 })
                 ->leftJoin('chat_rooms as last_message', function ($join) use ($userId) {
                     $join->on('last_message.id', '=', DB::raw("(
                         SELECT id FROM chat_rooms 
                         WHERE (
-                            (from_user_id = {$userId} AND to_user_id = users.id) OR 
-                            (from_user_id = users.id AND to_user_id = {$userId})
+                            (sender_id = {$userId} AND receiver_id = users.id) OR 
+                            (sender_id = users.id AND receiver_id = {$userId})
                         ) 
                         ORDER BY created_at DESC 
                         LIMIT 1
                     )"));
                 })
-                ->select('users.id', 'users.first_name', 'users.last_name', 'users.avatar', 'users.last_active_at', 'last_message.content', 'last_message.is_read', 'last_message.from_user_id', 'last_message.to_user_id', 'last_message.created_at')
+                ->select('users.id', 'users.first_name', 'users.last_name', 'users.avatar', 'users.last_active_at', 'last_message.content', 'last_message.is_read', 'last_message.sender_id', 'last_message.receiver_id', 'last_message.created_at')
                 ->orderBy('last_message.created_at', 'desc')
                 ->where('users.id', '!=', $userId)
                 ->get();
         }
+
 
         return [
             ...parent::share($request),

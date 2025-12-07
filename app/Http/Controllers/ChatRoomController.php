@@ -21,16 +21,16 @@ class ChatRoomController extends Controller
         ]);
 
         $insertedChat = ChatRoom::create([
-            'from_user_id' => Auth::id(),
-            'to_user_id' => $request->to_user_id,
+            'sender_id' => Auth::id(),
+            'receiver_id' => $request->receiver_id,
             'content' => $request->message,
         ]);
 
         // Event data
         $eventData = [
             'id' => $insertedChat->id,
-            'from_user_id' => Auth::id(),
-            'to_user_id' => $request->to_user_id,
+            'sender_id' => Auth::id(),
+            'receiver_id' => $request->receiver_id,
             'content' => $request->message,
             'created_at' => $insertedChat->created_at,
         ];
@@ -38,8 +38,8 @@ class ChatRoomController extends Controller
         // Dispatch the event to notify users about the new message
         event(new NewMessageEvent(
             $eventData['id'],
-            $eventData['from_user_id'],
-            $eventData['to_user_id'],
+            $eventData['sender_id'],
+            $eventData['receiver_id'],
             $eventData['content'],
             $eventData['created_at'],
         ));
@@ -50,10 +50,10 @@ class ChatRoomController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Request $request, $to_user_id)
+    public function show(Request $request, $receiver_id)
     {
-        // Validate the to_user_id
-        if (!$to_user_id || !is_numeric($to_user_id)) {
+        // Validate the receiver_id
+        if (!$receiver_id || !is_numeric($receiver_id)) {
             return response()->json(['error' => 'Invalid user ID'], 400);
         }
 
@@ -66,13 +66,13 @@ class ChatRoomController extends Controller
         $perPage = min(100, max(10, $perPage)); // Limit between 10-100 messages per page
 
         // Build the base query for messages between authenticated user and target user
-        $baseQuery = ChatRoom::where(function ($query) use ($to_user_id) {
-            $query->where('from_user_id', Auth::id())
-                ->where('to_user_id', $to_user_id);
+        $baseQuery = ChatRoom::where(function ($query) use ($receiver_id) {
+            $query->where('sender_id', Auth::id())
+                ->where('receiver_id', $receiver_id);
         })
-            ->orWhere(function ($query) use ($to_user_id) {
-                $query->where('from_user_id', $to_user_id)
-                    ->where('to_user_id', Auth::id());
+            ->orWhere(function ($query) use ($receiver_id) {
+                $query->where('sender_id', $receiver_id)
+                    ->where('receiver_id', Auth::id());
             });
 
         // Get total count (without pagination)
@@ -89,7 +89,7 @@ class ChatRoomController extends Controller
 
         // Get participant details
         $participant = User::select('id', 'first_name', 'last_name', 'avatar')
-            ->where('id', $to_user_id)
+            ->where('id', $receiver_id)
             ->first();
 
         if (!$participant) {
@@ -116,7 +116,7 @@ class ChatRoomController extends Controller
 
         foreach ($messagesIds as $messageId) {
             $messageId = ChatRoom::find($messageId)
-                ->where('to_user_id', Auth::id())
+                ->where('receiver_id', Auth::id())
                 ->where('is_read', false)
                 ->update(['is_read' => true]);
         }

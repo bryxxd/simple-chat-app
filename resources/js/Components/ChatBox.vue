@@ -118,13 +118,13 @@ async function sendMessage() {
     try {
         await axios.post("/api/chat-room/send-message", {
             message: messageContent,
-            to_user_id: userIdReceiver.value
+            receiver_id: userIdReceiver.value
         });
 
         chatStore.updateRecentChats({
             targetUserId: userIdReceiver.value,
             content: messageContent,
-            from_user_id: authUser.value?.id,
+            sender_id: authUser.value?.id,
         });
 
         formInput.value = '';
@@ -137,11 +137,11 @@ async function sendMessage() {
 }
 
 function isSender(chat) {
-    return authUser.value && chat.from_user_id === authUser.value.id;
+    return authUser.value && chat.sender_id === authUser.value.id;
 }
 
 function getUserAvatar(chat) {
-    return authUser.value && chat.from_user_id === authUser.value.id
+    return authUser.value && chat.sender_id === authUser.value.id
         ? authUser.value.avatar
         : chatStore.messagesData?.participant?.avatar
 }

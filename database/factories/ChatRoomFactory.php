@@ -20,8 +20,8 @@ class ChatRoomFactory extends Factory
         $userIds = [1, 2];
         return [
             //
-            'from_user_id' => $userIds[array_rand($userIds)],
-            'to_user_id' =>  $userIds[array_rand($userIds)],
+            'sender_id' => $userIds[array_rand($userIds)],
+            'receiver_id' =>  $userIds[array_rand($userIds)],
             'content' => fake()->unique()->sentence(),
         ];
     }

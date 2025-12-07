@@ -158,16 +158,16 @@ export const useChatStore = defineStore("chat", () => {
 
     const addMessageToChat = (e) => {
         const isMessageForCurrentChat =
-            (e.from_user_id === usePage().props.auth.user.id &&
-                e.to_user_id === selectedUserId.value) ||
-            (e.from_user_id === selectedUserId.value &&
-                e.to_user_id === usePage().props.auth.user.id);
+            (e.sender_id === usePage().props.auth.user.id &&
+                e.receiver_id === selectedUserId.value) ||
+            (e.sender_id === selectedUserId.value &&
+                e.receiver_id === usePage().props.auth.user.id);
 
         if (isMessageForCurrentChat) {
             const newMessage = {
                 id: e.id,
-                from_user_id: e.from_user_id,
-                to_user_id: e.to_user_id,
+                sender_id: e.sender_id,
+                receiver_id: e.receiver_id,
                 content: e.content,
                 created_at: e.created_at,
             };
@@ -201,10 +201,10 @@ export const useChatStore = defineStore("chat", () => {
                 ...user,
                 content: newMsg.content,
                 created_at: new Date().toISOString(),
-                from_user_id: newMsg.from_user_id,
+                sender_id: newMsg.sender_id,
                 // Only mark as unread if message is from another user and not in active chat
                 is_read:
-                    newMsg.from_user_id === authUserId ||
+                    newMsg.sender_id === authUserId ||
                     newMsg.targetUserId === selectedUserId.value
                         ? 1
                         : 0,
@@ -221,9 +221,9 @@ export const useChatStore = defineStore("chat", () => {
                     ...userFromAllUsers,
                     content: newMsg.content || "",
                     created_at: new Date().toISOString(),
-                    from_user_id: newMsg.from_user_id,
+                    sender_id: newMsg.sender_id,
                     // Only mark as unread if message is from another user
-                    is_read: newMsg.from_user_id === authUserId ? 1 : 0,
+                    is_read: newMsg.sender_id === authUserId ? 1 : 0,
                 };
                 chatUsers.value.unshift(newUser);
             }
@@ -266,17 +266,17 @@ export const useChatStore = defineStore("chat", () => {
 
                 // Always update the user list, regardless of active chat
                 const targetUserId =
-                    e.from_user_id === props.auth.user.id
-                        ? e.to_user_id
-                        : e.from_user_id;
+                    e.sender_id === props.auth.user.id
+                        ? e.receiver_id
+                        : e.sender_id;
                 updateRecentChats({
                     targetUserId: targetUserId,
                     content: e.content,
-                    from_user_id: e.from_user_id,
+                    sender_id: e.sender_id,
                 });
 
                 // Play notification sound if message is from another user
-                if (e.from_user_id !== props.auth.user.id) {
+                if (e.sender_id !== props.auth.user.id) {
                     notificationSound.play();
                 }
             },

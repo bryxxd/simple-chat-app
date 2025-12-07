@@ -20,8 +20,8 @@ class NewMessageEvent implements ShouldBroadcastNow
      */
     public function __construct(
         public int $id,
-        public int $from_user_id,
-        public int $to_user_id,
+        public int $sender_id,
+        public int $receiver_id,
         public string $message,
         public string $created_at
     ) {
@@ -36,8 +36,8 @@ class NewMessageEvent implements ShouldBroadcastNow
     public function broadcastOn(): array
     {
         return [
-            new PrivateChannel('new-messages.' . $this->from_user_id),
-            new PrivateChannel('new-messages.' . $this->to_user_id)
+            new PrivateChannel('new-messages.' . $this->sender_id),
+            new PrivateChannel('new-messages.' . $this->receiver_id)
         ];
     }
 
@@ -50,8 +50,8 @@ class NewMessageEvent implements ShouldBroadcastNow
     {
         return [
             'id' => $this->id,
-            'from_user_id' => $this->from_user_id,
-            'to_user_id' => $this->to_user_id,
+            'sender_id' => $this->sender_id,
+            'receiver_id' => $this->receiver_id,
             'content' => $this->message,
             'created_at' => $this->created_at,
         ];

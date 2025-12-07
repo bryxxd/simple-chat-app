@@ -10,8 +10,8 @@ class ChatRoom extends Model
      use HasFactory;
     //
     protected $fillable = [
-        'from_user_id',
-        'to_user_id',
+        'sender_id',
+        'receiver_id',
         'content',
         'is_read'
     ];

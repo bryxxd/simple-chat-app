@@ -41,12 +41,12 @@ const handleUserClick = () => {
 }
 
 const messageFormat = computed(() => {
-    return props.user?.from_user_id === usePage().props.auth.user.id ? `You: ${props.user?.content}` : props.user?.content;
+    return props.user?.sender_id === usePage().props.auth.user.id ? `You: ${props.user?.content}` : props.user?.content;
 });
 
 const messageRead = computed(() => {
     // If the message was sent BY the auth user, don't show as unread (no bold)
-    if (props.user?.from_user_id === usePage().props.auth.user.id) {
+    if (props.user?.sender_id === usePage().props.auth.user.id) {
         return true;
     }
     // If the message was sent TO the auth user, check if it's been read
