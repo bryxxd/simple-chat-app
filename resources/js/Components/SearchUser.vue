@@ -12,7 +12,7 @@ import {
     ComboboxInput,
     ComboboxItem,
     ComboboxList,
-} from "@/components/ui/combobox";
+} from "@/Components/ui/combobox";
 import { useChatStore } from "@/stores/chatStore";
 const chatStore = useChatStore();
 const searchusers = ref([]);
