@@ -1,52 +1,31 @@
-<script>
+<script setup>
+import { computed } from 'vue';
 import { Link } from "@inertiajs/vue3";
-import SearchUser from "@/components/SearchUser.vue";
+import SearchUser from "@/Components/SearchUser.vue";
 import {
     Sidebar,
     SidebarContent,
     SidebarGroup,
     SidebarGroupContent,
     SidebarHeader,
-    SidebarInput,
-} from "@/components/ui/sidebar";
-import Room  from "@/components/Room.vue";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
+} from "@/Components/ui/sidebar";
+import Room from "@/Components/Room.vue";
+import EmptyRoom from '@/Components/EmptyRoom.vue';
+import { useChatStore } from '@/stores/chatStore';
 
-export default {
-    name: "AppSidebar",
-    components: {
-        Link,
-        Sidebar,
-        SidebarContent,
-        SidebarGroup,
-        SidebarGroupContent,
-        SidebarHeader,
-        SidebarInput,
-        Room,
-        Switch,
-        SearchUser,
-        Label
-    },
-    emits : ["set-active-chat"],
-    props: {
-        side: { type: String, required: false },
-        variant: { type: String, required: false },
-        collapsible: { type: String, required: false, default: "icon" },
-        class: { type: null, required: false },
-    },
-    inject: ["interactedUsers"],
-    data() {
-        return {
-            title: "Logo"
-        };
-    },
-    methods: {
-        setActiveChat(id) {
-            this.$emit("set-active-chat", id);
-        }
-    },
-};
+const chatStore = useChatStore();
+
+const hasInteraction = computed(() => {
+    return chatStore.chatUsers && chatStore.chatUsers.length > 0;
+});
+
+// Props
+const props = defineProps({
+    side: { type: String, required: false },
+    variant: { type: String, required: false },
+    collapsible: { type: String, required: false, default: "icon" },
+    class: { type: null, required: false },
+});
 </script>
 
 <template>
@@ -54,19 +33,22 @@ export default {
         <Sidebar collapsible="none" class="flex-1 flex">
             <SidebarHeader class="gap-3.5 border-b p-4">
                 <div class="flex w-full items-center justify-between">
-                    <Link :href="route('dashboard')" class="text-base font-medium text-foreground">{{ title }}</Link>
-                    <Label class="flex items-center gap-2 text-sm">
-                        <span>Unreads</span>
-                        <Switch class="shadow-none" />
-                    </Label>
+                    <Link :href="route('dashboard')" class="text-base font-medium text-foreground">
+                        <img src="/favicon.svg" alt="Logo" class="w-8 h-8" />
+                    </Link>
                 </div>
                 <!-- Search User -->
-                <SearchUser @set-active-chat="setActiveChat"/>
+                <SearchUser />
             </SidebarHeader>
-            <SidebarContent>
+            <SidebarContent :class="{ 'justify-center': !hasInteraction }">
                 <SidebarGroup class="px-0">
                     <SidebarGroupContent>
-                        <Room v-for="user in interactedUsers" :key="user.id" :user="user" @click="setActiveChat(user.id)"></Room>
+                        <template v-if="hasInteraction">
+                            <Room v-for="user in chatStore.chatUsers" :key="user.id" :user="user" />
+                        </template>
+                        <template v-else>
+                            <EmptyRoom />
+                        </template>
                     </SidebarGroupContent>
                 </SidebarGroup>
             </SidebarContent>

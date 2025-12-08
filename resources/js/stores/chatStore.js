@@ -1,0 +1,351 @@
+import { defineStore } from "pinia";
+import { ref, computed } from "vue";
+import { usePage } from "@inertiajs/vue3";
+import axios from "axios";
+import { useCookies } from "@vueuse/integrations/useCookies";
+import { useSound } from "@vueuse/sound";
+
+export const useChatStore = defineStore("chat", () => {
+    const props = usePage().props;
+    // State
+    const selectedUserId = ref(null);
+    const chatUsers = ref([]);
+    const onlineUsers = ref([]);
+    const messagesData = ref({});
+    const totalMessages = ref(0);
+    const perPage = ref(10);
+    const currentPage = ref(1);
+    const loadError = ref(null);
+    const hasMorePages = ref(false);
+    const cookieActiveRoom = useCookies(["activeRoom"]);
+    const notificationSound = useSound('/sounds/sound-1.mp3');
+
+    // Cookie management
+    const setCookieActiveRoom = (roomId) => {
+        cookieActiveRoom.set("activeRoom", roomId, {
+            path: "/",
+            maxAge: 86400,
+        });
+    };
+
+    const getCookieActiveRoom = () => {
+        return cookieActiveRoom.get("activeRoom");
+    };
+
+    // Computed
+    const users = computed(() => {
+        return usePage().props.users || [];
+    });
+
+    const selectedUserDetails = computed(() => {
+        if (!selectedUserId.value) {
+            return null;
+        }
+
+        // First try interactedUsers
+        if (chatUsers.value && chatUsers.value.length > 0) {
+            const foundUser = chatUsers.value.find(
+                (user) => user.id === selectedUserId.value,
+            );
+            if (foundUser) {
+                return foundUser;
+            }
+        }
+
+        // Then try all users
+        if (users.value && users.value.length > 0) {
+            const foundUser = users.value.find(
+                (user) => user.id === selectedUserId.value,
+            );
+            if (foundUser) {
+                return foundUser;
+            }
+        }
+
+        return null;
+    });
+
+    const isOnline = computed(() => {
+        return (userOrId) => {
+            const userId =
+                typeof userOrId === "object" ? userOrId.id : userOrId;
+            return onlineUsers.value.includes(userId);
+        };
+    });
+
+    // Actions
+    
+    const updateSelectedUser = (userId) => {
+        if (selectedUserId.value === userId) return;
+
+        selectedUserId.value = userId;
+        setCookieActiveRoom(userId);
+
+        // Load messages immediately when user is selected
+        if (userId) {
+            onLoadMessages(userId);
+        }
+    };
+
+    const updateMessageReadStatus = (userId) => {
+        const userIndex = chatUsers.value.findIndex(
+            (user) => user.id === userId,
+        );
+        if (userIndex !== -1) {
+            chatUsers.value[userIndex] = {
+                ...chatUsers.value[userIndex],
+                is_read: 1,
+            };
+        }
+    };
+
+    const onLoadMessages = async (userId) => {
+        if (!userId) return;
+
+        try {
+            loadError.value = null;
+            const res = await axios.get(
+                `/api/chat-room/get-messages/${userId}`,
+            );
+            currentPage.value = 1;
+
+            if (res.data) {
+                const sortedMessages = res.data.messages.sort(
+                    (a, b) => a.id - b.id,
+                );
+                messagesData.value = {
+                    ...res.data,
+                    messages: sortedMessages,
+                };
+                totalMessages.value = res.data.totalMessages;
+                hasMorePages.value = res.data.hasMorePages;
+            }
+        } catch (error) {
+            console.error("Error loading messages:", error);
+            loadError.value = "Failed to load messages";
+        }
+    };
+
+    const onLoadMore = async () => {
+        if (!selectedUserId.value || !hasMorePages.value) return;
+
+        try {
+            hasMorePages.value = false;
+            const nextPage = currentPage.value + 1;
+            const res = await axios.get(
+                `/api/chat-room/get-messages/${selectedUserId.value}`,
+                {
+                    params: {
+                        page: nextPage,
+                        per_page: perPage.value,
+                    },
+                },
+            );
+
+            if (res.data.messages) {
+                const sortedNewMessages = res.data.messages.sort(
+                    (a, b) => a.id - b.id,
+                );
+                messagesData.value.messages.unshift(...sortedNewMessages);
+                hasMorePages.value = res.data.hasMorePages;
+                currentPage.value = nextPage;
+            }
+        } catch (error) {
+            console.error("Pinia: Error loading more messages:", error);
+            loadError.value = "Failed to load more messages";
+        }
+    };
+
+    const addMessageToChat = (e) => {
+        const isMessageForCurrentChat =
+            (e.sender_id === usePage().props.auth.user.id &&
+                e.receiver_id === selectedUserId.value) ||
+            (e.sender_id === selectedUserId.value &&
+                e.receiver_id === usePage().props.auth.user.id);
+
+        if (isMessageForCurrentChat) {
+            const newMessage = {
+                id: e.id,
+                sender_id: e.sender_id,
+                receiver_id: e.receiver_id,
+                content: e.content,
+                created_at: e.created_at,
+            };
+
+            // Insert in correct position to maintain sort order
+            const messages = [...messagesData.value.messages];
+            const insertIndex = messages.findIndex((msg) => msg.id > e.id);
+
+            if (insertIndex === -1) {
+                messages.push(newMessage);
+            } else {
+                messages.splice(insertIndex, 0, newMessage);
+            }
+
+            messagesData.value = {
+                ...messagesData.value,
+                messages,
+            };
+        }
+    };
+
+    const updateRecentChats = (newMsg) => {
+        const authUserId = usePage().props.auth.user.id;
+        const userIndex = chatUsers.value.findIndex(
+            ({ id }) => id === newMsg.targetUserId,
+        );
+        if (userIndex !== -1) {
+            const [user] = chatUsers.value.splice(userIndex, 1);
+            // Preserve all existing properties and update specific ones
+            const updatedUser = {
+                ...user,
+                content: newMsg.content,
+                created_at: new Date().toISOString(),
+                sender_id: newMsg.sender_id,
+                // Only mark as unread if message is from another user and not in active chat
+                is_read:
+                    newMsg.sender_id === authUserId ||
+                    newMsg.targetUserId === selectedUserId.value
+                        ? 1
+                        : 0,
+            };
+            chatUsers.value.unshift(updatedUser);
+        } else {
+            // If user not found in interactedUsers, find them in all users and add them
+            const userFromAllUsers = users.value.find(
+                (user) => user.id === newMsg.targetUserId,
+            );
+            // Add the content property when adding new user
+            if (userFromAllUsers) {
+                const newUser = {
+                    ...userFromAllUsers,
+                    content: newMsg.content || "",
+                    created_at: new Date().toISOString(),
+                    sender_id: newMsg.sender_id,
+                    // Only mark as unread if message is from another user
+                    is_read: newMsg.sender_id === authUserId ? 1 : 0,
+                };
+                chatUsers.value.unshift(newUser);
+            }
+        }
+    };
+
+    const initializeFromProps = () => {
+        // Initialize interactedUsers from props if available
+        if (props.interactedUsers && props.interactedUsers.length !== 0) {
+            chatUsers.value = props.interactedUsers;
+
+            // Check if we have a cookie value first
+            const cookieRoomId = getCookieActiveRoom();
+            if (cookieRoomId) {
+                const roomId = isNaN(cookieRoomId)
+                    ? cookieRoomId
+                    : parseInt(cookieRoomId);
+                const userExists = props.interactedUsers.some(
+                    (user) => user.id == roomId,
+                );
+
+                if (userExists) {
+                    updateSelectedUser(roomId);
+                    return;
+                }
+            }
+
+            // Fallback to first user if no valid cookie
+            updateSelectedUser(props.interactedUsers[0].id);
+        }
+    };
+
+    const setupEchoListeners = () => {
+        // Listen for incoming messages
+        window.Echo.private("new-messages." + props.auth.user.id).listen(
+            "NewMessageEvent",
+            (e) => {
+                console.log("Broadcast received:", e);
+                addMessageToChat(e);
+
+                // Always update the user list, regardless of active chat
+                const targetUserId =
+                    e.sender_id === props.auth.user.id
+                        ? e.receiver_id
+                        : e.sender_id;
+                updateRecentChats({
+                    targetUserId: targetUserId,
+                    content: e.content,
+                    sender_id: e.sender_id,
+                });
+
+                // Play notification sound if message is from another user
+                if (e.sender_id !== props.auth.user.id) {
+                    notificationSound.play();
+                }
+            },
+        );
+
+        // Presence channel for online users
+        window.Echo.join("online-users")
+            .here((users) => {
+                // Handle initial list of online users
+                onlineUsers.value = []; // Clear existing array
+                users.forEach((e) => {
+                    onlineUsers.value.push(e.id);
+                });
+            })
+            .joining((user) => {
+                // Handle when a new user comes online
+                if (!onlineUsers.value.includes(user.id)) {
+                    onlineUsers.value.push(user.id);
+                }
+            })
+            .leaving((user) => {
+                // Handle when a user goes offline
+                (async () => {
+                    try {
+                        await axios.post(
+                            `/api/user/update-last-active/${user.id}`,
+                        );
+                    } catch (error) {
+                        console.log("Error updating last active:", error);
+                    }
+                })();
+
+                setTimeout(() => {
+                    const index = onlineUsers.value.indexOf(user.id);
+                    if (index > -1) {
+                        onlineUsers.value.splice(index, 1);
+                    }
+                }, 60000);
+            })
+            .error((error) => {
+                console.error("Error in presence channel:", error);
+            });
+    };
+
+    return {
+        // State
+        selectedUserId,
+        chatUsers,
+        onlineUsers,
+        messagesData,
+        totalMessages,
+        perPage,
+        currentPage,
+        loadError,
+        hasMorePages,
+
+        // Computed
+        users,
+        selectedUserDetails,
+        isOnline,
+
+        // Actions
+        updateSelectedUser,
+        updateMessageReadStatus,
+        onLoadMessages,
+        onLoadMore,
+        addMessageToChat,
+        updateRecentChats,
+        initializeFromProps,
+        setupEchoListeners,
+    };
+});

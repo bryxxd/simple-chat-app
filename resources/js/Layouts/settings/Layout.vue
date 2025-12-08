@@ -1,34 +1,22 @@
-<script>
+<script setup>
 import { Link } from "@inertiajs/vue3";
 import { Toaster } from "@/Components/ui/toast";
+import { defineProps } from "vue";
 
-export default {
-    name: "SettingsLayout",
-    components: {
-        Link,
-        Toaster,
-    },
-    props: {
-        side: { type: String, required: false },
-        variant: { type: String, required: false },
-        collapsible: { type: String, required: false, default: "icon" },
-        class: { type: null, required: false },
-    },
-    data() {
-        return {
-            links: [
-                { name: "Profile", href: "/settings/profile" },
-                { name: "Password", href: "/settings/password" },
-                { name: "Appearance", href: "/settings/appearance" },
-            ],
-        };
-    },
-    methods: {
-        isActive(link) {
-            return this.$route.path === link.href;
-        },
-    },
-};
+// Props
+const props = defineProps({
+    side: { type: String, required: false },
+    variant: { type: String, required: false },
+    collapsible: { type: String, required: false, default: "icon" },
+    class: { type: null, required: false },
+});
+
+// Links for the settings sidebar
+const links = [
+    { name: "Profile", href: "/settings/profile" },
+    { name: "Password", href: "/settings/password" },       
+    { name: "Appearance", href: "/settings/appearance" },
+];
 </script>
 
 <template>

@@ -1,8 +1,9 @@
-<script>
-import { usePage } from "@inertiajs/vue3";
+<script setup>
+import { ref, watchEffect } from "vue";
 import { computed } from "vue";
 import { Search } from "lucide-vue-next";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarImage } from "@/components/ui/avatar";
+import { cn } from "@/lib/utils";
 import {
     Combobox,
     ComboboxAnchor,
@@ -10,45 +11,49 @@ import {
     ComboboxGroup,
     ComboboxInput,
     ComboboxItem,
-    ComboboxItemIndicator,
     ComboboxList,
 } from "@/components/ui/combobox";
+import { useChatStore } from "@/stores/chatStore";
+const chatStore = useChatStore();
+const searchusers = ref([]);
+const searchInput = ref("");
+const props = defineProps({
+    class: { type: null, required: false },
+});
 
-export default {
-    name: "SearchUser",
-    components: {
-        Combobox,
-        ComboboxAnchor,
-        ComboboxEmpty,
-        ComboboxGroup,
-        ComboboxInput,
-        ComboboxItem,
-        ComboboxItemIndicator,
-        ComboboxList,
-        Avatar,
-        AvatarImage,
-        AvatarFallback,
-        Search
-    },
-    computed: {
-        users() {
-            return usePage().props.users;
+async function fetchUsers(pattern) {
+    try {
+        const response = await fetch(`/api/users/search/${pattern}`);
+        if (response.ok) {
+            searchusers.value = await response.json();
+        } else {
+            console.error('Error fetching users:', response.statusText);
         }
-    },
-    methods: {
-        getUserAvatar(user) {
-            return user?.avatar || '/images/profile-placeholder.jpg';
-        }
+    } catch (error) {
+        console.error('Network error:', error);
     }
 }
 
+watchEffect(() => {
+    if (searchInput.value && searchInput.value.length > 1) {
+        fetchUsers(searchInput.value);
+    } else {
+        searchusers.value = [];
+    }
+});
+
+// Computed properties
+const users = computed(() => searchusers.value);
+
+// Methods
+const getUserAvatar = (user) => user?.avatar || '/images/profile-placeholder.jpg';
 </script>
 
 <template>
     <Combobox by="name" :items="users" class="w-full">
         <ComboboxAnchor>
-            <div class="relative w-full max-w-sm items-center">
-                <ComboboxInput class="pl-9" :display-value="(val) => val?.name ?? ''" placeholder="Search User..." />
+            <div :class="cn('relative w-full items-center', props.class)" >
+                <ComboboxInput class="pl-9" :display-value="(val) => val?.name ?? ''" placeholder="Search User..." v-model="searchInput"/>
                 <span class="absolute start-0 inset-y-0 flex items-center justify-center px-3">
                     <Search class="size-4 text-muted-foreground" />
                 </span>
@@ -59,7 +64,8 @@ export default {
             <ComboboxEmpty> No user found. </ComboboxEmpty>
 
             <ComboboxGroup>
-                <ComboboxItem v-for="user in users" :key="user.id" :value="user" class="justify-start" @click="$emit('set-active-chat', user.id)">
+                <ComboboxItem v-for="user in users" :key="user.id" :value="user" class="justify-start"
+                    @click="chatStore.updateSelectedUser(user.id)">
                     <Avatar>
                         <AvatarImage :src="getUserAvatar(user)" alt="" />
                     </Avatar>

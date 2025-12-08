@@ -1,13 +1,4 @@
 <script>
-export default {
-    name: 'GuestLayout',
-    props: {
-        title: {
-            type: String,
-            default: 'Welcome',
-        },
-    },
-};
 </script>
 <template>
     <div class="flex min-h-svh flex-col items-center justify-center p-6 md:p-10">

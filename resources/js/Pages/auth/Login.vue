@@ -1,40 +1,19 @@
-<script>
-import { Head, Link, useForm } from '@inertiajs/vue3';
+<script setup>
+import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
 import GuestLayout from '@/Layouts/GuestLayout.vue';
 import { Button } from '@/components/ui/button';
 import { Card, CardTitle, CardContent, CardHeader, CardDescription } from '@/components/ui/card';
-import { Input, InputError } from '@/components/ui/input';
+import { Input, InputStatusMessage } from '@/Components/ui/customInput';
 import { Label } from '@/components/ui/label';
 
-export default {
-    components: {
-        Head,
-        Link,
-        GuestLayout,
-        Button,
-        Card,
-        CardContent,
-        CardHeader,
-        CardTitle,
-        CardDescription,
-        Input,
-        InputError,
-        Label,
-    },
-    data() {
-        return {
-            image: './images/placeholder.svg',
-            form: useForm({
-                username: '',
-                password: ''
-            })
-        }
-    },
-    methods: {
-        submit() {
-            this.form.post(route('login.store'));
-        }
-    }
+const page = usePage();
+const form = useForm({
+    email: '',
+    password: ''
+});
+
+const submit = () => {
+    form.post(route('login.store'));
 };
 </script>
 
@@ -49,35 +28,28 @@ export default {
                         Login
                     </CardTitle>
                     <CardDescription>
-                        Enter your username below to login to your account
+                        Enter your email below to login to your account
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
+                    <InputStatusMessage v-if="page.props.flash?.success" :message="page.props.flash.success" variant="success" class="mb-6" />
                     <form @submit.prevent="submit" method="POST" class="grid gap-4">
                         <div class="grid gap-2">
-                            <Label for="username">Username</Label>
-                            <Input 
-                                id="username" 
-                                type="text" 
-                                v-model="form.username" 
-                                :class="{'border-red-500': form.errors.username}" 
-                            />
-                            <InputError v-if="form.errors.username" :message="form.errors.username" />
+                            <Label for="email">Email</Label>
+                            <Input id="email" type="text" v-model="form.email"
+                                :class="{ 'border-red-500': form.errors.email }" />
+                            <InputStatusMessage v-if="form.errors.email" :message="form.errors.email" />
                         </div>
                         <div class="grid gap-2">
                             <div class="flex items-center">
                                 <Label for="password">Password</Label>
-                                <Link :href="route('forgot.password')" class="ml-auto inline-block text-sm underline">
-                                    Forgot your password?
+                                <Link :href="route('password.request')" class="ml-auto inline-block text-sm underline">
+                                Forgot your password?
                                 </Link>
                             </div>
-                            <Input 
-                                id="password" 
-                                type="password" 
-                                v-model="form.password" 
-                                :class="{'border-red-500': form.errors.password}" 
-                            />
-                            <InputError v-if="form.errors.password" :message="form.errors.password" />
+                            <Input id="password" type="password" v-model="form.password"
+                                :class="{ 'border-red-500': form.errors.password }" />
+                            <InputStatusMessage v-if="form.errors.password" :message="form.errors.password" />
                         </div>
                         <Button type="submit" class="w-full">
                             <span>Login</span>
@@ -89,12 +61,8 @@ export default {
                             </span>
                         </div>
                         <div class="flex justify-center">
-                            <Button variant="outline" class="w-50">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                                    <path
-                                        d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z"
-                                        fill="currentColor" />
-                                </svg>
+                            <Button variant="outline" class="w-50" as="a" :href="route('auth.redirect')">
+                                <img class="w-4" src="/images/google.png" alt="">
                                 <span class="sr-only">Login with Google</span>
                             </Button>
                         </div>
@@ -102,7 +70,7 @@ export default {
                     <div class="mt-4 text-center text-sm">
                         Don't have an account?
                         <Link :href="route('signup.index')" class="underline">
-                            Sign up
+                        Sign up
                         </Link>
                     </div>
                 </CardContent>

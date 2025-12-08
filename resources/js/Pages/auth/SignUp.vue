@@ -1,4 +1,4 @@
-<script>
+<script setup>
 import { Head, Link, useForm } from "@inertiajs/vue3";
 import GuestLayout from "@/Layouts/GuestLayout.vue";
 import { Button } from "@/components/ui/button";
@@ -9,41 +9,19 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
-import { Input, InputError } from "@/components/ui/input";
+import { Input, InputStatusMessage } from "@/Components/ui/customInput";
 import { Label } from "@/components/ui/label";
 
-export default {
-    components: {
-        Head,
-        GuestLayout,
-        Button,
-        Card,
-        CardContent,
-        CardDescription,
-        CardHeader,
-        CardTitle,
-        Input,
-        InputError,
-        Label,
-        Link,
-    },
-    data() {
-        return {
-            form: useForm({
-                first_name: "",
-                last_name: "",
-                email: "",
-                username: "",
-                password: "",
-                password_confirmation: "",
-            }),
-        };
-    },
-    methods: {
-        submit() {
-            this.form.post(route("signup.store"));
-        },
-    },
+const form = useForm({
+    first_name: "",
+    last_name: "",
+    email: "",
+    password: "",
+    password_confirmation: "",
+});
+
+const submit = () => {
+    form.post(route("signup.store"));
 };
 </script>
 
@@ -64,38 +42,32 @@ export default {
                         <div class="grid gap-2">
                             <Label for="first-name">First name</Label>
                             <Input id="first-name" v-model="form.first_name" :class="{ 'border-red-500': form.errors.first_name }" />
-                            <InputError v-if="form.errors.first_name" :message="form.errors.first_name" />
+                            <InputStatusMessage v-if="form.errors.first_name" :message="form.errors.first_name" />
                         </div>
                         <div class="grid gap-2">
                             <Label for="last-name">Last name</Label>
                             <Input id="last-name" v-model="form.last_name" :class="{ 'border-red-500': form.errors.last_name }" />
-                            <InputError v-if="form.errors.last_name" :message="form.errors.last_name" />
+                            <InputStatusMessage v-if="form.errors.last_name" :message="form.errors.last_name" />
                         </div>
                     </div>
                     <div class="grid gap-2">
                         <Label for="email">Email</Label>
                         <Input id="email" type="email" v-model="form.email"
                             :class="{ 'border-red-500': form.errors.email }" />
-                        <InputError v-if="form.errors.email" :message="form.errors.email" />
-                    </div>
-                    <div class="grid gap-2">
-                        <Label for="username">Username</Label>
-                        <Input id="username" type="text" v-model="form.username"
-                            :class="{ 'border-red-500': form.errors.username }" />
-                        <InputError v-if="form.errors.username" :message="form.errors.username" />
+                        <InputStatusMessage v-if="form.errors.email" :message="form.errors.email" />
                     </div>
                     <div class="grid gap-2">
                         <Label for="password">Password</Label>
                         <Input id="password" type="password" v-model="form.password"
                             :class="{ 'border-red-500': form.errors.password }" />
-                        <InputError v-if="form.errors.password" :message="form.errors.password" />
+                        <InputStatusMessage v-if="form.errors.password" :message="form.errors.password" />
                     </div>
                     <div class="grid gap-2">
                         <Label for="password_confirmation">Confirm Password</Label>
                         <Input id="password_confirmation" type="password" v-model="form.password_confirmation" :class="{
                             'border-red-500': form.errors.password_confirmation,
                         }" />
-                        <InputError v-if="form.errors.password_confirmation" :message="form.errors.password_confirmation" />
+                        <InputStatusMessage v-if="form.errors.password_confirmation" :message="form.errors.password_confirmation" />
                     </div>
                     <Button type="submit" class="w-full">
                         <span>Create an account</span>
@@ -107,12 +79,8 @@ export default {
                         </span>
                     </div>
                     <div class="flex justify-center">
-                        <Button variant="outline" class="w-50">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                                <path
-                                    d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z"
-                                    fill="currentColor" />
-                            </svg>
+                        <Button variant="outline" class="w-50" as="a" :href="route('auth.redirect')">
+                            <img class="w-4" src="/images/google.png" alt="">
                             <span class="sr-only">Login with Google</span>
                         </Button>
                     </div>

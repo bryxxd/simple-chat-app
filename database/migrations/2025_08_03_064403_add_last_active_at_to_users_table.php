@@ -11,12 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('messages', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('from_user_id')->constrained('users');
-            $table->foreignId('to_user_id')->constrained('users');
-            $table->text('content');
-            $table->timestamps();
+        Schema::table('users', function (Blueprint $table) {
+            //
+            $table->timestamp('last_active_at')->nullable()->after('updated_at');
         });
     }
 
@@ -25,6 +22,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('messages');
+        Schema::dropIfExists('users');
     }
 };
