@@ -1,6 +1,6 @@
 <script setup>
 import { useChatStore } from "@/stores/chatStore";
-import { Avatar, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarImage } from "@/Components/ui/avatar";
 
 
 const chatStore = useChatStore();
