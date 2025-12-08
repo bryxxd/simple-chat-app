@@ -3,13 +3,13 @@ import AuthLayout from "@/Layouts/AuthLayout.vue";
 import Settings from "@/Layouts/settings/Layout.vue";
 import { Label } from '@/Components/ui/Label';
 import { Input, InputStatusMessage } from "@/Components/ui/customInput";
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/Components/ui/Button';
 import { Head, useForm, usePage } from '@inertiajs/vue3';
 import {
     BreadcrumbItem,
     BreadcrumbPage,
     BreadcrumbSeparator,
-} from "@/Components/ui/breadcrumb";
+} from "@/Components/ui/Breadcrumb";
 import { useFlashMessages } from "@/composables/useFlashMessage";
 
 const page = usePage();
