@@ -1,9 +1,9 @@
 <script setup>
 import AuthLayout from "@/Layouts/AuthLayout.vue";
 import Settings from "@/Layouts/settings/Layout.vue";
-import { Label } from '@/Components/ui/label';
+import { Label } from '@/Components/ui/Label';
 import { Input, InputStatusMessage } from "@/Components/ui/customInput";
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/Button';
 import { Head, useForm, usePage } from '@inertiajs/vue3';
 import {
     BreadcrumbItem,

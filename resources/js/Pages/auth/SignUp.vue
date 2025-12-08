@@ -8,9 +8,9 @@ import {
     CardDescription,
     CardHeader,
     CardTitle,
-} from "@/components/ui/card";
+} from "@/components/ui/Card";
 import { Input, InputStatusMessage } from "@/Components/ui/customInput";
-import { Label } from "@/components/ui/label";
+import { Label } from "@/components/ui/Label";
 
 const form = useForm({
     first_name: "",

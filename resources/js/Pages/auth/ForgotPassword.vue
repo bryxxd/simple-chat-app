@@ -1,16 +1,16 @@
 <script setup>
 import { Head, useForm } from '@inertiajs/vue3';
 import GuestLayout from '@/Layouts/GuestLayout.vue';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/Button';
 import {
     Card,
     CardContent,
     CardDescription,
     CardHeader,
     CardTitle,
-} from '@/components/ui/card';
+} from '@/components/ui/Card';
 import { Input, InputStatusMessage } from '@/Components/ui/customInput';
-import { Label } from '@/components/ui/label';
+import { Label } from '@/components/ui/Label';
 import { Link, usePage } from '@inertiajs/vue3';
 
 const page = usePage();
