@@ -8,7 +8,7 @@ import {
     CardDescription,
     CardHeader,
     CardTitle,
-} from "@/Components/ui/Card";
+} from "@/Components/ui/card";
 import { InputStatusMessage } from "@/Components/ui/customInput";
 
 const page = usePage();

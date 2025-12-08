@@ -9,7 +9,7 @@ import {
     BreadcrumbItem,
     BreadcrumbPage,
     BreadcrumbSeparator,
-} from "@/Components/ui/Breadcrumb";
+} from "@/Components/ui/breadcrumb";
 import { useFlashMessages } from "@/composables/useFlashMessage";
 
 const page = usePage();

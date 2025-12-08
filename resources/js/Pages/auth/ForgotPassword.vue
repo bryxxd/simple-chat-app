@@ -8,9 +8,9 @@ import {
     CardDescription,
     CardHeader,
     CardTitle,
-} from '@/Components/ui/Card';
+} from '@/Components/ui/card';
 import { Input, InputStatusMessage } from '@/Components/ui/customInput';
-import { Label } from '@/Components/ui/Label';
+import { Label } from '@/Components/ui/label';
 import { Link, usePage } from '@inertiajs/vue3';
 
 const page = usePage();

@@ -8,9 +8,9 @@ import {
     CardDescription,
     CardHeader,
     CardTitle,
-} from '@/components/ui/Card';
+} from '@/Components/ui/card';
 import { Input, InputStatusMessage } from '@/Components/ui/customInput';
-import { Label } from '@/components/ui/Label';
+import { Label } from '@/Components/ui/label';
 
 const page = usePage();
 const token = page.props.token;
