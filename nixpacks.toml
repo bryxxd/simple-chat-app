@@ -4,7 +4,7 @@ nixPkgs = ["php82", "php82Packages.composer", "nodejs-18_x"]
 [phases.build]
 cmds = [
     "composer install --no-dev --optimize-autoloader",
-    "npm ci",
+    "npm i",
     "npm run build"  # ← This builds Vue/Inertia assets
 ]
 
