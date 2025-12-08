@@ -1,7 +1,7 @@
 <script setup>
 import { Head, useForm, usePage } from '@inertiajs/vue3';
 import GuestLayout from '@/Layouts/GuestLayout.vue';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/Components/ui/button';
 import {
     Card,
     CardContent,
