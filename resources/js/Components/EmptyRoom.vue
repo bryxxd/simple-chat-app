@@ -1,6 +1,6 @@
 <script setup>
 import { Plus, MessageCircle } from "lucide-vue-next"; 
-import { Button } from '@/components/ui/button';
+import { Button } from '@/Components/ui/button';
 import { inject } from "vue";
 
 const { switchNoInteractionTab } = inject('noInteractionTabs');

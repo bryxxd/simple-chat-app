@@ -1,6 +1,6 @@
 <script setup>
-import { Skeleton } from "@/components/ui/skeleton";
-import { Chat, ChatContent, ChatDetails } from '@/components/ui/chat';
+import { Skeleton } from "@/Components/ui/skeleton";
+import { Chat, ChatContent, ChatDetails } from '@/Components/ui/chat';
 
 </script>
 <template>

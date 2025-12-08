@@ -1,8 +1,8 @@
 <script setup>
 import { ref, watchEffect } from "vue";
 import { Search, Sparkles, LoaderCircle } from "lucide-vue-next";
-import { Input } from '@/components/ui/input';
-import { SearchResult } from '@/components/ui/search';
+import { Input } from '@/Components/ui/input';
+import { SearchResult } from '@/Components/ui/search';
 import { computed } from "vue";
 import { usePage } from "@inertiajs/vue3";
 

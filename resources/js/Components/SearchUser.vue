@@ -2,7 +2,7 @@
 import { ref, watchEffect } from "vue";
 import { computed } from "vue";
 import { Search } from "lucide-vue-next";
-import { Avatar, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarImage } from "@/Components/ui/avatar";
 import { cn } from "@/lib/utils";
 import {
     Combobox,
