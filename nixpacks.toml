@@ -1,0 +1,23 @@
+[phases.setup]
+nixPkgs = ["php82", "php82Packages.composer", "nodejs-18_x"]
+
+[phases.build]
+cmds = [
+    "composer install --no-dev --optimize-autoloader",
+    "npm ci",
+    "npm run build"  # ← This builds Vue/Inertia assets
+]
+
+[phases.deploy]
+cmds = [
+    "mkdir -p storage/framework/{sessions,views,cache}",
+    "chmod -R 775 storage bootstrap/cache",
+    "php artisan config:clear",
+    "php artisan migrate --force",
+    "php artisan storage:link",
+    "php artisan config:cache",
+    "php artisan route:cache"
+]
+
+[start]
+cmd = "php artisan serve --host=0.0.0.0 --port=$PORT" 
