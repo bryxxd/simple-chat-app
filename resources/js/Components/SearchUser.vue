@@ -13,13 +13,21 @@ import {
     ComboboxItem,
     ComboboxList,
 } from "@/Components/ui/combobox";
+import { useSidebar } from '@/Components/ui/sidebar/utils';
 import { useChatStore } from "@/stores/chatStore";
+
 const chatStore = useChatStore();
 const searchusers = ref([]);
 const searchInput = ref("");
 const props = defineProps({
     class: { type: null, required: false },
 });
+const { setOpenMobile } = useSidebar();
+
+function updateSelectedUser(userId) {
+    chatStore.updateSelectedUser(userId);
+    setOpenMobile(false);
+}
 
 async function fetchUsers(pattern) {
     try {
@@ -65,7 +73,7 @@ const getUserAvatar = (user) => user?.avatar || '/images/profile-placeholder.jpg
 
             <ComboboxGroup>
                 <ComboboxItem v-for="user in users" :key="user.id" :value="user" class="justify-start"
-                    @click="chatStore.updateSelectedUser(user.id)">
+                    @click="updateSelectedUser(user.id)">
                     <Avatar>
                         <AvatarImage :src="getUserAvatar(user)" alt="" />
                     </Avatar>

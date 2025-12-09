@@ -261,7 +261,6 @@ export const useChatStore = defineStore("chat", () => {
         window.Echo.private("new-messages." + props.auth.user.id).listen(
             "NewMessageEvent",
             (e) => {
-                console.log("Broadcast received:", e);
                 addMessageToChat(e);
 
                 // Always update the user list, regardless of active chat
