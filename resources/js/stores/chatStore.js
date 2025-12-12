@@ -18,7 +18,7 @@ export const useChatStore = defineStore("chat", () => {
     const loadError = ref(null);
     const hasMorePages = ref(false);
     const cookieActiveRoom = useCookies(["activeRoom"]);
-    const notificationSound = useSound('/sounds/sound-1.mp3');
+    const notificationSound = useSound("/sounds/sound-1.mp3");
 
     // Cookie management
     const setCookieActiveRoom = (roomId) => {
@@ -42,39 +42,22 @@ export const useChatStore = defineStore("chat", () => {
             return null;
         }
 
-        // First try interactedUsers
-        if (chatUsers.value && chatUsers.value.length > 0) {
-            const foundUser = chatUsers.value.find(
-                (user) => user.id === selectedUserId.value,
-            );
-            if (foundUser) {
-                return foundUser;
-            }
-        }
+        const foundUser = users.value.find(
+            (user) => user.id === selectedUserId.value,
+        );
 
-        // Then try all users
-        if (users.value && users.value.length > 0) {
-            const foundUser = users.value.find(
-                (user) => user.id === selectedUserId.value,
-            );
-            if (foundUser) {
-                return foundUser;
-            }
+        if (foundUser) {
+            return foundUser;
         }
 
         return null;
     });
 
     const isOnline = computed(() => {
-        return (userOrId) => {
-            const userId =
-                typeof userOrId === "object" ? userOrId.id : userOrId;
-            return onlineUsers.value.includes(userId);
-        };
+        return (userId) => onlineUsers.value.includes(userId);
     });
 
     // Actions
-    
     const updateSelectedUser = (userId) => {
         if (selectedUserId.value === userId) return;
 
