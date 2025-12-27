@@ -1,5 +1,5 @@
 import { usePage } from '@inertiajs/vue3';
-import { useToast } from '@/components/ui/toast/use-toast';
+import { useToast } from '@/Components/ui/toast/use-toast';
 
 export function useFlashMessages(title, message) {
 

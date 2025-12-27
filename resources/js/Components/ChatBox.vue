@@ -1,7 +1,7 @@
 <script setup>
 import { Chat, ChatContent, ChatDetails, ChatAvatar, ChatMessage, ChatName, ChatItem, ChatList, ChatStatus, ChatForm } from '@/Components/ui/chat';
 import { Textarea } from '@/Components/ui/textarea';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/Components/ui/button';
 import { Send } from "lucide-vue-next";
 import { usePage, Head } from "@inertiajs/vue3";
 import UserActiveStatus from './UserActiveStatus.vue';

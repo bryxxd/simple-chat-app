@@ -1,16 +1,16 @@
 <script setup>
 import { Head, Link, useForm } from "@inertiajs/vue3";
 import GuestLayout from "@/Layouts/GuestLayout.vue";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/Components/ui/button";
 import {
     Card,
     CardContent,
     CardDescription,
     CardHeader,
     CardTitle,
-} from "@/components/ui/card";
+} from "@/Components/ui/card";
 import { Input, InputStatusMessage } from "@/Components/ui/customInput";
-import { Label } from "@/components/ui/label";
+import { Label } from "@/Components/ui/label";
 
 const form = useForm({
     first_name: "",

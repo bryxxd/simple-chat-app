@@ -2,7 +2,7 @@
 import { ref, watchEffect } from "vue";
 import { computed } from "vue";
 import { Search } from "lucide-vue-next";
-import { Avatar, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarImage } from "@/Components/ui/avatar";
 import { cn } from "@/lib/utils";
 import {
     Combobox,
@@ -12,7 +12,7 @@ import {
     ComboboxInput,
     ComboboxItem,
     ComboboxList,
-} from "@/components/ui/combobox";
+} from "@/Components/ui/combobox";
 import { useChatStore } from "@/stores/chatStore";
 const chatStore = useChatStore();
 const searchusers = ref([]);
