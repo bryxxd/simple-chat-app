@@ -11,77 +11,16 @@ import { useChatStore } from "@/stores/chatStore";
 import { useInfiniteScroll, useIntersectionObserver, useTemplateRefsList } from '@vueuse/core';
 import { LoaderCircle } from "lucide-vue-next";
 
+import { useMessageVisibility } from '@/composables/useMessageVisibility';
+
 const chatStore = useChatStore();
 const userIdReceiver = ref(null);
 const isSending = ref(false);
 const hasErrorSending = ref(false);
 const chatListContainer = useTemplateRef('chatListContainer');
 const chatItemRefs = useTemplateRefsList('chatItem');
-const visibleMessageIds = ref([]);
-const markedIds = ref(new Set());
-let markAsReadTimeout = null;
-let observerCleanup = null;
 
-function setupVisibilityObserver() {
-    // Clean up previous observer if it exists
-    if (observerCleanup) {
-        observerCleanup();
-    }
-
-    if (markedIds.value.size > 0) {
-        // Filter out already marked IDs
-        visibleMessageIds.value = visibleMessageIds.value.filter(id => !markedIds.value.has(id));
-    }
-
-    const { stop } = useIntersectionObserver(chatItemRefs, (entries) => {
-        entries.forEach(entry => {
-            const messageId = entry.target.getAttribute('data-mid');
-            // Skip if already marked or already in visible list
-            if (markedIds.value.has(messageId)) {
-                return;
-            }
-            if (entry.isIntersecting && !visibleMessageIds.value.includes(messageId)) {
-                visibleMessageIds.value.push(messageId);
-                scheduleMarkAsRead();
-            }
-        });
-    }, {
-        threshold: 1,
-    });
-
-    observerCleanup = stop;
-}
-
-function scheduleMarkAsRead() {
-    if (markAsReadTimeout) {
-        clearTimeout(markAsReadTimeout);
-    }
-
-    markAsReadTimeout = setTimeout(() => {
-        const messageIdsToMark = Array.from(visibleMessageIds.value);
-        markedIds.value = new Set([...markedIds.value, ...messageIdsToMark]);
-        if (messageIdsToMark.length > 0) {
-            markedAsRead(messageIdsToMark);
-            visibleMessageIds.value = [];
-        }
-    }, 2000); // 2 seconds delay
-}
-
-async function markedAsRead(chatIds) {
-    try {
-        await axios.get("/api/chat-room/marked-as-read/", {
-            params: {
-                message_ids: chatIds
-            }
-        });
-        // Update the read status in the store for the current user
-        if (userIdReceiver.value) {
-            chatStore.updateMessageReadStatus(userIdReceiver.value);
-        }
-    } catch (err) {
-        console.error('Failed to mark messages as read:', err);
-    }
-}
+const { setupVisibilityObserver, resetVisibility } = useMessageVisibility(chatItemRefs, userIdReceiver);
 
 // V-model
 const formInput = defineModel();
@@ -150,8 +89,7 @@ function getUserAvatar(chat) {
 watch(() => chatStore.selectedUserDetails, (newActiveUser) => {
     if (newActiveUser?.id) {
         userIdReceiver.value = newActiveUser.id;
-        setupVisibilityObserver();
-        visibleMessageIds.value = [];
+        resetVisibility();
     }
 }, { immediate: true });
 

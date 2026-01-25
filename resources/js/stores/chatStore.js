@@ -74,7 +74,6 @@ export const useChatStore = defineStore("chat", () => {
     });
 
     // Actions
-    
     const updateSelectedUser = (userId) => {
         if (selectedUserId.value === userId) return;
 
@@ -172,61 +171,44 @@ export const useChatStore = defineStore("chat", () => {
                 created_at: e.created_at,
             };
 
-            // Insert in correct position to maintain sort order
             const messages = [...messagesData.value.messages];
+            // Binary search or simple findIndex for insertion point (since simplified)
             const insertIndex = messages.findIndex((msg) => msg.id > e.id);
-
+            
             if (insertIndex === -1) {
                 messages.push(newMessage);
             } else {
                 messages.splice(insertIndex, 0, newMessage);
             }
 
-            messagesData.value = {
-                ...messagesData.value,
-                messages,
-            };
+            messagesData.value.messages = messages;
         }
     };
 
     const updateRecentChats = (newMsg) => {
         const authUserId = usePage().props.auth.user.id;
-        const userIndex = chatUsers.value.findIndex(
-            ({ id }) => id === newMsg.targetUserId,
-        );
-        if (userIndex !== -1) {
-            const [user] = chatUsers.value.splice(userIndex, 1);
-            // Preserve all existing properties and update specific ones
+        const targetUserId = newMsg.targetUserId;
+        
+        let user = chatUsers.value.find(u => u.id === targetUserId);
+        
+        if (user) {
+            // Remove existing user to re-add at top
+            chatUsers.value = chatUsers.value.filter(u => u.id !== targetUserId);
+        } else {
+             // Find from all users if not in recent
+            user = users.value.find(u => u.id === targetUserId);
+        }
+
+        if (user) {
             const updatedUser = {
                 ...user,
-                content: newMsg.content,
+                content: newMsg.content || "",
                 created_at: new Date().toISOString(),
                 sender_id: newMsg.sender_id,
-                // Only mark as unread if message is from another user and not in active chat
-                is_read:
-                    newMsg.sender_id === authUserId ||
-                    newMsg.targetUserId === selectedUserId.value
-                        ? 1
-                        : 0,
+                is_read: (newMsg.sender_id === authUserId || targetUserId === selectedUserId.value) ? 1 : 0
             };
+            
             chatUsers.value.unshift(updatedUser);
-        } else {
-            // If user not found in interactedUsers, find them in all users and add them
-            const userFromAllUsers = users.value.find(
-                (user) => user.id === newMsg.targetUserId,
-            );
-            // Add the content property when adding new user
-            if (userFromAllUsers) {
-                const newUser = {
-                    ...userFromAllUsers,
-                    content: newMsg.content || "",
-                    created_at: new Date().toISOString(),
-                    sender_id: newMsg.sender_id,
-                    // Only mark as unread if message is from another user
-                    is_read: newMsg.sender_id === authUserId ? 1 : 0,
-                };
-                chatUsers.value.unshift(newUser);
-            }
         }
     };
 
